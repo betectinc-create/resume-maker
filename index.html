@@ -21,8 +21,6 @@
 <script type="text/babel">
 const {useState,useEffect}=React;
 
-
-
 const YRS=Array.from({length:55},(_,i)=>1970+i);
 const MOS=Array.from({length:12},(_,i)=>i+1);
 const DAYS=Array.from({length:31},(_,i)=>i+1);
@@ -231,7 +229,6 @@ const generateDocx=async function(){
     if(f.dependent==="有")xml=xml.replace("※　　　有・無</w:t></w:r>","※　</w:t></w:r>"+circR("有")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>・無</w:t></w:r>');
     else if(f.dependent==="無")xml=xml.replace("※　　　有・無</w:t></w:r>","※　有・</w:t></w:r>"+circR("無")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t></w:t></w:r>');
 
-    // Photo insertion
     if(f.photoPreview){
       try{
         var pdata=f.photoPreview.split(",")[1];
@@ -290,7 +287,6 @@ return <div className="space-y-4">
 </div>;
 };
 
-
 const steps=[S0,S1,S2,S3,S4,S5];
 
 const SavePg=()=> <div className="space-y-4">
@@ -305,78 +301,7 @@ const SavePg=()=> <div className="space-y-4">
 return <div className="min-h-screen" style={{background:'#F5F0EB',fontFamily:"'Noto Sans JP',sans-serif"}}>
 <div className="max-w-2xl mx-auto px-4 py-6 noprint">
 <div className="text-center mb-8">
-<img src="data:image/png;base64,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
-FMTExMEUxMTEwRTExMTBF//Z" alt="CONNECT こねくと" style={height:40,marginBottom:12}/>
+<img src="https://raw.githubusercontent.com/betectinc-create/resume-maker/main/logo.png" alt="CONNECT こねくと" style={height:40,marginBottom:12}/>
 <h1 style={{fontSize:22,fontWeight:900,color:"#3B3228",letterSpacing:-0.5,marginBottom:4,fontFamily:"'Zen Maru Gothic',sans-serif"}}>障がい者雇用 履歴書メーカー</h1>
 <p style={{fontSize:12,color:"#A0937D",fontWeight:500}}>選ぶだけで履歴書が完成。そのまま提出できます。</p>
 </div>
@@ -395,9 +320,6 @@ FMTExMEUxMTEwRTExMTBF//Z" alt="CONNECT こねくと" style={height:40,marginBott
 {toast&&<div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-sm font-bold text-white shadow-lg z-50" style={{background:"#3B3228",borderRadius:16}}>{toast}</div>}
 <p className="text-center text-xs pb-8" style={{color:"#C0B5A5"}}>© CONNECT こねくと　|　個人情報はブラウザ上のみで処理されます</p>
 </div></div>;}
-
-
-
 
 ReactDOM.render(React.createElement(App),document.getElementById("root"));
 </script>
