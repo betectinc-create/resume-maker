@@ -9,8 +9,11 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-<style>body{font-family:'Noto Sans JP',sans-serif;margin:0;}</style>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+<style>body{font-family:'Noto Sans JP',sans-serif;margin:0;-webkit-font-smoothing:antialiased;}
+    *{box-sizing:border-box;}
+    input,select,textarea{font-family:inherit;}
+    .glass{backdrop-filter:blur(20px);background:rgba(255,255,255,0.85);}</style>
 </head>
 <body>
 <div id="root"></div>
@@ -60,12 +63,12 @@ const pSc=sc=>{setF(p=>({...p,scene:sc,selfPR:gP(f.strId,sc,f.sceneOther)}));};
 useEffect(()=>{if(f.strId&&f.scene)setF(p=>({...p,selfPR:gP(f.strId,f.scene,f.sceneOther)}));},[f.sceneOther]);
 const lookupZip=async()=>{const z=f.zip.replace(/[-ー−]/g,"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xfee0));if(z.length<7){tt("7桁入力してください");return;}try{const r=await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z}`);const d=await r.json();if(d.results?.[0]){const a=d.results[0];setF(p=>({...p,address:`${a.address1}${a.address2}${a.address3}`}));tt("住所を入力しました");}else{tt("見つかりません");}}catch{tt("検索できません");}};
 
-const O={50:"#FDF8F3",100:"#FAF0E4",200:"#F5DFC8",300:"#E8B87A",400:"#E8973C",500:"#E87330",600:"#C85A20",700:"#8B3E15",800:"#5C2A0E"};
-const ic="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-600";
-const sc2=ic+" bg-white";
-const lc="block text-xs font-semibold text-gray-600 mb-1";
-const cc="bg-white rounded-2xl shadow-sm border border-yellow-100 p-5 mb-4";
-const hc="text-sm font-bold mb-3";
+const O={50:"#FEFCF8",100:"#FBF3E8",200:"#F0DFC0",300:"#D4A54A",400:"#E87830",500:"#D35C1F",600:"#B24818",700:"#7A3210",800:"#4A1F08"};
+const ic="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-all";
+const sc2=ic+" bg-gray-50";
+const lc="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider";
+const cc="bg-white rounded-2xl shadow-lg border-0 p-6 mb-5";
+const hc="text-base font-black tracking-tight mb-4";
 const STP=["基本情報","学歴・職歴","資格・免許","障害について","強み・自己PR","確認・出力"];
 const eduF=ed=>{let n=fS(ed.name,ed.type);if(ed.dept){const dt=ST[ed.type];n+=` ${ed.dept}${dt?.d||""}`;if(ed.sub&&dt?.s)n+=` ${ed.sub}${dt.s}`;}if(ed.sfx)n+=` ${ed.sfx}`;return n;};
 const qn=q=>q.name==="その他（自由記入）"?q.custom:q.name;
@@ -104,7 +107,7 @@ const S0=()=> <div className="space-y-4">
 
 const S1=()=> <div className="space-y-4">
 <div className={cc}><div className="flex justify-between items-center mb-2"><h3 className={hc} style={{color:O[700]}}>学歴</h3>{f.education.length<ME&&<button onClick={()=>setF(p=>({...p,education:[...p.education,{year:"",month:"",type:"",name:"",dept:"",sub:"",sfx:""}]}))} style={{color:O[600]}} className="text-xs font-bold">＋追加</button>}</div>
-{f.education.map((ed,i)=> <div key={i} className="rounded-xl p-3 mb-3" style={{background:O[50],border:`1px solid ${O[200]}`}}>
+{f.education.map((ed,i)=> <div key={i} className="rounded-xl p-3 mb-3" style={{background:"#FAFAF7",border:"2px solid #EDE8E0",borderRadius:16}}>
 <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-gray-500">学歴{i+1}</span>{f.education.length>1&&<button onClick={()=>setF(p=>({...p,education:p.education.filter((_,j)=>j!==i)}))} className="text-red-400 text-xs font-bold">削除</button>}</div>
 <div className="grid grid-cols-4 gap-2 mb-2">
 <div><label className={lc}>年</label><select className={sc2} value={ed.year} onChange={e=>uE(i,"year",e.target.value)}><option value="">年</option>{YRS.map(y=> <option key={y}>{y}</option>)}</select></div>
@@ -118,7 +121,7 @@ const S1=()=> <div className="space-y-4">
 </div>
 <div className={cc}><div className="flex justify-between items-center mb-2"><h3 className={hc} style={{color:O[700]}}>職歴</h3>{f.work.length<MW&&<button onClick={()=>setF(p=>({...p,work:[...p.work,{year:"",month:"",company:"",sfx:""}]}))} style={{color:O[600]}} className="text-xs font-bold">＋追加</button>}</div>
 <label className="flex items-center gap-2 mb-3"><input type="checkbox" checked={f.isPartTime} onChange={e=>setF(p=>({...p,isPartTime:e.target.checked}))} className="accent-green-600"/><span className="text-xs text-gray-600">アルバイト経験のみ</span></label>
-{f.work.map((w,i)=> <div key={i} className="rounded-xl p-3 mb-3" style={{background:O[50],border:`1px solid ${O[200]}`}}>
+{f.work.map((w,i)=> <div key={i} className="rounded-xl p-3 mb-3" style={{background:"#FAFAF7",border:"2px solid #EDE8E0",borderRadius:16}}>
 <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-gray-500">{f.isPartTime?"バイト":"職歴"}{i+1}</span>{f.work.length>1&&<button onClick={()=>setF(p=>({...p,work:p.work.filter((_,j)=>j!==i)}))} className="text-red-400 text-xs font-bold">削除</button>}</div>
 <div className="grid grid-cols-4 gap-2">
 <div><label className={lc}>年</label><select className={sc2} value={w.year} onChange={e=>uW(i,"year",e.target.value)}><option value="">年</option>{YRS.map(y=> <option key={y}>{y}</option>)}</select></div>
@@ -134,7 +137,7 @@ const S2=()=> <div className={cc}>
 </div>;
 
 const DB=({n})=>{const dn2=`dis${n}name`,dot=`dis${n}other`,t2=`techo${n}`,to2=`techo${n}other`,gr=`grade${n}`,gc=`grade${n}custom`;const gl=GR[f[t2]]||[];
-return <div className="rounded-xl p-3 mb-3" style={{background:O[50],border:`1px solid ${O[200]}`}}>
+return <div className="rounded-xl p-3 mb-3" style={{background:"#FAFAF7",border:"2px solid #EDE8E0",borderRadius:16}}>
 <p className="text-xs font-bold text-gray-500 mb-2">障がい{n===1?"①":"②"}</p>
 <div className="grid grid-cols-2 gap-3 mb-2"><div><label className={lc}>障害名</label><select className={sc2} value={f[dn2]} onChange={u(dn2)}><option value="">選択</option>{DL.map(d=> <option key={d}>{d}</option>)}</select></div>{f[dn2]==="その他"&&<div><label className={lc}>障害名（記入）</label><input className={ic} value={f[dot]} onChange={u(dot)}/></div>}</div>
 <div className="grid grid-cols-2 gap-3"><div><label className={lc}>手帳の種類</label><select className={sc2} value={f[t2]} onChange={e=>{setF(p=>({...p,[t2]:e.target.value,[gr]:"",[gc]:""}));}}><option value="">選択</option>{TC.map(t=> <option key={t}>{t}</option>)}</select>{f[t2]==="その他"&&<input className={ic+" mt-1"} placeholder="手帳名" value={f[to2]} onChange={u(to2)}/>}</div>
@@ -149,13 +152,13 @@ const S3=()=> <div className="space-y-4">
 </div>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>障害特性（現状）</h3><textarea className={ic+" h-28"} value={f.chars} onChange={u("chars")}/>{f.dis1name&&DI[f.dis1name]&&<div className="mt-3 rounded-xl p-3" style={{background:"#FEF3C7"}}><p className="text-xs text-amber-900">{DI[f.dis1name]}</p></div>}</div>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>必要な配慮</h3><p className="text-xs text-gray-500 mb-2">例文タップで追加</p><textarea className={ic+" h-24"} value={f.accoms} onChange={u("accoms")}/>
-<div className="mt-3 space-y-1.5">{AC.map((ex,i)=> <button key={i} onClick={()=>insAc(ex)} className="block w-full text-left text-xs rounded-lg px-3 py-2 border hover:border-yellow-600" style={{background:"#FAFAFA"}}>+ {ex}</button>)}</div>
+<div className="mt-3 space-y-1.5">{AC.map((ex,i)=> <button key={i} onClick={()=>insAc(ex)} className="block w-full text-left text-xs rounded-lg px-3 py-2 border hover:border-yellow-600" style={{background:"#FAF8F5",borderColor:"#E5E0D8"}}>+ {ex}</button>)}</div>
 </div></div>;
 
 const S4=()=> <div className="space-y-4">
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>強みを選択</h3>
-<div className="grid grid-cols-1 gap-2">{SR.map(s=> <button key={s.id} onClick={()=>pS(s.id)} className="text-left px-4 py-3 rounded-xl border-2 text-sm font-medium" style={{borderColor:f.strId===s.id?O[500]:"#E5E7EB",background:f.strId===s.id?O[50]:"white"}}>{s.label}</button>)}</div></div>
-{f.strId&&<div className={cc}><h3 className={hc} style={{color:O[700]}}>場面</h3><div className="space-y-2">{SC[f.strId]?.map((s,i)=> <div key={i}><button onClick={()=>pSc(s)} className="w-full text-left px-4 py-2.5 rounded-xl border-2 text-xs" style={{borderColor:f.scene===s?O[500]:"#E5E7EB",background:f.scene===s?O[50]:"white"}}>{s}</button>{s==="その他（自由記述）"&&f.scene===s&&<input className={ic+" mt-2"} value={f.sceneOther} onChange={u("sceneOther")}/>}</div>)}</div></div>}
+<div className="grid grid-cols-1 gap-2">{SR.map(s=> <button key={s.id} onClick={()=>pS(s.id)} className="text-left px-4 py-3 rounded-xl border-2 text-sm font-medium" style={{borderColor:f.strId===s.id?"#D35C1F":"#E5E0D8",background:f.strId===s.id?"#FDF5EF":"white",borderWidth:2,borderRadius:16}}>{s.label}</button>)}</div></div>
+{f.strId&&<div className={cc}><h3 className={hc} style={{color:O[700]}}>場面</h3><div className="space-y-2">{SC[f.strId]?.map((s,i)=> <div key={i}><button onClick={()=>pSc(s)} className="w-full text-left px-4 py-2.5 rounded-xl border-2 text-xs" style={{borderColor:f.scene===s?"#D35C1F":"#E5E0D8",background:f.scene===s?"#FDF5EF":"white",borderWidth:2,borderRadius:12}}>{s}</button>{s==="その他（自由記述）"&&f.scene===s&&<input className={ic+" mt-2"} value={f.sceneOther} onChange={u("sceneOther")}/>}</div>)}</div></div>}
 {f.strId&&<div className={cc}><h3 className={hc} style={{color:O[700]}}>自己PR（編集可）</h3><textarea className={ic+" h-32"} value={f.selfPR} onChange={e=>{if(e.target.value.length<=MP)setF(p=>({...p,selfPR:e.target.value}));}}/><p className={`text-xs mt-1 text-right ${f.selfPR.length>MP*0.9?"text-red-500":"text-gray-400"}`}>{f.selfPR.length}/{MP}</p></div>}
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>志望動機（編集可）</h3><textarea className={ic+" h-32"} value={f.motivation} onChange={e=>{if(e.target.value.length<=MP)setF(p=>({...p,motivation:e.target.value}));}} placeholder="強み選択で自動生成"/></div>
 </div>;
@@ -260,7 +263,7 @@ const S5=function(){
 var eR=f.education.filter(function(e){return e.name;}).map(function(e){return {y:e.year,m:e.month,t:eduF(e)};});
 var wR=f.work.filter(function(w){return w.company;}).map(function(w){return {y:w.year,m:w.month,t:w.company+" "+w.sfx};});
 return <div className="space-y-4">
-<div className="p-4 rounded-lg border-2 border-green-200 bg-green-50">
+<div className="p-5 rounded-2xl border-0" style={{background:"linear-gradient(135deg,#EFF8E8,#F5FBF0)"}}>
 <p className="text-sm font-bold mb-2">履歴書DOCXをダウンロード</p>
 <p className="text-xs text-gray-600">入力データをWordテンプレートに書き込みます。そのまま提出・印刷OK。</p>
 </div>
@@ -279,10 +282,10 @@ return <div className="space-y-4">
 {f.selfPR&&<div><p className="text-xs font-bold text-gray-500 border-b pb-1 mb-1 mt-2">自己PR</p><p className="text-sm whitespace-pre-wrap">{f.selfPR}</p></div>}
 </div>
 <div className="flex gap-2">
-<button onClick={generateDocx} disabled={generating||!zipReady} className="text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow disabled:opacity-50" style={{background:O[500]}}>
+<button onClick={generateDocx} disabled={generating||!zipReady} className="text-white px-8 py-3.5 rounded-xl text-sm font-black shadow-lg disabled:opacity-40 transition-all" style={{background:"linear-gradient(135deg,#5B8C2B,#8CB82B)"}}>
 {generating?"生成中...":"📄 履歴書DOCXをダウンロード"}
 </button>
-<button onClick={function(){setStep(0);}} className="bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-bold">編集に戻る</button>
+<button onClick={function(){setStep(0);}} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200">編集に戻る</button>
 </div>
 </div>;
 };
@@ -291,31 +294,38 @@ return <div className="space-y-4">
 const steps=[S0,S1,S2,S3,S4,S5];
 
 const SavePg=()=> <div className="space-y-4">
-<button onClick={()=>setPg("form")} className="bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-bold">← 戻る</button>
+<button onClick={()=>setPg("form")} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200">← 戻る</button>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>保存スロット（3件）</h3>
 {[0,1,2].map(i=> <div key={i} className="rounded-xl p-4 mb-3" style={{background:saves[i]?O[50]:"#F9FAFB",border:`1px solid ${saves[i]?O[300]:"#E5E7EB"}`}}>
 <div className="flex justify-between items-center"><div><p className="text-sm font-bold" style={{color:saves[i]?O[800]:"#9CA3AF"}}>スロット{i+1}</p>{saves[i]?<p className="text-xs text-gray-500 mt-1">{saves[i]._at}　{saves[i].name||"未入力"}</p>:<p className="text-xs text-gray-400 mt-1">空き</p>}</div>
-<div className="flex gap-2"><button onClick={()=>save(i)} className="px-4 py-2 rounded-lg text-xs font-bold text-white" style={{background:O[500]}}>保存</button><button onClick={()=>load(i)} disabled={!saves[i]} className={`px-4 py-2 rounded-lg text-xs font-bold ${saves[i]?"bg-white border-2":"bg-gray-100 text-gray-300"}`} style={saves[i]?{borderColor:O[400],color:O[700]}:{}}>読込</button></div>
+<div className="flex gap-2"><button onClick={()=>save(i)} className="px-4 py-2 rounded-xl text-xs font-bold text-white" style={{background:"#3B3228"}}>保存</button><button onClick={()=>load(i)} disabled={!saves[i]} className={`px-4 py-2 rounded-lg text-xs font-bold ${saves[i]?"bg-white border-2":"bg-gray-100 text-gray-300"}`} style={saves[i]?{borderColor:O[400],color:O[700]}:{}}>読込</button></div>
 </div></div>)}
 </div></div>;
 
-return <div className="min-h-screen" style={{background:`linear-gradient(135deg,${O[50]},#FAFAF5,${O[100]})`,fontFamily:"'Noto Sans JP',sans-serif"}}>
+return <div className="min-h-screen" style={{background:'#F5F0EB',fontFamily:"'Noto Sans JP',sans-serif"}}>
 <div className="max-w-2xl mx-auto px-4 py-6 noprint">
-<div className="text-center mb-5"><img src="https://and-connect.co.jp/wp-content/themes/connect/img/logo.svg" alt="CONNECT" style={{height:36,margin:"0 auto 8px"}} onError={function(e){e.target.style.display="none";}}/><h1 className="text-2xl font-black" style={{color:O[700]}}>障がい者雇用 履歴書メーカー</h1><p className="text-xs text-gray-500 mt-1">入力するだけでWord履歴書が完成</p></div>
-<div className="rounded-xl p-3 mb-4 text-xs" style={{background:O[50],border:`1px solid ${O[200]}`,color:O[800]}}><b>個人情報は収集しません。</b>ブラウザ上のみで処理。</div>
+<div className="text-center mb-8">
+<div style={{display:"inline-flex",alignItems:"center",gap:10,marginBottom:12}}>
+<div style={{width:44,height:44,borderRadius:"50%",background:"linear-gradient(135deg,#D35C1F,#8CB82B)",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{color:"#fff",fontSize:20,fontWeight:900}}>C</span></div>
+<span style={{fontSize:13,fontWeight:900,color:"#3B3228",letterSpacing:3}}>CONNECT</span>
+</div>
+<h1 style={{fontSize:22,fontWeight:900,color:"#3B3228",letterSpacing:-0.5,marginBottom:4,fontFamily:"'Zen Maru Gothic',sans-serif"}}>障がい者雇用 履歴書メーカー</h1>
+<p style={{fontSize:12,color:"#A0937D",fontWeight:500}}>選ぶだけで履歴書が完成。そのまま提出できます。</p>
+</div>
+<div className="rounded-xl p-3 mb-4 text-xs" style={{background:"#F0EDE8",border:"none",color:"#6B5D4F",borderRadius:16}}><b>個人情報は収集しません。</b>ブラウザ上のみで処理。</div>
 {pg==="form"&&<>
-<div className="flex gap-1 mb-4 overflow-x-auto pb-1">
-{STP.map((s,i)=> <button key={i} onClick={()=>setStep(i)} className="whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold" style={{background:step===i?O[500]:"white",color:step===i?"white":"#6B7280",border:step===i?"none":"1px solid #E5E7EB"}}>{i+1}.{s}</button>)}
-<button onClick={()=>setPg("saves")} className="whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200 ml-1">保存/読込</button>
+<div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+{STP.map((s,i)=> <button key={i} onClick={()=>setStep(i)} className="whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold" style={{background:step===i?"#3B3228":"transparent",color:step===i?"#fff":"#8B7355",border:step===i?"none":"2px solid #E0D5C5",fontWeight:700}}>{i+1}.{s}</button>)}
+<button onClick={()=>setPg("saves")} className="whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold ml-2" style={{background:"#EDE8E0",color:"#6B5D4F",border:"none"}}>保存/読込</button>
 </div>
 {steps[step]()}
 <div className="flex justify-between mt-6 mb-4">
-{step>0?<button onClick={()=>setStep(step-1)} className="bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-bold">← 前へ</button>:<div/>}
-{step<STP.length-1?<button onClick={()=>setStep(step+1)} className="text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow" style={{background:O[500]}}>次へ →</button>:null}
+{step>0?<button onClick={()=>setStep(step-1)} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200 hover:border-gray-300 transition-all">← 前へ</button>:<div/>}
+{step<STP.length-1?<button onClick={()=>setStep(step+1)} className="text-white px-8 py-3 rounded-xl text-sm font-black shadow-lg hover:shadow-xl transition-all" style={{background:"linear-gradient(135deg,#D35C1F,#E87830)"}}>次へ →</button>:null}
 </div></>}
 {pg==="saves"&&<SavePg/>}
-{toast&&<div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-sm font-bold text-white shadow-lg z-50" style={{background:O[600]}}>{toast}</div>}
-<p className="text-center text-xs text-gray-400 pb-6">© CONNECT こねくと</p>
+{toast&&<div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-sm font-bold text-white shadow-lg z-50" style={{background:"#3B3228",borderRadius:16}}>{toast}</div>}
+<p className="text-center text-xs pb-8" style={{color:"#C0B5A5"}}>© CONNECT こねくと　|　個人情報はブラウザ上のみで処理されます</p>
 </div></div>;}
 
 
