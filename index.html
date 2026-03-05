@@ -228,22 +228,22 @@ const generateDocx=async function(){
     if(f.dependent==="有")xml=xml.replace("※　　　有・無</w:t></w:r>","※　</w:t></w:r>"+circR("有")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>・無</w:t></w:r>');
     else if(f.dependent==="無")xml=xml.replace("※　　　有・無</w:t></w:r>","※　有・</w:t></w:r>"+circR("無")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t></w:t></w:r>');
 
-    // Photo
+    // Photo insertion
     if(f.photoPreview){
       try{
         var pdata=f.photoPreview.split(",")[1];
-        var pbin=Uint8Array.from(atob(pdata),function(c2){return c2.charCodeAt(0);});
         var pmime=f.photoPreview.match(/data:([^;]+)/)[1];
         var pext=pmime.split("/")[1]||"jpeg";
+        if(pext==="jpeg")pext="jpg";
+        var pbin=Uint8Array.from(atob(pdata),function(c2){return c2.charCodeAt(0);});
         zp.file("word/media/photo1."+pext,pbin);
-        var rels=await zp.file("word/_rels/document.xml.rels").async("string");
-        var rid="rIdPhoto1";
-        rels=rels.replace("</Relationships>",'<Relationship Id="'+rid+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/photo1.'+pext+'"/></Relationships>');
-        zp.file("word/_rels/document.xml.rels",rels);
-        var photoXml='<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="2286000" cy="3048000"/><wp:docPr id="99" name="photo"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="'+rid+'" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="2286000" cy="3048000"/></a:xfrm><a:prstGeom prst="rect"/></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
-        var photoMarker="写真貼付欄";
-        var ppos=xml.indexOf(photoMarker);
-        if(ppos!==-1){var pempty=xml.indexOf("</w:pPr></w:p>",ppos);if(pempty!==-1){xml=xml.substring(0,pempty+"</w:pPr>".length)+photoXml+xml.substring(pempty+"</w:pPr>".length);}}
+        var rels2=await zp.file("word/_rels/document.xml.rels").async("string");
+        rels2=rels2.replace("</Relationships>",'<Relationship Id="rIdP99" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/photo1.'+pext+'"/></Relationships>');
+        zp.file("word/_rels/document.xml.rels",rels2);
+        var ct2=await zp.file("[Content_Types].xml").async("string");
+        if(ct2.indexOf('Extension="'+pext+'"')===-1){ct2=ct2.replace("</Types>",'<Default Extension="'+pext+'" ContentType="'+pmime+'"/></Types>');zp.file("[Content_Types].xml",ct2);}
+        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5500000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>400000</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
+        var bstart=xml.indexOf("<w:body>");var fp=xml.indexOf("</w:p>",bstart);if(fp!==-1){xml=xml.substring(0,fp)+phXml+xml.substring(fp);}
       }catch(pe){console.log("Photo error:",pe);}
     }
     zp.file("word/document.xml",xml);
