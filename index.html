@@ -182,9 +182,9 @@ const generateDocx=async function(){
     if(f.furigana)xml=rNth(xml,"ふりがな","ふりがな　"+xesc(f.furigana),0);
     if(f.name)xml=xml.replace("氏　　名</w:t></w:r>","氏　名</w:t></w:r><w:r><w:rPr><w:sz w:val=\"40\"/><w:szCs w:val=\"40\"/></w:rPr><w:t>　"+xesc(f.name)+"</w:t></w:r>");
     xml=xml.replace("年　　　　月　　　　日生　（満　　　歳）",f.birthYear+"年　"+f.birthMonth+"月　"+f.birthDay+"日生　（満"+ag+"歳）");
-    var circR=function(ch){return '<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:instrText xml:space="preserve"> EQ \\O(\\s\\up 1(○),'+ch+')</w:instrText></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+ch+'</w:t></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:fldChar w:fldCharType="end"/></w:r>';};
-    if(f.gender==="男")xml=xml.replace("※　男・女</w:t></w:r>","※　</w:t></w:r>"+circR("男")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>・女</w:t></w:r>');
-    else if(f.gender==="女")xml=xml.replace("※　男・女</w:t></w:r>","※　男・</w:t></w:r>"+circR("女")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t></w:t></w:r>');
+    
+    if(f.gender==="男")xml=xml.replace("※　男・女","※　○男・女");
+    else if(f.gender==="女")xml=xml.replace("※　男・女","※　男・○女");
     if(f.furiganaAddr)xml=rNth(xml,"ふりがな","ふりがな　"+xesc(f.furiganaAddr),1);
     if(f.phone)xml=rNth(xml,"電話","電話　"+xesc(f.phone),0);
     if(f.zip||f.address)xml=xml.replace("現住所　〒","現住所　〒"+xesc(f.zip)+"　"+xesc(f.address));
@@ -200,8 +200,8 @@ const generateDocx=async function(){
     var eR2=f.education.filter(function(e){return e.name;}).map(function(e){return {y:e.year,m:e.month,t:eduF(e)};});
     var wR2=f.work.filter(function(w){return w.company;}).map(function(w){return {y:w.year,m:w.month,t:w.company+" "+w.sfx};});
     var hist=[];
-    if(eR2.length){hist.push({y:"",m:"",t:"学歴"});eR2.forEach(function(r){hist.push(r);});}
-    if(wR2.length){hist.push({y:"",m:"",t:f.isPartTime?"アルバイト歴":"職歴"});wR2.forEach(function(r){hist.push(r);});}
+    if(eR2.length){eR2.forEach(function(r){hist.push(r);});}
+    if(wR2.length){wR2.forEach(function(r){hist.push(r);});}
     var hM="学歴・職歴（各部にまとめて書く）";
     for(var i=0;i<Math.min(hist.length,16);i++){if(hist[i].y)xml=insEP(xml,hM,i*3,hist[i].y);if(hist[i].m)xml=insEP(xml,hM,i*3+1,hist[i].m);if(hist[i].t)xml=insEP(xml,hM,i*3+2,hist[i].t);}
     var qM="免許・資格";
@@ -215,7 +215,7 @@ const generateDocx=async function(){
     var d2=f.dis2name==="その他"?f.dis2other:f.dis2name;
     if(d2)xml=rNth(xml,"名：","名："+xesc(d2),1);
     var g2=f.grade2;if(f.techo2==="その他")g2=f.grade2custom;if(g2==="その他（記入）")g2=f.grade2custom;
-    if(g2){g2=g2.replace(/級$/,"");xml=rNth(xml,"等級：","等級："+xesc(g2),1);}
+    if(g2){g2=g2.replace(/級$/,"");xml=rNth(xml,"等級：","等級："+xesc(g2)+"級",1);}
     var vt=f.visit+(f.visit==="している"&&f.visitFreq?("（"+(f.visitFreq==="その他"?f.visitFreqOther:f.visitFreq)+"）"):"");
     if(vt)xml=insAfter(xml,"通院</w:t>",vt);
     var mt=f.med+(f.med==="している"&&f.medName?("（"+f.medName+"）"):"");
@@ -224,10 +224,10 @@ const generateDocx=async function(){
     if(f.accoms)xml=insAfter(xml,"配慮</w:t>",f.accoms);
     xml=xml.replace("約　　　　時間　　　　分","約　"+f.commuteH+"　時間　"+f.commuteM+"　分");
     xml=rNth(xml,"人　　　　",f.familyCount+"人",0);
-    if(f.spouse==="有")xml=xml.replace("※　有・無　</w:t></w:r>","※　</w:t></w:r>"+circR("有")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>・無</w:t></w:r>');
-    else if(f.spouse==="無")xml=xml.replace("※　有・無　</w:t></w:r>","※　有・</w:t></w:r>"+circR("無")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t></w:t></w:r>');
-    if(f.dependent==="有")xml=xml.replace("※　　　有・無</w:t></w:r>","※　</w:t></w:r>"+circR("有")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>・無</w:t></w:r>');
-    else if(f.dependent==="無")xml=xml.replace("※　　　有・無</w:t></w:r>","※　有・</w:t></w:r>"+circR("無")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t></w:t></w:r>');
+    if(f.spouse==="有")xml=xml.replace("※　有・無　","※　○有・無　");
+    else if(f.spouse==="無")xml=xml.replace("※　有・無　","※　有・○無　");
+    if(f.dependent==="有")xml=xml.replace("※　　　有・無","※　　○有・無");
+    else if(f.dependent==="無")xml=xml.replace("※　　　有・無","※　　有・○無");
 
     if(f.photoPreview){
       try{
@@ -242,7 +242,7 @@ const generateDocx=async function(){
         zp.file("word/_rels/document.xml.rels",rels2);
         var ct2=await zp.file("[Content_Types].xml").async("string");
         if(ct2.indexOf('Extension="'+pext+'"')===-1){ct2=ct2.replace("</Types>",'<Default Extension="'+pext+'" ContentType="'+pmime+'"/></Types>');zp.file("[Content_Types].xml",ct2);}
-        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5350000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>530000</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
+        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5280000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>480000</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
         var bstart=xml.indexOf("<w:body>");var fp=xml.indexOf("</w:p>",bstart);if(fp!==-1){xml=xml.substring(0,fp)+phXml+xml.substring(fp);}
       }catch(pe){console.log("Photo error:",pe);}
     }
