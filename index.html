@@ -60,11 +60,11 @@ const pSc=sc=>{setF(p=>({...p,scene:sc,selfPR:gP(f.strId,sc,f.sceneOther)}));};
 useEffect(()=>{if(f.strId&&f.scene)setF(p=>({...p,selfPR:gP(f.strId,f.scene,f.sceneOther)}));},[f.sceneOther]);
 const lookupZip=async()=>{const z=f.zip.replace(/[-ー−]/g,"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xfee0));if(z.length<7){tt("7桁入力してください");return;}try{const r=await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z}`);const d=await r.json();if(d.results?.[0]){const a=d.results[0];setF(p=>({...p,address:`${a.address1}${a.address2}${a.address3}`}));tt("住所を入力しました");}else{tt("見つかりません");}}catch{tt("検索できません");}};
 
-const O={50:"#FFF7ED",100:"#FFEDD5",200:"#FED7AA",300:"#FDBA74",400:"#FB923C",500:"#F97316",600:"#EA580C",700:"#C2410C",800:"#9A3412"};
-const ic="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400";
+const O={50:"#FDF8F3",100:"#FAF0E4",200:"#F5DFC8",300:"#E8B87A",400:"#E8973C",500:"#E87330",600:"#C85A20",700:"#8B3E15",800:"#5C2A0E"};
+const ic="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-600";
 const sc2=ic+" bg-white";
 const lc="block text-xs font-semibold text-gray-600 mb-1";
-const cc="bg-white rounded-2xl shadow-sm border border-orange-100 p-5 mb-4";
+const cc="bg-white rounded-2xl shadow-sm border border-yellow-100 p-5 mb-4";
 const hc="text-sm font-bold mb-3";
 const STP=["基本情報","学歴・職歴","資格・免許","障害について","強み・自己PR","確認・出力"];
 const eduF=ed=>{let n=fS(ed.name,ed.type);if(ed.dept){const dt=ST[ed.type];n+=` ${ed.dept}${dt?.d||""}`;if(ed.sub&&dt?.s)n+=` ${ed.sub}${dt.s}`;}if(ed.sfx)n+=` ${ed.sfx}`;return n;};
@@ -92,7 +92,7 @@ const S0=()=> <div className="space-y-4">
 <div className="grid grid-cols-3 gap-3 mb-3"><div><label className={lc}>最寄り線</label><input className={ic} value={f.nearLine} onChange={u("nearLine")}/></div><div><label className={lc}>最寄り駅</label><input className={ic} value={f.nearStation} onChange={u("nearStation")}/></div><div><label className={lc}>徒歩（分）</label><input className={ic} type="number" min="0" value={f.walkMin} onChange={e=>setF(p=>({...p,walkMin:Math.max(0,parseInt(e.target.value)||0).toString()}))} placeholder="0"/></div></div>
 <div className="grid grid-cols-3 gap-3 mb-3"><div><label className={lc}>電話番号</label><input className={ic} value={f.phone} onChange={u("phone")}/></div><div><label className={lc}>携帯</label><input className={ic} value={f.mobile} onChange={u("mobile")}/></div><div><label className={lc}>FAX</label><input className={ic} value={f.fax} onChange={u("fax")}/></div></div>
 <div className="mb-3"><label className={lc}>E-mail</label><input className={ic} value={f.email} onChange={u("email")}/></div>
-<hr className="my-3 border-orange-200"/><p className="text-xs text-gray-400 mb-2">連絡先（現住所以外の場合のみ）</p>
+<hr className="my-3 border-yellow-300"/><p className="text-xs text-gray-400 mb-2">連絡先（現住所以外の場合のみ）</p>
 <div className="grid grid-cols-2 gap-3 mb-2"><div><label className={lc}>連絡先ふりがな</label><input className={ic} value={f.furiganaContact} onChange={u("furiganaContact")}/></div><div><label className={lc}>連絡先〒</label><input className={ic} value={f.contactZip} onChange={u("contactZip")}/></div></div>
 <div className="mb-2"><label className={lc}>連絡先住所</label><input className={ic} value={f.contactAddr} onChange={u("contactAddr")}/></div>
 <div className="grid grid-cols-3 gap-3"><div><label className={lc}>電話</label><input className={ic} value={f.contactPhone} onChange={u("contactPhone")}/></div><div><label className={lc}>携帯</label><input className={ic} value={f.contactMobile} onChange={u("contactMobile")}/></div><div><label className={lc}>FAX</label><input className={ic} value={f.contactFax} onChange={u("contactFax")}/></div></div>
@@ -117,7 +117,7 @@ const S1=()=> <div className="space-y-4">
 </div>)}
 </div>
 <div className={cc}><div className="flex justify-between items-center mb-2"><h3 className={hc} style={{color:O[700]}}>職歴</h3>{f.work.length<MW&&<button onClick={()=>setF(p=>({...p,work:[...p.work,{year:"",month:"",company:"",sfx:""}]}))} style={{color:O[600]}} className="text-xs font-bold">＋追加</button>}</div>
-<label className="flex items-center gap-2 mb-3"><input type="checkbox" checked={f.isPartTime} onChange={e=>setF(p=>({...p,isPartTime:e.target.checked}))} className="accent-orange-500"/><span className="text-xs text-gray-600">アルバイト経験のみ</span></label>
+<label className="flex items-center gap-2 mb-3"><input type="checkbox" checked={f.isPartTime} onChange={e=>setF(p=>({...p,isPartTime:e.target.checked}))} className="accent-green-600"/><span className="text-xs text-gray-600">アルバイト経験のみ</span></label>
 {f.work.map((w,i)=> <div key={i} className="rounded-xl p-3 mb-3" style={{background:O[50],border:`1px solid ${O[200]}`}}>
 <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-gray-500">{f.isPartTime?"バイト":"職歴"}{i+1}</span>{f.work.length>1&&<button onClick={()=>setF(p=>({...p,work:p.work.filter((_,j)=>j!==i)}))} className="text-red-400 text-xs font-bold">削除</button>}</div>
 <div className="grid grid-cols-4 gap-2">
@@ -149,7 +149,7 @@ const S3=()=> <div className="space-y-4">
 </div>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>障害特性（現状）</h3><textarea className={ic+" h-28"} value={f.chars} onChange={u("chars")}/>{f.dis1name&&DI[f.dis1name]&&<div className="mt-3 rounded-xl p-3" style={{background:"#FEF3C7"}}><p className="text-xs text-amber-900">{DI[f.dis1name]}</p></div>}</div>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>必要な配慮</h3><p className="text-xs text-gray-500 mb-2">例文タップで追加</p><textarea className={ic+" h-24"} value={f.accoms} onChange={u("accoms")}/>
-<div className="mt-3 space-y-1.5">{AC.map((ex,i)=> <button key={i} onClick={()=>insAc(ex)} className="block w-full text-left text-xs rounded-lg px-3 py-2 border hover:border-orange-300" style={{background:"#FAFAFA"}}>+ {ex}</button>)}</div>
+<div className="mt-3 space-y-1.5">{AC.map((ex,i)=> <button key={i} onClick={()=>insAc(ex)} className="block w-full text-left text-xs rounded-lg px-3 py-2 border hover:border-yellow-600" style={{background:"#FAFAFA"}}>+ {ex}</button>)}</div>
 </div></div>;
 
 const S4=()=> <div className="space-y-4">
@@ -179,7 +179,7 @@ const generateDocx=async function(){
     var ag=f.birthYear?String(now.getFullYear()-parseInt(f.birthYear)):"";
     xml=xml.replace("年　　月　　日",yr+"年　"+mo+"月　"+dy+"日");
     if(f.furigana)xml=rNth(xml,"ふりがな","ふりがな　"+xesc(f.furigana),0);
-    if(f.name)xml=xml.replace("氏　　名</w:t></w:r>","氏　名</w:t></w:r><w:r><w:rPr><w:sz w:val=\"28\"/><w:szCs w:val=\"28\"/></w:rPr><w:t>　"+xesc(f.name)+"</w:t></w:r>");
+    if(f.name)xml=xml.replace("氏　　名</w:t></w:r>","氏　名</w:t></w:r><w:r><w:rPr><w:sz w:val=\"40\"/><w:szCs w:val=\"40\"/></w:rPr><w:t>　"+xesc(f.name)+"</w:t></w:r>");
     xml=xml.replace("年　　　　月　　　　日生　（満　　　歳）",f.birthYear+"年　"+f.birthMonth+"月　"+f.birthDay+"日生　（満"+ag+"歳）");
     var circR=function(ch){return '<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:instrText xml:space="preserve"> EQ \\O(\\s\\up 1(○),'+ch+')</w:instrText></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+ch+'</w:t></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:fldChar w:fldCharType="end"/></w:r>';};
     if(f.gender==="男")xml=xml.replace("※　男・女</w:t></w:r>","※　</w:t></w:r>"+circR("男")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>・女</w:t></w:r>');
@@ -242,7 +242,7 @@ const generateDocx=async function(){
         zp.file("word/_rels/document.xml.rels",rels2);
         var ct2=await zp.file("[Content_Types].xml").async("string");
         if(ct2.indexOf('Extension="'+pext+'"')===-1){ct2=ct2.replace("</Types>",'<Default Extension="'+pext+'" ContentType="'+pmime+'"/></Types>');zp.file("[Content_Types].xml",ct2);}
-        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5500000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>400000</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
+        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5350000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>530000</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
         var bstart=xml.indexOf("<w:body>");var fp=xml.indexOf("</w:p>",bstart);if(fp!==-1){xml=xml.substring(0,fp)+phXml+xml.substring(fp);}
       }catch(pe){console.log("Photo error:",pe);}
     }
@@ -299,9 +299,9 @@ const SavePg=()=> <div className="space-y-4">
 </div></div>)}
 </div></div>;
 
-return <div className="min-h-screen" style={{background:`linear-gradient(135deg,${O[50]},#FFFBEB,${O[100]})`,fontFamily:"'Noto Sans JP',sans-serif"}}>
+return <div className="min-h-screen" style={{background:`linear-gradient(135deg,${O[50]},#FAFAF5,${O[100]})`,fontFamily:"'Noto Sans JP',sans-serif"}}>
 <div className="max-w-2xl mx-auto px-4 py-6 noprint">
-<div className="text-center mb-5"><h1 className="text-2xl font-black" style={{color:O[700]}}>障害者雇用 履歴書メーカー</h1><p className="text-xs text-gray-500 mt-1">入力するだけでWord履歴書が完成</p></div>
+<div className="text-center mb-5"><img src="https://and-connect.co.jp/wp-content/themes/connect/img/logo.svg" alt="CONNECT" style={{height:36,margin:"0 auto 8px"}} onError={function(e){e.target.style.display="none";}}/><h1 className="text-2xl font-black" style={{color:O[700]}}>障がい者雇用 履歴書メーカー</h1><p className="text-xs text-gray-500 mt-1">入力するだけでWord履歴書が完成</p></div>
 <div className="rounded-xl p-3 mb-4 text-xs" style={{background:O[50],border:`1px solid ${O[200]}`,color:O[800]}}><b>個人情報は収集しません。</b>ブラウザ上のみで処理。</div>
 {pg==="form"&&<>
 <div className="flex gap-1 mb-4 overflow-x-auto pb-1">
@@ -315,7 +315,7 @@ return <div className="min-h-screen" style={{background:`linear-gradient(135deg,
 </div></>}
 {pg==="saves"&&<SavePg/>}
 {toast&&<div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-sm font-bold text-white shadow-lg z-50" style={{background:O[600]}}>{toast}</div>}
-<p className="text-center text-xs text-gray-400 pb-6">© 障害者雇用 履歴書メーカー</p>
+<p className="text-center text-xs text-gray-400 pb-6">© CONNECT こねくと</p>
 </div></div>;}
 
 
