@@ -179,10 +179,11 @@ const generateDocx=async function(){
     var ag=f.birthYear?String(now.getFullYear()-parseInt(f.birthYear)):"";
     xml=xml.replace("年　　月　　日",yr+"年　"+mo+"月　"+dy+"日");
     if(f.furigana)xml=rNth(xml,"ふりがな","ふりがな　"+xesc(f.furigana),0);
-    if(f.name)xml=xml.replace("氏　　名","氏　名　"+xesc(f.name));
+    if(f.name)xml=xml.replace("氏　　名</w:t></w:r>","氏　名</w:t></w:r><w:r><w:rPr><w:sz w:val=\"28\"/><w:szCs w:val=\"28\"/></w:rPr><w:t>　"+xesc(f.name)+"</w:t></w:r>");
     xml=xml.replace("年　　　　月　　　　日生　（満　　　歳）",f.birthYear+"年　"+f.birthMonth+"月　"+f.birthDay+"日生　（満"+ag+"歳）");
-    if(f.gender==="男")xml=xml.replace("※　男・女","※ ○男・女");
-    else if(f.gender==="女")xml=xml.replace("※　男・女","※ 男・○女");
+    var circR=function(ch){return '<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:instrText xml:space="preserve"> EQ \\O(\\s\\up 1(○),'+ch+')</w:instrText></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+ch+'</w:t></w:r><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:fldChar w:fldCharType="end"/></w:r>';};
+    if(f.gender==="男")xml=xml.replace("※　男・女</w:t></w:r>","※　</w:t></w:r>"+circR("男")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>・女</w:t></w:r>');
+    else if(f.gender==="女")xml=xml.replace("※　男・女</w:t></w:r>","※　男・</w:t></w:r>"+circR("女")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t></w:t></w:r>');
     if(f.furiganaAddr)xml=rNth(xml,"ふりがな","ふりがな　"+xesc(f.furiganaAddr),1);
     if(f.phone)xml=rNth(xml,"電話","電話　"+xesc(f.phone),0);
     if(f.zip||f.address)xml=xml.replace("現住所　〒","現住所　〒"+xesc(f.zip)+"　"+xesc(f.address));
@@ -222,10 +223,29 @@ const generateDocx=async function(){
     if(f.accoms)xml=insAfter(xml,"配慮</w:t>",f.accoms);
     xml=xml.replace("約　　　　時間　　　　分","約　"+f.commuteH+"　時間　"+f.commuteM+"　分");
     xml=rNth(xml,"人　　　　",f.familyCount+"人",0);
-    if(f.spouse==="有")xml=xml.replace("※　有・無　","※ ○有・無");
-    else if(f.spouse==="無")xml=xml.replace("※　有・無　","※ 有・○無");
-    if(f.dependent==="有")xml=xml.replace("※　　　有・無","※　○有・無");
-    else if(f.dependent==="無")xml=xml.replace("※　　　有・無","※　有・○無");
+    if(f.spouse==="有")xml=xml.replace("※　有・無　</w:t></w:r>","※　</w:t></w:r>"+circR("有")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>・無</w:t></w:r>');
+    else if(f.spouse==="無")xml=xml.replace("※　有・無　</w:t></w:r>","※　有・</w:t></w:r>"+circR("無")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t></w:t></w:r>');
+    if(f.dependent==="有")xml=xml.replace("※　　　有・無</w:t></w:r>","※　</w:t></w:r>"+circR("有")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>・無</w:t></w:r>');
+    else if(f.dependent==="無")xml=xml.replace("※　　　有・無</w:t></w:r>","※　有・</w:t></w:r>"+circR("無")+'<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t></w:t></w:r>');
+
+    // Photo
+    if(f.photoPreview){
+      try{
+        var pdata=f.photoPreview.split(",")[1];
+        var pbin=Uint8Array.from(atob(pdata),function(c2){return c2.charCodeAt(0);});
+        var pmime=f.photoPreview.match(/data:([^;]+)/)[1];
+        var pext=pmime.split("/")[1]||"jpeg";
+        zp.file("word/media/photo1."+pext,pbin);
+        var rels=await zp.file("word/_rels/document.xml.rels").async("string");
+        var rid="rIdPhoto1";
+        rels=rels.replace("</Relationships>",'<Relationship Id="'+rid+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/photo1.'+pext+'"/></Relationships>');
+        zp.file("word/_rels/document.xml.rels",rels);
+        var photoXml='<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="2286000" cy="3048000"/><wp:docPr id="99" name="photo"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="'+rid+'" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="2286000" cy="3048000"/></a:xfrm><a:prstGeom prst="rect"/></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
+        var photoMarker="写真貼付欄";
+        var ppos=xml.indexOf(photoMarker);
+        if(ppos!==-1){var pempty=xml.indexOf("</w:pPr></w:p>",ppos);if(pempty!==-1){xml=xml.substring(0,pempty+"</w:pPr>".length)+photoXml+xml.substring(pempty+"</w:pPr>".length);}}
+      }catch(pe){console.log("Photo error:",pe);}
+    }
     zp.file("word/document.xml",xml);
     var blob=await zp.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
     var url=URL.createObjectURL(blob);
