@@ -205,7 +205,7 @@ const generateDocx=async function(){
     else if(f.gender==="女")xml=xml.replace("※　男・女","※　女");
     if(f.furiganaAddr)xml=rNth(xml,"ふりがな","ふりがな　"+xesc(f.furiganaAddr),1);
     if(f.phone)xml=rNth(xml,"電話","電話　"+xesc(f.phone),0);
-    if(f.zip||f.address)xml=xml.replace("現住所　〒","現住所　〒"+xesc(f.zip)+"　"+xesc(f.address));
+    if(f.zip||f.address){xml=xml.replace("現住所　〒</w:t></w:r>","現住所　〒"+xesc(f.zip)+"</w:t></w:r><w:r><w:rPr><w:sz w:val=\"22\"/><w:szCs w:val=\"22\"/></w:rPr><w:t>　"+xesc(f.address)+"</w:t></w:r>"); }
     xml=xml.replace("最寄り駅　　　線　　　駅　徒歩　　分","最寄り駅　"+xesc(f.nearLine)+"線　"+xesc(f.nearStation)+"駅　徒歩"+xesc(f.walkMin)+"分");
     if(f.mobile)xml=rNth(xml,"携帯","携帯　"+xesc(f.mobile),0);
     if(f.fax)xml=rNth(xml,"FAX","FAX　"+xesc(f.fax),0);
@@ -247,7 +247,8 @@ const generateDocx=async function(){
     if(f.chars)xml=insAfter(xml,"現状</w:t>",f.chars);
     if(f.accoms)xml=insAfter(xml,"配慮</w:t>",f.accoms);
     xml=xml.replace("約　　　　時間　　　　分","約　"+f.commuteH+"　時間　"+f.commuteM+"　分");
-    xml=rNth(xml,"人　　　　",f.familyCount+"人　　",0);
+    var famPos=xml.indexOf("人　　　　</w:t>");
+    if(famPos!==-1){xml=xml.substring(0,famPos)+f.familyCount+"人</w:t>"+xml.substring(famPos+"人　　　　</w:t>".length);}
     if(f.spouse==="有")xml=xml.replace("※　有・無　","※　有　");
     else if(f.spouse==="無")xml=xml.replace("※　有・無　","※　無　");
     if(f.dependent==="有")xml=xml.replace("※　　　有・無","※　　　有");
@@ -266,11 +267,13 @@ const generateDocx=async function(){
         zp.file("word/_rels/document.xml.rels",rels2);
         var ct2=await zp.file("[Content_Types].xml").async("string");
         if(ct2.indexOf('Extension="'+pext+'"')===-1){ct2=ct2.replace("</Types>",'<Default Extension="'+pext+'" ContentType="'+pmime+'"/></Types>');zp.file("[Content_Types].xml",ct2);}
-        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5230000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>580000</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
+        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5380000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>1350000</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
         var bstart=xml.indexOf("<w:body>");var fp=xml.indexOf("</w:p>",bstart);if(fp!==-1){xml=xml.substring(0,fp)+phXml+xml.substring(fp);}
       }catch(pe){console.log("Photo error:",pe);}
     }
-    xml=xml.replace(/w:val="dotted"/g,'w:val="nil"');
+    var prIdx=xml.indexOf("自己");var prEnd=xml.indexOf("</w:tbl>",prIdx);
+    var prSec=xml.substring(prIdx,prEnd);
+    xml=xml.substring(0,prIdx)+prSec.replace(/w:val="dotted"/g,'w:val="nil"')+xml.substring(prEnd);
     zp.file("word/document.xml",xml);
     var blob=await zp.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
     var url=URL.createObjectURL(blob);
