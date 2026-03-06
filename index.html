@@ -41,7 +41,7 @@ const gP=(sid,sc,ot)=>{const sl=SR.find(s=>s.id===sid)?.label||"";const s2=sc===
 const gM=(sid)=>{const sl=SR.find(s=>s.id===sid)?.label||"自分の強み";return`貴社の事業内容に魅力を感じ、志望いたしました。私の強みである${sl}を活かし、貴社の業務に貢献できると考えております。障害への配慮をいただきながら、長期的に安定して働き、お力になれるよう努めてまいります。`;};
 const fS=(n,t)=>{if(!n||!t||t==="その他"||t==="専門学校")return n;const x=ST[t]?.x||"";return x&&!n.includes(x)?n+x:n;};
 
-const INIT={name:"",furigana:"",furiganaAddr:"",furiganaContact:"",birthYear:"",birthMonth:"",birthDay:"",gender:"",photoPreview:null,zip:"",address:"",phone:"",mobile:"",fax:"",email:"",nearLine:"",nearStation:"",walkMin:"",contactZip:"",contactAddr:"",contactPhone:"",contactMobile:"",contactFax:"",commuteH:"",commuteM:"",familyCount:"",spouse:"",dependent:"",education:[{year:"",month:"",type:"",name:"",dept:"",sub:"",sfx:""}],isPartTime:false,work:[{year:"",month:"",company:"",sfx:""}],quals:[{name:"",custom:""}],dis1name:"",dis1other:"",techo1:"",techo1other:"",grade1:"",grade1custom:"",dis2name:"",dis2other:"",techo2:"",techo2other:"",grade2:"",grade2custom:"",visit:"",visitFreq:"",visitFreqOther:"",med:"",medName:"",chars:"",accoms:"",strId:"",scene:"",sceneOther:"",selfPR:"",motivation:""};
+const INIT={name:"",furigana:"",furiganaAddr:"",furiganaContact:"",birthYear:"",birthMonth:"",birthDay:"",gender:"",photoPreview:null,zip:"",address:"",phone:"",mobile:"",fax:"",email:"",nearLine:"",nearStation:"",walkMin:"",contactZip:"",contactAddr:"",contactPhone:"",contactMobile:"",contactFax:"",commuteH:"",commuteM:"",familyCount:"",spouse:"",dependent:"",education:[{year:"",month:"",type:"",name:"",dept:"",sub:"",sfx:""}],isPartTime:false,work:[{year:"",month:"",company:"",sfx:""}],quals:[{name:"",custom:"",year:"",month:""}],dis1name:"",dis1other:"",techo1:"",techo1other:"",grade1:"",grade1custom:"",dis2name:"",dis2other:"",techo2:"",techo2other:"",grade2:"",grade2custom:"",dis3name:"",dis3other:"",dis4name:"",dis4other:"",techo3:"",techo3other:"",grade3:"",grade3custom:"",visit:"",visitFreq:"",visitFreqOther:"",med:"",medName:"",chars:"",accoms:"",strId:"",scene:"",sceneOther:"",selfPR:"",motivation:""};
 
 function App(){
 const[pg,setPg]=useState("form");const[step,setStep]=useState(0);const[f,setF]=useState({...INIT});const[saves,setSaves]=useState([null,null,null]);const[toast,setToast]=useState("");const[zipReady,setZipReady]=useState(false);const[generating,setGenerating]=useState(false);
@@ -54,7 +54,7 @@ const u=k=>e=>setF(p=>({...p,[k]:e.target.value}));
 const uE=(i,k,v)=>{const a=[...f.education];a[i]={...a[i],[k]:v};setF(p=>({...p,education:a}));};
 const uW=(i,k,v)=>{const a=[...f.work];a[i]={...a[i],[k]:v};setF(p=>({...p,work:a}));};
 const uQ=(i,k,v)=>{const a=[...f.quals];a[i]={...a[i],[k]:v};setF(p=>({...p,quals:a}));};
-const handlePhoto=e=>{const file=e.target.files?.[0];if(file){const r=new FileReader();r.onloadend=()=>setF(p=>({...p,photoPreview:r.result}));r.readAsDataURL(file);}};
+const handlePhoto=e=>{const file=e.target.files?.[0];if(file){const img=new Image();img.onload=function(){const canvas=document.createElement("canvas");canvas.width=227;canvas.height=303;const ctx=canvas.getContext("2d");const sx=Math.max(0,(img.width-img.height*0.75)/2);const sy=Math.max(0,(img.height-img.width/0.75)/2);const sw=Math.min(img.width,img.height*0.75);const sh=Math.min(img.height,img.width/0.75);ctx.drawImage(img,sx,sy,sw,sh,0,0,227,303);setF(p=>({...p,photoPreview:canvas.toDataURL("image/jpeg",0.9)}));};img.src=URL.createObjectURL(file);}};
 const insAc=text=>{setF(p=>({...p,accoms:p.accoms?(p.accoms+"\n"+text):text}));tt("追加しました");};
 const pS=id=>setF(p=>({...p,strId:id,scene:"",sceneOther:"",selfPR:gP(id,"",""),motivation:gM(id)}));
 const pSc=sc=>{setF(p=>({...p,scene:sc,selfPR:gP(f.strId,sc,f.sceneOther)}));};
@@ -70,14 +70,14 @@ const hc="text-base font-black tracking-tight mb-4";
 const STP=["基本情報","学歴・職歴","資格・免許","障害について","強み・自己PR","確認・出力"];
 const eduF=ed=>{let n=fS(ed.name,ed.type);if(ed.dept){const dt=ST[ed.type];n+=` ${ed.dept}${dt?.d||""}`;if(ed.sub&&dt?.s)n+=` ${ed.sub}${dt.s}`;}if(ed.sfx)n+=` ${ed.sfx}`;return n;};
 const qn=q=>q.name==="その他（自由記入）"?q.custom:q.name;
-const dn=n=>{const v=f[`dis${n}name`];return v==="その他"?f[`dis${n}other`]:v;};
-const dg=n=>{const v=f[`grade${n}`];return v==="その他（記入）"?f[`grade${n}custom`]:(f[`techo${n}`]==="その他"?f[`grade${n}custom`]:v);};
+const dn=n=>{const v=f["dis"+n+"name"];return v==="その他"?f["dis"+n+"other"]:v;};
+const dg=n=>{const v=f["grade"+n];return v==="その他（記入）"?f["grade"+n+"custom"]:(f["techo"+n]==="その他"?f["grade"+n+"custom"]:v);};
 const age=f.birthYear?new Date().getFullYear()-parseInt(f.birthYear):"";
 const now=new Date();
 
 /* ========== FORM STEPS S0-S4 (unchanged) ========== */
 const S0=()=> <div className="space-y-4">
-<div className={cc}><h3 className={hc} style={{color:O[700]}}>証明写真</h3><input type="file" accept="image/*" onChange={handlePhoto} className="text-xs"/>{f.photoPreview&&<img src={f.photoPreview} alt="" className="mt-2 border rounded" style={{width:90,height:120,objectFit:"cover"}}/>}</div>
+<div className={cc}><h3 className={hc} style={{color:O[700]}}>証明写真</h3><p className="text-xs text-gray-500 mb-2">縦4cm×横3cmに自動リサイズされます</p><input type="file" accept="image/*" onChange={handlePhoto} className="text-xs"/>{f.photoPreview&&<img src={f.photoPreview} alt="" className="mt-2 border rounded shadow" style={{width:90,height:120,objectFit:"cover"}}/>}</div>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>氏名</h3>
 <div className="grid grid-cols-2 gap-3"><div><label className={lc}>ふりがな</label><input className={ic} placeholder="やまだ たろう" value={f.furigana} onChange={u("furigana")}/></div><div><label className={lc}>氏名</label><input className={ic} placeholder="山田 太郎" value={f.name} onChange={u("name")}/></div></div>
 <div className="grid grid-cols-4 gap-2 mt-3">
@@ -110,7 +110,7 @@ const S1=()=> <div className="space-y-4">
 <div className="grid grid-cols-4 gap-2 mb-2">
 <div><label className={lc}>年</label><select className={sc2} value={ed.year} onChange={e=>uE(i,"year",e.target.value)}><option value="">年</option>{YRS.map(y=> <option key={y}>{y}</option>)}</select></div>
 <div><label className={lc}>月</label><select className={sc2} value={ed.month} onChange={e=>uE(i,"month",e.target.value)}><option value="">月</option>{MOS.map(m=> <option key={m}>{m}</option>)}</select></div>
-<div><label className={lc}>種別</label><select className={sc2} value={ed.type} onChange={e=>uE(i,"type",e.target.value)}><option value="">選択</option>{Object.keys(ST).map(t=> <option key={t}>{t}</option>)}</select></div>
+<div><label className={lc}>種別</label><select className={sc2} value={ed.type} onChange={e=>uE(i,"type",e.target.value)}><option value="">選択</option>{Object.keys(ST).map(t=> <option key={t}>{t}</option>)}</select>{ed.type==="その他"&&<p className="text-xs text-amber-600 mt-1">学校名を直接入力してください</p>}</div>
 <div><label className={lc}>区分</label><select className={sc2} value={ed.sfx} onChange={e=>uE(i,"sfx",e.target.value)}><option value="">選択</option>{ES.map(s=> <option key={s}>{s}</option>)}</select></div>
 </div>
 <div className="mb-2"><label className={lc}>学校名</label><input className={ic} value={ed.name} onChange={e=>uE(i,"name",e.target.value)}/></div>
@@ -118,7 +118,6 @@ const S1=()=> <div className="space-y-4">
 </div>)}
 </div>
 <div className={cc}><div className="flex justify-between items-center mb-2"><h3 className={hc} style={{color:O[700]}}>職歴</h3>{f.work.length<MW&&<button onClick={()=>setF(p=>({...p,work:[...p.work,{year:"",month:"",company:"",sfx:""}]}))} style={{color:O[600]}} className="text-xs font-bold">＋追加</button>}</div>
-<label className="flex items-center gap-2 mb-3"><input type="checkbox" checked={f.isPartTime} onChange={e=>setF(p=>({...p,isPartTime:e.target.checked}))} className="accent-green-600"/><span className="text-xs text-gray-600">アルバイト経験のみ</span></label>
 {f.work.map((w,i)=> <div key={i} className="rounded-xl p-3 mb-3" style={{background:"#FAFAF7",border:"2px solid #EDE8E0",borderRadius:16}}>
 <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-gray-500">{f.isPartTime?"バイト":"職歴"}{i+1}</span>{f.work.length>1&&<button onClick={()=>setF(p=>({...p,work:p.work.filter((_,j)=>j!==i)}))} className="text-red-400 text-xs font-bold">削除</button>}</div>
 <div className="grid grid-cols-4 gap-2">
@@ -130,20 +129,39 @@ const S1=()=> <div className="space-y-4">
 </div></div>;
 
 const S2=()=> <div className={cc}>
-<div className="flex justify-between items-center mb-3"><h3 className={hc} style={{color:O[700]}}>資格・免許</h3>{f.quals.length<MQ&&<button onClick={()=>setF(p=>({...p,quals:[...p.quals,{name:"",custom:""}]}))} style={{color:O[600]}} className="text-xs font-bold">＋追加</button>}</div>
-{f.quals.map((q,i)=> <div key={i} className="flex items-start gap-2 mb-3"><div className="flex-1"><select className={sc2+" mb-1"} value={q.name} onChange={e=>uQ(i,"name",e.target.value)}><option value="">選択</option>{CQ.map(c=> <option key={c}>{c}</option>)}</select>{q.name==="その他（自由記入）"&&<input className={ic} placeholder="資格名" value={q.custom} onChange={e=>uQ(i,"custom",e.target.value)}/>}</div>{f.quals.length>1&&<button onClick={()=>setF(p=>({...p,quals:p.quals.filter((_,j)=>j!==i)}))} className="text-red-400 text-xs font-bold mt-2">✕</button>}</div>)}
+<div className="flex justify-between items-center mb-3"><h3 className={hc} style={{color:O[700]}}>資格・免許</h3>{f.quals.length<MQ&&<button onClick={()=>setF(p=>({...p,quals:[...p.quals,{name:"",custom:"",year:"",month:""}]}))} style={{color:O[600]}} className="text-xs font-bold">＋追加</button>}</div>
+{f.quals.map((q,i)=> <div key={i} className="mb-4 p-3 rounded-xl" style={{background:"#FAFAF7",border:"2px solid #EDE8E0",borderRadius:16}}>
+<div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-gray-500">資格{i+1}</span>{f.quals.length>1&&<button onClick={()=>setF(p=>({...p,quals:p.quals.filter((_,j)=>j!==i)}))} className="text-red-400 text-xs font-bold">削除</button>}</div>
+<div className="grid grid-cols-4 gap-2 mb-2">
+<div><label className={lc}>取得年</label><select className={sc2} value={q.year} onChange={e=>uQ(i,"year",e.target.value)}><option value="">年</option>{YRS.map(y=> <option key={y}>{y}</option>)}</select></div>
+<div><label className={lc}>月</label><select className={sc2} value={q.month} onChange={e=>uQ(i,"month",e.target.value)}><option value="">月</option>{MOS.map(m=> <option key={m}>{m}</option>)}</select></div>
+<div className="col-span-2"><label className={lc}>資格名</label><select className={sc2} value={q.name} onChange={e=>uQ(i,"name",e.target.value)}><option value="">選択</option>{CQ.map(c=> <option key={c}>{c}</option>)}</select></div>
+</div>
+{q.name==="その他（自由記入）"&&<div><label className={lc}>資格名（手入力）</label><input className={ic} placeholder="資格名を入力" value={q.custom} onChange={e=>uQ(i,"custom",e.target.value)}/></div>}
+</div>)}
 </div>;
 
-const DB=({n})=>{const dn2=`dis${n}name`,dot=`dis${n}other`,t2=`techo${n}`,to2=`techo${n}other`,gr=`grade${n}`,gc=`grade${n}custom`;const gl=GR[f[t2]]||[];
-return <div className="rounded-xl p-3 mb-3" style={{background:"#FAFAF7",border:"2px solid #EDE8E0",borderRadius:16}}>
-<p className="text-xs font-bold text-gray-500 mb-2">障がい{n===1?"①":"②"}</p>
-<div className="grid grid-cols-2 gap-3 mb-2"><div><label className={lc}>障害名</label><select className={sc2} value={f[dn2]} onChange={u(dn2)}><option value="">選択</option>{DL.map(d=> <option key={d}>{d}</option>)}</select></div>{f[dn2]==="その他"&&<div><label className={lc}>障害名（記入）</label><input className={ic} value={f[dot]} onChange={u(dot)}/></div>}</div>
-<div className="grid grid-cols-2 gap-3"><div><label className={lc}>手帳の種類</label><select className={sc2} value={f[t2]} onChange={e=>{setF(p=>({...p,[t2]:e.target.value,[gr]:"",[gc]:""}));}}><option value="">選択</option>{TC.map(t=> <option key={t}>{t}</option>)}</select>{f[t2]==="その他"&&<input className={ic+" mt-1"} placeholder="手帳名" value={f[to2]} onChange={u(to2)}/>}</div>
-<div><label className={lc}>等級</label>{f[t2]==="その他"?<input className={ic} placeholder="等級を入力" value={f[gc]} onChange={u(gc)}/>:<><select className={sc2} value={f[gr]} onChange={u(gr)} disabled={!f[t2]}><option value="">選択</option>{gl.map(g=> <option key={g}>{g}</option>)}<option value="その他（記入）">その他（記入）</option></select>{f[gr]==="その他（記入）"&&<input className={ic+" mt-1"} placeholder="等級を入力" value={f[gc]} onChange={u(gc)}/>}</>}</div>
+const DisRow=({n,label})=>{const k="dis"+n+"name",ko="dis"+n+"other";
+return <div className="flex gap-2 items-center mb-2">
+<span className="text-xs font-bold text-gray-400 w-6">{label}</span>
+<div className="flex-1"><select className={sc2} value={f[k]} onChange={u(k)}><option value="">選択</option>{DL.map(d=> <option key={d}>{d}</option>)}</select></div>
+{f[k]==="その他"&&<div className="flex-1"><input className={ic} placeholder="障害名を入力" value={f[ko]} onChange={u(ko)}/></div>}
+</div>;};
+const TechoRow=({n,label})=>{const t2="techo"+n,to2="techo"+n+"other",gr="grade"+n,gc="grade"+n+"custom";const gl=GR[f[t2]]||[];
+return <div className="flex gap-2 items-start mb-2">
+<span className="text-xs font-bold text-gray-400 w-6 mt-2">{label}</span>
+<div className="flex-1 grid grid-cols-2 gap-2">
+<div><select className={sc2} value={f[t2]} onChange={e=>{setF(p=>({...p,[t2]:e.target.value,[gr]:"",[gc]:""}));}}><option value="">手帳の種類</option>{TC.map(t=> <option key={t}>{t}</option>)}</select>{f[t2]==="その他"&&<input className={ic+" mt-1"} placeholder="手帳名" value={f[to2]} onChange={u(to2)}/>}</div>
+<div>{f[t2]==="その他"?<input className={ic} placeholder="等級を入力" value={f[gc]} onChange={u(gc)}/>:<><select className={sc2} value={f[gr]} onChange={u(gr)} disabled={!f[t2]}><option value="">等級</option>{gl.map(g=> <option key={g}>{g}</option>)}<option value="その他（記入）">その他</option></select>{f[gr]==="その他（記入）"&&<input className={ic+" mt-1"} placeholder="等級" value={f[gc]} onChange={u(gc)}/>}</>}</div>
 </div></div>;};
 
 const S3=()=> <div className="space-y-4">
-<div className={cc}><h3 className={hc} style={{color:O[700]}}>障害名・手帳</h3><DB n={1}/><DB n={2}/></div>
+<div className={cc}><h3 className={hc} style={{color:O[700]}}>障がい名（最大4つ）</h3>
+<DisRow n={1} label="①"/><DisRow n={2} label="②"/><DisRow n={3} label="③"/><DisRow n={4} label="④"/>
+</div>
+<div className={cc}><h3 className={hc} style={{color:O[700]}}>手帳（最大3つ）</h3>
+<TechoRow n={1} label="①"/><TechoRow n={2} label="②"/><TechoRow n={3} label="③"/>
+</div>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>通院・服薬</h3>
 <div className="grid grid-cols-2 gap-3 mb-3"><div><label className={lc}>通院</label><select className={sc2} value={f.visit} onChange={u("visit")}><option value="">選択</option><option>している</option><option>していない</option></select></div>{f.visit==="している"&&<div><label className={lc}>頻度</label><select className={sc2} value={f.visitFreq} onChange={u("visitFreq")}><option value="">選択</option>{VF.map(v=> <option key={v}>{v}</option>)}</select>{f.visitFreq==="その他"&&<input className={ic+" mt-1"} value={f.visitFreqOther} onChange={u("visitFreqOther")}/>}</div>}</div>
 <div className="grid grid-cols-2 gap-3"><div><label className={lc}>服薬</label><select className={sc2} value={f.med} onChange={u("med")}><option value="">選択</option><option>している</option><option>していない</option></select></div>{f.med==="している"&&<div><label className={lc}>薬名</label><input className={ic} value={f.medName} onChange={u("medName")}/></div>}</div>
@@ -157,8 +175,8 @@ const S4=()=> <div className="space-y-4">
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>強みを選択</h3>
 <div className="grid grid-cols-1 gap-2">{SR.map(s=> <button key={s.id} onClick={()=>pS(s.id)} className="text-left px-4 py-3 rounded-xl border-2 text-sm font-medium" style={{borderColor:f.strId===s.id?"#D35C1F":"#E5E0D8",background:f.strId===s.id?"#FDF5EF":"white",borderWidth:2,borderRadius:16}}>{s.label}</button>)}</div></div>
 {f.strId&&<div className={cc}><h3 className={hc} style={{color:O[700]}}>場面</h3><div className="space-y-2">{SC[f.strId]?.map((s,i)=> <div key={i}><button onClick={()=>pSc(s)} className="w-full text-left px-4 py-2.5 rounded-xl border-2 text-xs" style={{borderColor:f.scene===s?"#D35C1F":"#E5E0D8",background:f.scene===s?"#FDF5EF":"white",borderWidth:2,borderRadius:12}}>{s}</button>{s==="その他（自由記述）"&&f.scene===s&&<input className={ic+" mt-2"} value={f.sceneOther} onChange={u("sceneOther")}/>}</div>)}</div></div>}
-{f.strId&&<div className={cc}><h3 className={hc} style={{color:O[700]}}>自己PR（編集可）</h3><textarea className={ic+" h-32"} value={f.selfPR} onChange={e=>{if(e.target.value.length<=MP)setF(p=>({...p,selfPR:e.target.value}));}}/><p className={`text-xs mt-1 text-right ${f.selfPR.length>MP*0.9?"text-red-500":"text-gray-400"}`}>{f.selfPR.length}/{MP}</p></div>}
-<div className={cc}><h3 className={hc} style={{color:O[700]}}>志望動機（編集可）</h3><textarea className={ic+" h-32"} value={f.motivation} onChange={e=>{if(e.target.value.length<=MP)setF(p=>({...p,motivation:e.target.value}));}} placeholder="強み選択で自動生成"/></div>
+{f.strId&&<div className={cc}><h3 className={hc} style={{color:O[700]}}>自己PR（編集可）</h3><textarea className={ic+" h-32"} value={f.selfPR} onChange={e=>{if(e.target.value.length<=MP)setF(p=>({...p,selfPR:e.target.value}));}}/><div className="flex justify-between mt-1"><p className="text-xs" style={{color:f.selfPR.length>=280&&f.selfPR.length<=380?"#5B8C2B":"#E87830"}}>{f.selfPR.length<280?"あと"+(280-f.selfPR.length)+"文字くらい書くと良いです":f.selfPR.length<=380?"いい文字量です！":"少し長すぎるかも…"}</p><p className={`text-xs ${f.selfPR.length>MP*0.9?"text-red-500":"text-gray-400"}`}>{f.selfPR.length}/{MP}</p></div></div>}
+<div className={cc}><h3 className={hc} style={{color:O[700]}}>志望動機（編集可）</h3><textarea className={ic+" h-32"} value={f.motivation} onChange={e=>{if(e.target.value.length<=MP)setF(p=>({...p,motivation:e.target.value}));}} placeholder="強み選択で自動生成"/><div className="flex justify-between mt-1"><p className="text-xs" style={{color:f.motivation.length>=280&&f.motivation.length<=380?"#5B8C2B":"#E87830"}}>{f.motivation.length<280?"320文字くらいがベスト！":f.motivation.length<=380?"いい文字量です！":"少し長すぎるかも…"}</p><p className={`text-xs ${f.motivation.length>MP*0.9?"text-red-500":"text-gray-400"}`}>{f.motivation.length}/{MP}</p></div></div>
 </div>;
 
 /* ========== S5: REVIEW + DOCX DOWNLOAD ========== */
@@ -206,7 +224,7 @@ const generateDocx=async function(){
     for(var i=Math.min(hist.length,16)-1;i>=0;i--){if(hist[i].t)xml=insEP(xml,hM,i*3+2,hist[i].t);if(hist[i].m)xml=insEP(xml,hM,i*3+1,hist[i].m);if(hist[i].y)xml=insEP(xml,hM,i*3,hist[i].y);}
     var qM="免許・資格";
     var qs=f.quals.filter(function(q){return q.name;});
-    for(var j=Math.min(qs.length,5)-1;j>=0;j--){var nm=qs[j].name==="その他（自由記入）"?qs[j].custom:qs[j].name;if(nm)xml=insEP(xml,qM,j*3+2,nm);}
+    for(var j=Math.min(qs.length,5)-1;j>=0;j--){var nm=qs[j].name==="その他（自由記入）"?qs[j].custom:qs[j].name;if(nm)xml=insEP(xml,qM,j*3+2,nm);if(qs[j].month)xml=insEP(xml,qM,j*3+1,qs[j].month);if(qs[j].year)xml=insEP(xml,qM,j*3,qs[j].year);}
     if(f.selfPR){var prPos2=xml.indexOf("PR</w:t>");if(prPos2!==-1){var ep=xml.indexOf("</w:pPr></w:p>",prPos2);if(ep!==-1){var prRun='<w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr><w:t>'+xesc(f.selfPR)+'</w:t></w:r>';xml=xml.substring(0,ep+"</w:pPr>".length)+prRun+xml.substring(ep+"</w:pPr>".length);}}}
     var d1=f.dis1name==="その他"?f.dis1other:f.dis1name;
     if(d1)xml=rNth(xml,"障がい名：",""+xesc(d1),0);
@@ -216,6 +234,9 @@ const generateDocx=async function(){
     if(d2)xml=rNth(xml,"名：",xesc(d2),1);
     var g2=f.grade2;if(f.techo2==="その他")g2=f.grade2custom;if(g2==="その他（記入）")g2=f.grade2custom;
     if(g2){xml=rNth(xml,"等級：",""+xesc(g2),1);}
+    var d3=f.dis3name==="その他"?f.dis3other:f.dis3name;
+    var d4=f.dis4name==="その他"?f.dis4other:f.dis4name;
+    var t3n=f.techo3||"";var g3v=f.grade3||"";if(f.techo3==="その他")g3v=f.grade3custom;if(g3v==="その他（記入）")g3v=f.grade3custom;
     var vt=f.visit+(f.visit==="している"&&f.visitFreq?("（"+(f.visitFreq==="その他"?f.visitFreqOther:f.visitFreq)+"）"):"");
     if(vt)xml=insAfter(xml,"通院</w:t>",vt);
     var mt=f.med+(f.med==="している"&&f.medName?("（"+f.medName+"）"):"");
@@ -242,10 +263,11 @@ const generateDocx=async function(){
         zp.file("word/_rels/document.xml.rels",rels2);
         var ct2=await zp.file("[Content_Types].xml").async("string");
         if(ct2.indexOf('Extension="'+pext+'"')===-1){ct2=ct2.replace("</Types>",'<Default Extension="'+pext+'" ContentType="'+pmime+'"/></Types>');zp.file("[Content_Types].xml",ct2);}
-        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5200000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>420000</wp:posOffset></wp:positionV><wp:extent cx="1000000" cy="1330000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1000000" cy="1330000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
+        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5230000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>470000</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
         var bstart=xml.indexOf("<w:body>");var fp=xml.indexOf("</w:p>",bstart);if(fp!==-1){xml=xml.substring(0,fp)+phXml+xml.substring(fp);}
       }catch(pe){console.log("Photo error:",pe);}
     }
+    xml=xml.replace(/w:val="dotted"/g,'w:val="nil"');
     zp.file("word/document.xml",xml);
     var blob=await zp.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
     var url=URL.createObjectURL(blob);
@@ -275,7 +297,11 @@ return <div className="space-y-4">
 <p className="text-xs font-bold text-gray-500 border-b pb-1 mb-1 mt-2">学歴・職歴</p>
 {eR.map(function(e,i){return <p key={"e"+i} className="text-sm">{e.y}年{e.m}月 {e.t}</p>;})}
 {wR.map(function(w,i){return <p key={"w"+i} className="text-sm">{w.y}年{w.m}月 {w.t}</p>;})}
-{dn(1)&&<div><p className="text-xs font-bold text-gray-500 border-b pb-1 mb-1 mt-2">障がい</p><p className="text-sm">①{dn(1)} {dg(1)}</p>{dn(2)&&<p className="text-sm">②{dn(2)} {dg(2)}</p>}</div>}
+{(dn(1)||dn(2)||dn(3)||dn(4))&&<div><p className="text-xs font-bold text-gray-500 border-b pb-1 mb-1 mt-2">障がい</p>
+{dn(1)&&<p className="text-sm">①{dn(1)}</p>}{dn(2)&&<p className="text-sm">②{dn(2)}</p>}{dn(3)&&<p className="text-sm">③{dn(3)}</p>}{dn(4)&&<p className="text-sm">④{dn(4)}</p>}
+<p className="text-xs font-bold text-gray-500 border-b pb-1 mb-1 mt-2">手帳</p>
+{dg(1)&&<p className="text-sm">①{f.techo1} {dg(1)}</p>}{dg(2)&&<p className="text-sm">②{f.techo2} {dg(2)}</p>}{dg(3)&&<p className="text-sm">③{f.techo3} {dg(3)}</p>}
+</div>}
 {f.selfPR&&<div><p className="text-xs font-bold text-gray-500 border-b pb-1 mb-1 mt-2">自己PR</p><p className="text-sm whitespace-pre-wrap">{f.selfPR}</p></div>}
 </div>
 <div className="flex gap-2">
