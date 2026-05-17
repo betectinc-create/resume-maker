@@ -8,6 +8,22 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAlrD7rCYRjdQ4AzM20bBFLOX846yArXog",
+  authDomain:"syogaisyakoyo-rirekisyo.firebaseapp.com",
+  projectId:"syogaisyakoyo-rirekisyo",
+  storageBucket:"syogaisyakoyo-rirekisyo.firebasestorage.app",
+  messagingSenderId:"718600611303",
+  appId:"1:718600611303:web:7ae7f60daef6d50e1a0942"
+});
+var fbAuth=firebase.auth();
+var fbDb=firebase.firestore();
+var googleProvider=new firebase.auth.GoogleAuthProvider();
+</script>
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
 <style>body{font-family:'Noto Sans JP',sans-serif;margin:0;-webkit-font-smoothing:antialiased;}
@@ -44,7 +60,7 @@ const fS=(n,t)=>{if(!n||!t||t==="その他"||t==="専門学校")return n;const x
 const INIT={name:"",furigana:"",furiganaAddr:"",furiganaContact:"",birthYear:"",birthMonth:"",birthDay:"",gender:"",photoPreview:null,zip:"",address:"",phone:"",mobile:"",fax:"",email:"",nearLine:"",nearStation:"",walkMin:"",contactZip:"",contactAddr:"",contactPhone:"",contactMobile:"",contactFax:"",commuteH:"",commuteM:"",familyCount:"",spouse:"",dependent:"",education:[{year:"",month:"",type:"",name:"",dept:"",sub:"",sfx:""}],isPartTime:false,work:[{year:"",month:"",company:"",sfx:""}],quals:[{name:"",custom:"",year:"",month:""}],dis1name:"",dis1other:"",techo1:"",techo1other:"",grade1:"",grade1custom:"",dis2name:"",dis2other:"",techo2:"",techo2other:"",grade2:"",grade2custom:"",dis3name:"",dis3other:"",dis4name:"",dis4other:"",techo3:"",techo3other:"",grade3:"",grade3custom:"",visit:"",visitFreq:"",visitFreqOther:"",med:"",medName:"",chars:"",accoms:"",strId:"",scene:"",sceneOther:"",selfPR:"",motivation:""};
 
 function App(){
-const[pg,setPg]=useState("form");const[step,setStep]=useState(0);const[f,setF]=useState({...INIT});const[saves,setSaves]=useState([null,null,null]);const[toast,setToast]=useState("");const[zipReady,setZipReady]=useState(false);const[generating,setGenerating]=useState(false);
+const[pg,setPg]=useState("form");const[step,setStep]=useState(0);const[f,setF]=useState({...INIT});const[saves,setSaves]=useState([null,null,null]);const[toast,setToast]=useState("");const[zipReady,setZipReady]=useState(false);const[generating,setGenerating]=useState(false);const[user,setUser]=useState(null);const[cloudSaves,setCloudSaves]=useState([]);const[loadingAuth,setLoadingAuth]=useState(true);
 useEffect(()=>{try{const r=localStorage.getItem("rs5");if(r)setSaves(JSON.parse(r));}catch{}},[]);
 
 const tt=m=>{setToast(m);setTimeout(()=>setToast(""),2200);};
@@ -166,8 +182,8 @@ const S3=()=> <div className="space-y-4">
 <div className="grid grid-cols-2 gap-3 mb-3"><div><label className={lc}>通院</label><select className={sc2} value={f.visit} onChange={u("visit")}><option value="">選択</option><option>している</option><option>していない</option></select></div>{f.visit==="している"&&<div><label className={lc}>頻度</label><select className={sc2} value={f.visitFreq} onChange={u("visitFreq")}><option value="">選択</option>{VF.map(v=> <option key={v}>{v}</option>)}</select>{f.visitFreq==="その他"&&<input className={ic+" mt-1"} value={f.visitFreqOther} onChange={u("visitFreqOther")}/>}</div>}</div>
 <div className="grid grid-cols-2 gap-3"><div><label className={lc}>服薬</label><select className={sc2} value={f.med} onChange={u("med")}><option value="">選択</option><option>している</option><option>していない</option></select></div>{f.med==="している"&&<div><label className={lc}>薬名</label><input className={ic} value={f.medName} onChange={u("medName")}/></div>}</div>
 </div>
-<div className={cc}><h3 className={hc} style={{color:O[700]}}>障害特性（現状）</h3><textarea className={ic+" h-28"} value={f.chars} onChange={u("chars")}/>{f.dis1name&&DI[f.dis1name]&&<div className="mt-3 rounded-xl p-3" style={{background:"#FEF3C7"}}><p className="text-xs text-amber-900">{DI[f.dis1name]}</p></div>}</div>
-<div className={cc}><h3 className={hc} style={{color:O[700]}}>必要な配慮</h3><p className="text-xs text-gray-500 mb-2">例文タップで追加</p><textarea className={ic+" h-24"} value={f.accoms} onChange={u("accoms")}/>
+<div className={cc}><h3 className={hc} style={{color:O[700]}}>障害特性（現状）</h3><textarea className={ic+" h-28"} value={f.chars} onChange={e=>{if(e.target.value.length<=250)setF(p=>({...p,chars:e.target.value}));}}/><p className="text-xs text-right mt-1" style={{color:f.chars.length>230?"#E87830":"#999"}}>{f.chars.length}/250</p>{f.dis1name&&DI[f.dis1name]&&<div className="mt-3 rounded-xl p-3" style={{background:"#FEF3C7"}}><p className="text-xs text-amber-900">{DI[f.dis1name]}</p></div>}</div>
+<div className={cc}><h3 className={hc} style={{color:O[700]}}>必要な配慮</h3><p className="text-xs text-gray-500 mb-2">例文タップで追加</p><textarea className={ic+" h-24"} value={f.accoms} onChange={e=>{if(e.target.value.length<=80)setF(p=>({...p,accoms:e.target.value}));}}/><p className="text-xs text-right mt-1" style={{color:f.accoms.length>70?"#E87830":"#999"}}>{f.accoms.length}/80</p>
 <div className="mt-3 space-y-1.5">{AC.map((ex,i)=> <button key={i} onClick={()=>insAc(ex)} className="block w-full text-left text-xs rounded-lg px-3 py-2 border hover:border-yellow-600" style={{background:"#FAF8F5",borderColor:"#E5E0D8"}}>+ {ex}</button>)}</div>
 </div></div>;
 
@@ -182,11 +198,42 @@ const S4=()=> <div className="space-y-4">
 /* ========== S5: REVIEW + DOCX DOWNLOAD ========== */
 
 useEffect(function(){setZipReady(true);},[]);
+useEffect(function(){
+  var timer=setTimeout(function(){setLoadingAuth(false);},3000);
+  if(typeof fbAuth==="undefined"){setLoadingAuth(false);return;}
+  var unsub=fbAuth.onAuthStateChanged(function(u){
+    clearTimeout(timer);setUser(u);setLoadingAuth(false);
+    if(u){fbDb.collection("resumes").where("uid","==",u.uid).orderBy("updatedAt","desc").get().then(function(snap){
+      var docs=[];snap.forEach(function(d){docs.push({id:d.id,...d.data()});});setCloudSaves(docs);
+    }).catch(function(e){console.log(e);});}else{setCloudSaves([]);}
+  });
+  return function(){unsub();};
+},[]);
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 const rNth=function(str,old,rep,n){var idx=-1;for(var i=0;i<=n;i++){idx=str.indexOf(old,idx+1);if(idx===-1)return str;}return str.substring(0,idx)+rep+str.substring(idx+old.length);};
 const insEP=function(xml,marker,n,text){text=xesc(text);var pos=xml.indexOf(marker);if(pos===-1)return xml;var emp="</w:pPr></w:p>";var search=pos;for(var i=0;i<=n;i++){var p=xml.indexOf(emp,search);if(p===-1)return xml;if(i<n){search=p+emp.length;}else{var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+text+'</w:t></w:r>';return xml.substring(0,p+"</w:pPr>".length)+rn+xml.substring(p+"</w:pPr>".length);}}return xml;};
 const insAfter=function(xml,marker,text){var pos=xml.indexOf(marker);if(pos===-1)return xml;var ep=xml.indexOf("</w:pPr></w:p>",pos);if(ep===-1)return xml;var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+xesc(text)+'</w:t></w:r>';return xml.substring(0,ep+"</w:pPr>".length)+rn+xml.substring(ep+"</w:pPr>".length);};
 
+const doLogin=function(){fbAuth.signInWithPopup(googleProvider).catch(function(e){tt("ログインエラー: "+e.message);});};
+const doLogout=function(){fbAuth.signOut();};
+const saveToCloud=async function(){
+  if(!user){tt("ログインしてください");return;}
+  try{
+    var data={uid:user.uid,name:f.name||"無題",formData:JSON.stringify({...f,photoPreview:null}),updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+    await fbDb.collection("resumes").add(data);
+    var snap=await fbDb.collection("resumes").where("uid","==",user.uid).orderBy("updatedAt","desc").get();
+    var docs=[];snap.forEach(function(d){docs.push({id:d.id,...d.data()});});setCloudSaves(docs);
+    tt("クラウドに保存しました");
+  }catch(e){tt("保存エラー: "+e.message);}
+};
+const loadFromCloud=function(doc){
+  try{var d=JSON.parse(doc.formData);setF({...INIT,...d});setStep(0);setPg("form");tt("読み込みました");}catch(e){tt("読み込みエラー");}
+};
+const deleteFromCloud=async function(docId){
+  try{await fbDb.collection("resumes").doc(docId).delete();
+    setCloudSaves(cloudSaves.filter(function(d){return d.id!==docId;}));tt("削除しました");
+  }catch(e){tt("削除エラー");}
+};
 const generateDocx=async function(){
   if(!window.JSZip){tt("テンプレート読み込み中...");return;}
   setGenerating(true);
@@ -324,14 +371,26 @@ return <div className="space-y-4">
 
 const steps=[S0,S1,S2,S3,S4,S5];
 
-const SavePg=()=> <div className="space-y-4">
-<button onClick={()=>setPg("form")} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200">← 戻る</button>
-<div className={cc}><h3 className={hc} style={{color:O[700]}}>保存スロット（3件）</h3>
-{[0,1,2].map(i=> <div key={i} className="rounded-xl p-4 mb-3" style={{background:saves[i]?O[50]:"#F9FAFB",border:`1px solid ${saves[i]?O[300]:"#E5E7EB"}`}}>
-<div className="flex justify-between items-center"><div><p className="text-sm font-bold" style={{color:saves[i]?O[800]:"#9CA3AF"}}>スロット{i+1}</p>{saves[i]?<p className="text-xs text-gray-500 mt-1">{saves[i]._at}　{saves[i].name||"未入力"}</p>:<p className="text-xs text-gray-400 mt-1">空き</p>}</div>
-<div className="flex gap-2"><button onClick={()=>save(i)} className="px-4 py-2 rounded-xl text-xs font-bold text-white" style={{background:"#3B3228"}}>保存</button><button onClick={()=>load(i)} disabled={!saves[i]} className={`px-4 py-2 rounded-lg text-xs font-bold ${saves[i]?"bg-white border-2":"bg-gray-100 text-gray-300"}`} style={saves[i]?{borderColor:O[400],color:O[700]}:{}}>読込</button></div>
-</div></div>)}
-</div></div>;
+const SavePg=()=>
+<div className="space-y-4">
+<div className={cc}>
+<h3 className={hc} style={{color:O[700]}}>クラウド保存</h3>
+{user?<div>
+<button onClick={saveToCloud} className="w-full text-white py-3 rounded-xl text-sm font-black shadow-lg mb-4" style={{background:"linear-gradient(135deg,#D35C1F,#E87830)"}}>現在の履歴書をクラウドに保存</button>
+{cloudSaves.length>0?<div className="space-y-2">
+{cloudSaves.map(function(doc){return <div key={doc.id} className="flex justify-between items-center p-3 rounded-xl" style={{background:"#FAFAF7",border:"2px solid #EDE8E0"}}>
+<div><p className="text-sm font-bold">{doc.name||"無題"}</p><p className="text-xs text-gray-400">{doc.updatedAt?new Date(doc.updatedAt.seconds*1000).toLocaleString("ja-JP"):""}</p></div>
+<div className="flex gap-2">
+<button onClick={function(){loadFromCloud(doc);}} className="text-xs font-bold px-3 py-1.5 rounded-lg" style={{background:"#3B3228",color:"white"}}>読込</button>
+<button onClick={function(){deleteFromCloud(doc.id);}} className="text-xs font-bold px-3 py-1.5 rounded-lg text-red-400 bg-red-50">削除</button>
+</div></div>;})}
+</div>:<p className="text-sm text-gray-400 text-center">保存された履歴書はまだありません</p>}
+</div>:<div className="text-center"><p className="text-sm text-gray-500 mb-3">ログインすると履歴書をクラウドに保存できます</p>
+<button onClick={doLogin} className="text-sm font-bold px-6 py-2.5 rounded-xl" style={{background:"white",border:"2px solid #E0D5C5",color:"#3B3228",cursor:"pointer"}}>Googleでログイン</button>
+</div>}
+</div>
+<button onClick={function(){setPg("form");}} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200">← 戻る</button>
+</div>
 
 return <div className="min-h-screen" style={{background:'#F5F0EB',fontFamily:"'Noto Sans JP',sans-serif"}}>
 <div className="max-w-2xl mx-auto px-4 py-6 noprint">
@@ -339,6 +398,15 @@ return <div className="min-h-screen" style={{background:'#F5F0EB',fontFamily:"'N
 <img src="https://raw.githubusercontent.com/betectinc-create/resume-maker/main/logo.png" alt="CONNECT こねくと" style={{height:40,marginBottom:12}}/>
 <h1 style={{fontSize:22,fontWeight:900,color:"#3B3228",letterSpacing:-0.5,marginBottom:4,fontFamily:"'Zen Maru Gothic',sans-serif"}}>障がい者雇用 履歴書メーカー</h1>
 <p style={{fontSize:12,color:"#A0937D",fontWeight:500}}>選ぶだけで履歴書が完成。そのまま提出できます。</p>
+{<div style={{marginTop:12}}>
+{user?<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+<img src={user.photoURL} alt="" style={{width:28,height:28,borderRadius:"50%"}} onError={function(e){e.target.style.display="none";}}/>
+<span style={{fontSize:12,color:"#6B5D4F"}}>{user.displayName}</span>
+<button onClick={doLogout} style={{fontSize:11,color:"#A0937D",background:"none",border:"1px solid #D5CFC5",borderRadius:8,padding:"4px 10px",cursor:"pointer"}}>ログアウト</button>
+</div>:<button onClick={doLogin} style={{display:"inline-flex",alignItems:"center",gap:6,background:"white",border:"2px solid #E0D5C5",borderRadius:12,padding:"8px 20px",cursor:"pointer",fontSize:13,fontWeight:700,color:"#3B3228"}}>
+<svg width="16" height="16" viewBox="0 0 48 48"><path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 019.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.94 23.94 0 000 24c0 3.77.9 7.35 2.56 10.53l7.97-5.94z"/><path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.94C6.51 42.62 14.62 48 24 48z"/></svg>
+Googleでログイン</button>}
+</div>}
 </div>
 <div className="rounded-xl p-3 mb-4 text-xs" style={{background:"#F0EDE8",border:"none",color:"#6B5D4F",borderRadius:16}}><b>個人情報は収集しません。</b>ブラウザ上のみで処理。</div>
 {pg==="form"&&<>
@@ -353,7 +421,29 @@ return <div className="min-h-screen" style={{background:'#F5F0EB',fontFamily:"'N
 </div></>}
 {pg==="saves"&&<SavePg/>}
 {toast&&<div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-sm font-bold text-white shadow-lg z-50" style={{background:"#3B3228",borderRadius:16}}>{toast}</div>}
-<p className="text-center text-xs pb-8" style={{color:"#C0B5A5"}}>© CONNECT こねくと　|　個人情報はブラウザ上のみで処理されます</p>
+<div className="text-center pb-8">
+<p className="text-xs mb-2" style={{color:"#C0B5A5"}}>© CONNECT こねくと</p>
+<button onClick={function(){document.getElementById("ppModal").style.display="flex";}} className="text-xs underline" style={{color:"#C0B5A5",background:"none",border:"none",cursor:"pointer"}}>プライバシーポリシー</button>
+</div>
+<div id="ppModal" style={{display:"none",position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",zIndex:9999,alignItems:"center",justifyContent:"center"}} onClick={function(e){if(e.target.id==="ppModal")e.target.style.display="none";}}>
+<div style={{background:"white",borderRadius:16,padding:24,maxWidth:500,maxHeight:"80vh",overflow:"auto",margin:16}}>
+<h2 style={{fontSize:18,fontWeight:900,marginBottom:12}}>プライバシーポリシー</h2>
+<div style={{fontSize:12,lineHeight:1.8,color:"#555"}}>
+<p style={{marginBottom:8}}>株式会社CONNECT（以下「当社」）は、本サービス「障がい者雇用 履歴書メーカー」における個人情報の取扱いについて、以下のとおり定めます。</p>
+<p style={{fontWeight:700,marginTop:12}}>1. 個人情報の取得</p>
+<p>本サービスで入力された氏名、住所、連絡先、障がいに関する情報等の個人情報は、履歴書の作成のみに使用されます。</p>
+<p style={{fontWeight:700,marginTop:12}}>2. データの処理</p>
+<p>入力されたデータはお使いのブラウザ上でのみ処理され、当社のサーバーには送信・保存されません。Googleログインをご利用の場合、履歴書データはお客様のアカウントに紐づけてクラウドに保存されます。</p>
+<p style={{fontWeight:700,marginTop:12}}>3. 第三者提供</p>
+<p>当社は、お客様の個人情報を第三者に提供することはありません。</p>
+<p style={{fontWeight:700,marginTop:12}}>4. 安全管理</p>
+<p>当社は、個人情報の漏洩、滅失または毀損の防止のため、適切な安全管理措置を講じます。</p>
+<p style={{fontWeight:700,marginTop:12}}>5. お問い合わせ</p>
+<p>個人情報の取扱いに関するお問い合わせは、当社までご連絡ください。</p>
+</div>
+<button onClick={function(){document.getElementById("ppModal").style.display="none";}} style={{marginTop:16,padding:"8px 24px",background:"#3B3228",color:"white",border:"none",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:700}}>閉じる</button>
+</div>
+</div>
 </div></div>;}
 
 ReactDOM.render(React.createElement(App),document.getElementById("root"));
