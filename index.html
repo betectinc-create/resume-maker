@@ -393,7 +393,7 @@ const SavePg=()=>
 </div>
 
 return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'Noto Sans JP',sans-serif"}}>
-<div className="max-w-2xl mx-auto px-4 py-6 noprint">
+<div className="mx-auto px-4 py-6 noprint" style={{maxWidth:960,display:"flex",gap:24,alignItems:"flex-start",flexWrap:"wrap"}}>
 <div className="text-center mb-8">
 <img src="https://raw.githubusercontent.com/betectinc-create/resume-maker/main/logo.png" alt="CONNECT こねくと" style={{height:40,marginBottom:12}}/>
 <h1 style={{fontSize:22,fontWeight:900,color:"#3B3228",letterSpacing:-0.5,marginBottom:4,fontFamily:"'Zen Maru Gothic',sans-serif"}}>障がい者雇用 履歴書メーカー</h1>
@@ -414,7 +414,7 @@ return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'N
 </div></>}
 {pg==="saves"&&<SavePg/>}
 {toast&&<div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-sm font-bold text-white shadow-lg z-50" style={{background:O[700],borderRadius:12}}>{toast}</div>}
-</div>
+</div></div>
 <div className="hidden md:block" style={{width:280,flexShrink:0,position:"sticky",top:24}}>
 
 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-4">
