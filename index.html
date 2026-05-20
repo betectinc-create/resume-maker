@@ -35,6 +35,7 @@ var googleProvider=new firebase.auth.GoogleAuthProvider();
     .header-logo{height:18px;}
     .header-title{font-size:11px;line-height:1.2;}
     @media(min-width:640px){.header-logo{height:24px;}.header-title{font-size:14px;}}
+    .lc-tight{font-size:11px!important;white-space:nowrap;}
     .print-resume{display:none;}
     @page{size:A4;margin:12mm;}
     @media print{
@@ -128,7 +129,7 @@ const S0=()=> <div className="space-y-4">
 </div>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>通勤・家族</h3>
 <div className="grid grid-cols-2 gap-3 mb-3"><div><label className={lc}>通勤（時間）</label><select className={sc2} value={f.commuteH} onChange={u("commuteH")}><option value="">-</option>{[0,1,2,3].map(h=> <option key={h}>{h}</option>)}</select></div><div><label className={lc}>通勤（分）</label><select className={sc2} value={f.commuteM} onChange={u("commuteM")}><option value="">-</option>{[0,5,10,15,20,25,30,35,40,45,50,55].map(m=> <option key={m}>{m}</option>)}</select></div></div>
-<div className="grid grid-cols-3 gap-3"><div><label className={lc}>扶養家族数</label><select className={sc2} value={f.familyCount} onChange={u("familyCount")}><option value="">-</option>{[0,1,2,3,4,5,6,7,8].map(n=> <option key={n}>{n}</option>)}</select></div><div><label className={lc}>配偶者</label><select className={sc2} value={f.spouse} onChange={u("spouse")}><option value="">-</option><option>有</option><option>無</option></select></div><div><label className={lc}>配偶者の扶養義務</label><select className={sc2} value={f.dependent} onChange={u("dependent")}><option value="">-</option><option>有</option><option>無</option></select></div></div>
+<div className="grid grid-cols-3 gap-3"><div><label className={lc+" lc-tight"}>扶養家族数</label><select className={sc2} value={f.familyCount} onChange={u("familyCount")}><option value="">-</option>{[0,1,2,3,4,5,6,7,8].map(n=> <option key={n}>{n}</option>)}</select></div><div><label className={lc+" lc-tight"}>配偶者</label><select className={sc2} value={f.spouse} onChange={u("spouse")}><option value="">-</option><option>有</option><option>無</option></select></div><div><label className={lc+" lc-tight"}>配偶者の扶養義務</label><select className={sc2} value={f.dependent} onChange={u("dependent")}><option value="">-</option><option>有</option><option>無</option></select></div></div>
 </div></div>;
 
 const S1=()=> <div className="space-y-4">
@@ -141,8 +142,8 @@ const S1=()=> <div className="space-y-4">
 <div><label className={lc}>種別</label><select className={sc2} value={ed.type} onChange={e=>uE(i,"type",e.target.value)}><option value="">選択</option>{Object.keys(ST).map(t=> <option key={t}>{t}</option>)}</select>{ed.type==="その他"&&<p className="text-xs text-amber-600 mt-1">学校名を直接入力してください</p>}</div>
 <div><label className={lc}>区分</label><select className={sc2} value={ed.sfx} onChange={e=>uE(i,"sfx",e.target.value)}><option value="">選択</option>{ES.map(s=> <option key={s}>{s}</option>)}</select></div>
 </div>
-<div className="mb-2"><label className={lc}>学校名<span className="font-normal text-gray-400 ml-1">（学校名のみ入力。「大学」等は自動付与）</span></label><div style={{position:"relative"}}><input className={ic} value={ed.name} onChange={e=>uE(i,"name",e.target.value)} placeholder={ed.type==="その他"?"学校名を全て入力（例：〇〇学園）":ed.type?(ed.type==="専門学校"?"例：〇〇専門学校":"例：〇〇"):"学校名を入力"}/>{ed.type&&ed.type!=="その他"&&ed.type!=="専門学校"&&ST[ed.type]?.x&&<span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:"#C0B5A5",fontSize:12,pointerEvents:"none"}}>{ed.name||"〇〇"}{ST[ed.type].x}</span>}</div>{ed.type==="その他"&&<p className="text-xs mt-1" style={{color:"#E87830"}}>種別「その他」は全て手入力してください（例：〇〇学園、〇〇スクール）</p>}</div>
-{ed.type&&ST[ed.type]?.d&&<div className="grid grid-cols-2 gap-2"><div><label className={lc}>{ST[ed.type].d}名<span className="font-normal text-gray-400 ml-1">（「{ST[ed.type].d}」は自動付与）</span></label><input className={ic} value={ed.dept} onChange={e=>uE(i,"dept",e.target.value)} placeholder={"例：経済"}/></div>{ST[ed.type]?.s&&<div><label className={lc}>{ST[ed.type].s}名<span className="font-normal text-gray-400 ml-1">（「{ST[ed.type].s}」は自動付与）</span></label><input className={ic} value={ed.sub} onChange={e=>uE(i,"sub",e.target.value)} placeholder={"例：経済"}/></div>}</div>}
+<div className="mb-2"><label className={lc}>学校名<span className="hidden sm:inline font-normal text-gray-400 ml-1">（学校名のみ入力。「大学」等は自動付与）</span></label><div style={{position:"relative"}}><input className={ic} value={ed.name} onChange={e=>uE(i,"name",e.target.value)} placeholder={ed.type==="その他"?"学校名を全て入力（例：〇〇学園）":ed.type?(ed.type==="専門学校"?"例：〇〇専門学校":"例：〇〇"):"学校名を入力"}/>{ed.type&&ed.type!=="その他"&&ed.type!=="専門学校"&&ST[ed.type]?.x&&<span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:"#C0B5A5",fontSize:12,pointerEvents:"none"}}>{ed.name||"〇〇"}{ST[ed.type].x}</span>}</div>{ed.type==="その他"&&<p className="text-xs mt-1" style={{color:"#E87830"}}>種別「その他」は全て手入力してください（例：〇〇学園、〇〇スクール）</p>}</div>
+{ed.type&&ST[ed.type]?.d&&<div className="grid grid-cols-2 gap-2"><div><label className={lc}>{ST[ed.type].d}名<span className="hidden sm:inline font-normal text-gray-400 ml-1">（「{ST[ed.type].d}」は自動付与）</span></label><input className={ic} value={ed.dept} onChange={e=>uE(i,"dept",e.target.value)} placeholder={"例：経済"}/></div>{ST[ed.type]?.s&&<div><label className={lc}>{ST[ed.type].s}名<span className="hidden sm:inline font-normal text-gray-400 ml-1">（「{ST[ed.type].s}」は自動付与）</span></label><input className={ic} value={ed.sub} onChange={e=>uE(i,"sub",e.target.value)} placeholder={"例：経済"}/></div>}</div>}
 </div>)}
 </div>
 <div className={cc}><div className="flex justify-between items-center mb-2"><h3 className={hc} style={{color:O[700]}}>職歴</h3>{f.work.length<MW&&<button onClick={()=>setF(p=>({...p,work:[...p.work,{year:"",month:"",company:"",sfx:""}]}))} style={{color:O[600]}} className="text-xs font-bold">＋追加</button>}</div>
@@ -348,8 +349,7 @@ const generateDocx=async function(){
     a.download="履歴書_"+(f.name||"output")+".docx";
     a.style.display="none";
     document.body.appendChild(a);
-    a.click();
-    setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+    setTimeout(function(){a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);},100);
     tt("ダウンロード完了！");
   }catch(err){console.error(err);tt("エラー: "+err.message);}
   setGenerating(false);
@@ -436,7 +436,7 @@ var wR=f.work.filter(function(w){return w.company;}).map(function(w){return {y:w
 return <div className="space-y-4">
 <div className="p-5 rounded-2xl" style={{background:O[50],border:"1px solid "+O[200]}}>
 <p className="text-sm font-bold mb-2">履歴書をダウンロード</p>
-<p className="text-xs text-gray-600">Word形式は提出用テンプレートに書き込みます。PDF形式は印刷ダイアログで「PDFに保存」を選んでください。</p>
+<p className="text-xs text-gray-600">Word形式は提出用テンプレートに書き込みます。PDFは印刷ダイアログで「PDFに保存」を選んでください（スマホはブラウザの共有→プリントから保存できます）。</p>
 </div>
 <div className="bg-white rounded-lg border p-4 space-y-1">
 <p className="text-xs font-bold text-gray-500 border-b pb-1 mb-1">基本情報</p>
@@ -461,7 +461,7 @@ return <div className="space-y-4">
 {generating?"生成中...":"📝 Word形式でダウンロード"}
 </button>
 <button id="pdfBtn" onClick={function(){setTimeout(function(){window.print();},500);}} className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold transition-all" style={{background:"white",color:O[500],border:"2px solid "+O[500]}}>
-📄 PDF形式でダウンロード
+📄 印刷 / PDFで保存
 </button>
 </div>
 <button onClick={function(){setStep(0);}} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200">編集に戻る</button>
