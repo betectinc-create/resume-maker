@@ -32,6 +32,9 @@ var googleProvider=new firebase.auth.GoogleAuthProvider();
     .glass{backdrop-filter:blur(20px);background:rgba(255,255,255,0.85);}
     .hc-orange{border-left:4px solid #E87830;padding-left:12px;}
     .focus-orange:focus{outline:none!important;border-color:#E87830!important;box-shadow:0 0 0 3px rgba(232,120,48,0.25)!important;}
+    .header-logo{height:20px;}
+    .header-title{font-size:12px;line-height:1.2;}
+    @media(min-width:640px){.header-logo{height:24px;}.header-title{font-size:14px;}}
     .print-resume{display:none;}
     @page{size:A4;margin:12mm;}
     @media print{
@@ -457,7 +460,7 @@ return <div className="space-y-4">
 <button onClick={generateDocx} disabled={generating||!zipReady} className="flex-1 text-white px-6 py-3.5 rounded-xl text-sm font-bold shadow-md disabled:opacity-40 transition-all" style={{background:O[500]}}>
 {generating?"生成中...":"📝 Word形式でダウンロード"}
 </button>
-<button onClick={function(){window.print();}} className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold transition-all" style={{background:"white",color:O[500],border:"2px solid "+O[500]}}>
+<button id="pdfBtn" onClick={function(){setTimeout(function(){window.print();},500);}} className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold transition-all" style={{background:"white",color:O[500],border:"2px solid "+O[500]}}>
 📄 PDF形式でダウンロード
 </button>
 </div>
@@ -490,22 +493,19 @@ const SavePg=()=>
 
 return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'Noto Sans JP',sans-serif"}}>
 <header className="noprint" style={{position:"sticky",top:0,zIndex:100,background:"white",borderBottom:"2px solid #E87830",marginBottom:24,overflow:"hidden"}}>
-<div className="mx-auto pl-2 pr-4" style={{maxWidth:960,height:60,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"nowrap"}}>
+<div style={{paddingLeft:24,paddingRight:24,height:60,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"nowrap"}}>
 <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0,flex:1,overflow:"hidden"}}>
-<img src="https://raw.githubusercontent.com/betectinc-create/resume-maker/main/logo.png" alt="CONNECT こねくと" style={{height:24,flexShrink:0}}/>
-<div style={{minWidth:0,lineHeight:1.2,overflow:"hidden"}}>
-<p style={{fontSize:14,fontWeight:700,color:"#1F2937",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>障がい者雇用 履歴書メーカー</p>
-<p className="hidden sm:block" style={{fontSize:11,color:"#6B7280",marginTop:2}}>選ぶだけで履歴書が完成</p>
-</div>
+<img className="header-logo" src="https://raw.githubusercontent.com/betectinc-create/resume-maker/main/logo.png" alt="CONNECT こねくと" style={{flexShrink:0}}/>
+<p className="header-title" style={{fontWeight:700,color:"#1F2937",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",margin:0}}>障がい者雇用 履歴書メーカー</p>
 </div>
 <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
 {user?<>
 <img src={user.photoURL} alt="" style={{width:32,height:32,borderRadius:"50%"}} onError={function(e){e.target.style.display="none";}}/>
 <button onClick={function(){setPg("saves");}} className="rounded-xl font-bold text-white whitespace-nowrap" style={{background:"#E87830",padding:"8px 14px",fontSize:13,border:"none",cursor:"pointer"}}>
-<span className="hidden sm:inline">保存履歴</span><span className="sm:hidden">📂</span>
+<span className="hidden sm:inline">保存履歴</span><span className="sm:hidden">履歴</span>
 </button>
 </>:<button onClick={doLogin} className="rounded-xl font-bold whitespace-nowrap" style={{background:"white",border:"1px solid #D1D5DB",color:"#374151",padding:"8px 14px",fontSize:13,cursor:"pointer"}}>
-<span className="hidden sm:inline">Googleでログイン</span><span className="sm:hidden">🔑</span>
+<span className="hidden sm:inline">Googleでログイン</span><span className="sm:hidden">ログイン</span>
 </button>}
 </div>
 </div>
