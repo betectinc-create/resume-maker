@@ -393,7 +393,7 @@ const SavePg=()=>
 </div>
 
 return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'Noto Sans JP',sans-serif"}}>
-<div className="mx-auto px-4 pt-8 pb-2 noprint text-center" style={{maxWidth:1080}}>
+<div className="mx-auto px-4 pt-3 pb-2 noprint text-center" style={{maxWidth:1080}}>
 <img src="https://raw.githubusercontent.com/betectinc-create/resume-maker/main/logo.png" alt="CONNECT こねくと" style={{height:40,marginBottom:12}}/>
 <h1 style={{fontSize:24,fontWeight:900,color:"#3B3228",letterSpacing:-0.5,marginBottom:4,fontFamily:"'Zen Maru Gothic',sans-serif"}}>障がい者雇用 履歴書メーカー</h1>
 <p style={{fontSize:13,color:"#A0937D",fontWeight:500}}>選ぶだけで履歴書が完成。そのまま提出できます。</p>
@@ -459,19 +459,39 @@ Googleでログイン</button>
 </div>
 <div id="ppModal" style={{display:"none",position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",zIndex:9999,alignItems:"center",justifyContent:"center"}} onClick={function(e){if(e.target.id==="ppModal")e.target.style.display="none";}}>
 <div style={{background:"white",borderRadius:16,padding:24,maxWidth:500,maxHeight:"80vh",overflow:"auto",margin:16}}>
-<h2 style={{fontSize:18,fontWeight:900,marginBottom:12}}>プライバシーポリシー</h2>
+<h2 style={{fontSize:18,fontWeight:900,marginBottom:12}}>個人情報の取り扱いについて</h2>
 <div style={{fontSize:12,lineHeight:1.8,color:"#555"}}>
-<p style={{marginBottom:8}}>株式会社CONNECT（以下「当社」）は、本サービス「障がい者雇用 履歴書メーカー」における個人情報の取扱いについて、以下のとおり定めます。</p>
-<p style={{fontWeight:700,marginTop:12}}>1. 個人情報の取得</p>
-<p>本サービスで入力された氏名、住所、連絡先、障がいに関する情報等の個人情報は、履歴書の作成のみに使用されます。</p>
-<p style={{fontWeight:700,marginTop:12}}>2. データの処理</p>
-<p>入力されたデータはお使いのブラウザ上でのみ処理され、当社のサーバーには送信・保存されません。Googleログインをご利用の場合、履歴書データはお客様のアカウントに紐づけてクラウドに保存されます。</p>
-<p style={{fontWeight:700,marginTop:12}}>3. 第三者提供</p>
-<p>当社は、お客様の個人情報を第三者に提供することはありません。</p>
-<p style={{fontWeight:700,marginTop:12}}>4. 安全管理</p>
-<p>当社は、個人情報の漏洩、滅失または毀損の防止のため、適切な安全管理措置を講じます。</p>
-<p style={{fontWeight:700,marginTop:12}}>5. お問い合わせ</p>
-<p>個人情報の取扱いに関するお問い合わせは、当社までご連絡ください。</p>
+<p style={{fontWeight:700,fontSize:13,marginBottom:8}}>CONNECTにおける個人情報の取り扱いについて</p>
+<p style={{marginBottom:8}}>就労移行支援事業所CONNECTこねくと（以下「当社」）は、以下のとおり個人情報保護方針を定め、個人情報保護の仕組みを構築し、全従業員に個人情報保護の重要性の認識と取組みを徹底させることにより、個人情報の保護を推進致します。</p>
+<p style={{fontWeight:700,marginTop:12}}>１．個人情報の適切な取得、管理、利用、開示委託、第三者提供</p>
+<p>(1) 個人情報の取得にあたり、利用目的を明示した上で必要な情報を取得し、利用目的を通知または公表し、その範囲で利用します。</p>
+<p>(2) 個人情報の取得・利用・第三者提供にあたり、本人または家族の同意を得ることとします。</p>
+<p>(3) 当社が個人情報の取扱いを外部に委託する場合、業務の委託にあたり、個人情報保護法とガイドラインの趣旨を理解し、これに沿った対応を行う事業者と機密保持を盛り込んだ委託契約を締結した上で、情報提供し、委託先への適切な監督を行います。</p>
+<p>(4) 当社では個人情報を以下の目的で利用いたします。</p>
+<p style={{marginLeft:12}}>・お問い合わせへの対応および、説明会や見学の日程等の調整のため</p>
+<p style={{marginLeft:12}}>・資料送付等サービスおよびイベント等のご案内のため</p>
+<p style={{marginLeft:12}}>・サービス提供および運営のため</p>
+<p style={{marginLeft:12}}>・データ分析など各種分析的業務のため</p>
+<p>(5) 第三者への提供はご本人の同意を得て行う他、以下の場合に提供を行います。</p>
+<p style={{marginLeft:12}}>・法令に基づく場合</p>
+<p style={{marginLeft:12}}>・人の生命、身体又は財産の保護のために必要がある場合であって、本人の同意を得ることが困難であるとき</p>
+<p style={{marginLeft:12}}>・公衆衛生の向上又は児童の健全な育成の推進のために特に必要がある場合であって、本人の同意を得ることが困難であるとき</p>
+<p style={{marginLeft:12}}>・国の機関若しくは地方公共団体又はその委託を受けた者が法令の定める事務を遂行することに対して協力する必要がある場合であって、本人の同意を得ることにより当該事務の遂行に支障を及ぼすおそれがあるとき</p>
+<p style={{marginLeft:12}}>・その他提供目的及び提供先を明示し、同意を得て提供する場合</p>
+<p style={{marginTop:8}}>個人データを第三者に提供したとき、あるいは第三者から提供をうけたとき、提供・取得経緯等の確認を行うとともに、提供先・提供者の氏名等、法令で定める事項を記録し、保管いたします。</p>
+<p style={{fontWeight:700,marginTop:12}}>２．個人情報の安全性確保の措置</p>
+<p>(1) 当社は、個人情報保護に関する規程類を整備し、必要な教育を継続的に行います。その上で個人情報保護の取り組みを全役職員へと周知徹底します。</p>
+<p>(2) 個人情報への不正アクセス、個人情報の漏洩、減質、または棄損の予防及び是正のため、当社内において規程を整備し安全対策につとめます。</p>
+<p style={{fontWeight:700,marginTop:12}}>３．個人情報の開示、訂正、利用停止、削除等への対応</p>
+<p>当社は、本人が自己の情報について、開示、訂正、更新、利用停止、削除などの申し出がある場合には速やかに対応します。</p>
+<p style={{fontWeight:700,marginTop:12}}>４．苦情の処理</p>
+<p>当社は、個人情報取り扱いに関する苦情に対し、適切かつ迅速な処理に努めます。</p>
+<p style={{fontWeight:700,marginTop:12}}>お問い合わせ先：</p>
+<p>株式会社mooble</p>
+<p>〒530-0002 大阪市北区曽根崎新地２丁目３番１３号 若杉大阪駅前ビル801</p>
+<p>個人情報に関する受付窓口</p>
+<p>電話：0120-270-330（平日9:00～16:30）</p>
+<p>メール：privacy@connect-syurou.com</p>
 </div>
 <button onClick={function(){document.getElementById("ppModal").style.display="none";}} style={{marginTop:16,padding:"8px 24px",background:"#3B3228",color:"white",border:"none",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:700}}>閉じる</button>
 </div>
