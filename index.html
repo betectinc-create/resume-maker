@@ -30,6 +30,8 @@ var googleProvider=new firebase.auth.GoogleAuthProvider();
     *{box-sizing:border-box;}
     input,select,textarea{font-family:inherit;}
     .glass{backdrop-filter:blur(20px);background:rgba(255,255,255,0.85);}
+    .hc-orange{border-left:3px solid #E87830;padding-left:12px;}
+    .focus-orange:focus{outline:none!important;border-color:#E87830!important;box-shadow:0 0 0 3px rgba(232,120,48,0.25)!important;}
     .print-resume{display:none;}
     @page{size:A4;margin:12mm;}
     @media print{
@@ -85,11 +87,11 @@ useEffect(()=>{if(f.strId&&f.scene)setF(p=>({...p,selfPR:gP(f.strId,f.scene,f.sc
 const lookupZip=async()=>{const z=f.zip.replace(/[-ー−]/g,"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xfee0));if(z.length<7){tt("7桁入力してください");return;}try{const r=await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z}`);const d=await r.json();if(d.results?.[0]){const a=d.results[0];setF(p=>({...p,address:`${a.address1}${a.address2}${a.address3}`}));tt("住所を入力しました");}else{tt("見つかりません");}}catch{tt("検索できません");}};
 
 const O={50:"#FEFCF8",100:"#FBF3E8",200:"#F0DFC0",300:"#D4A54A",400:"#E87830",500:"#D35C1F",600:"#B24818",700:"#7A3210",800:"#4A1F08"};
-const ic="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all bg-white";
+const ic="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus-orange transition-all bg-white";
 const sc2=ic+" bg-gray-50";
 const lc="block text-sm font-medium text-gray-700 mb-1.5";
 const cc="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6";
-const hc="text-lg font-bold text-gray-900 mb-4";
+const hc="text-lg font-bold text-gray-900 mb-4 hc-orange";
 const STP=["基本情報","学歴・職歴","資格","障害","強み・PR","確認"];
 const eduF=ed=>{let n=fS(ed.name,ed.type);if(ed.dept){const dt=ST[ed.type];n+=` ${ed.dept}${dt?.d||""}`;if(ed.sub&&dt?.s)n+=` ${ed.sub}${dt.s}`;}if(ed.sfx)n+=` ${ed.sfx}`;return n;};
 const qn=q=>q.name==="その他（自由記入）"?q.custom:q.name;
@@ -205,6 +207,7 @@ const S4=()=> <div className="space-y-4">
 /* ========== S5: REVIEW + DOCX DOWNLOAD ========== */
 
 useEffect(function(){setZipReady(true);},[]);
+useEffect(function(){if(typeof fbAuth!=="undefined"){fbAuth.getRedirectResult().catch(function(e){console.log("getRedirectResult:",e&&e.code);});}},[]);
 useEffect(function(){
   var timer=setTimeout(function(){setLoadingAuth(false);},3000);
   if(typeof fbAuth==="undefined"){setLoadingAuth(false);return;}
@@ -221,7 +224,7 @@ const rNth=function(str,old,rep,n){var idx=-1;for(var i=0;i<=n;i++){idx=str.inde
 const insEP=function(xml,marker,n,text){text=xesc(text);var pos=xml.indexOf(marker);if(pos===-1)return xml;var emp="</w:pPr></w:p>";var search=pos;for(var i=0;i<=n;i++){var p=xml.indexOf(emp,search);if(p===-1)return xml;if(i<n){search=p+emp.length;}else{var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+text+'</w:t></w:r>';return xml.substring(0,p+"</w:pPr>".length)+rn+xml.substring(p+"</w:pPr>".length);}}return xml;};
 const insAfter=function(xml,marker,text){var pos=xml.indexOf(marker);if(pos===-1)return xml;var ep=xml.indexOf("</w:pPr></w:p>",pos);if(ep===-1)return xml;var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+xesc(text)+'</w:t></w:r>';return xml.substring(0,ep+"</w:pPr>".length)+rn+xml.substring(ep+"</w:pPr>".length);};
 
-const doLogin=function(){fbAuth.signInWithPopup(googleProvider).catch(function(e){tt("ログインエラー: "+e.message);});};
+const doLogin=async function(){try{await fbAuth.signInWithPopup(googleProvider);}catch(e){if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/unauthorized-domain"||e.code==="auth/operation-not-supported-in-this-environment")){try{await fbAuth.signInWithRedirect(googleProvider);}catch(re){tt("ログインエラー: "+(re.message||re.code));}}else{tt("ログインエラー: "+(e.message||e.code));}}};
 const doLogout=function(){fbAuth.signOut();};
 const saveToCloud=async function(){
   if(!user){tt("ログインしてください");return;}
@@ -487,7 +490,7 @@ const SavePg=()=>
 
 return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'Noto Sans JP',sans-serif"}}>
 <header className="noprint" style={{position:"sticky",top:0,zIndex:100,background:"white",borderBottom:"1px solid #E5E7EB",marginBottom:24}}>
-<div className="mx-auto px-4" style={{maxWidth:960,height:64,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+<div className="mx-auto pl-2 pr-4" style={{maxWidth:960,height:64,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
 <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0,flex:1}}>
 <img src="https://raw.githubusercontent.com/betectinc-create/resume-maker/main/logo.png" alt="CONNECT こねくと" style={{height:32,flexShrink:0}}/>
 <div style={{minWidth:0,lineHeight:1.2}}>
@@ -512,7 +515,7 @@ return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'N
 <div className="rounded-xl p-3 mb-6 text-xs" style={{background:O[50],border:"1px solid "+O[200],color:O[800],borderRadius:16}}><b>個人情報は収集しません。</b>ブラウザ上のみで処理。</div>
 {pg==="form"&&<>
 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-{STP.map((s,i)=> <button key={i} onClick={()=>setStep(i)} className="whitespace-nowrap rounded-xl font-bold flex-shrink-0" style={{background:step===i?"white":"transparent",color:step===i?O[600]:"#9CA3AF",border:step===i?"2px solid "+O[500]:"1px solid #E5E7EB",fontWeight:700,fontSize:10,padding:"8px 10px",overflow:"hidden",textOverflow:"ellipsis",maxWidth:120}}>{i+1}.{s}</button>)}
+{STP.map((s,i)=> <button key={i} onClick={()=>setStep(i)} className="whitespace-nowrap rounded-xl font-bold flex-shrink-0" style={{background:step===i?"#E87830":"transparent",color:step===i?"white":"#9CA3AF",border:step===i?"2px solid #E87830":"1px solid #E5E7EB",fontWeight:700,fontSize:10,padding:"8px 10px",overflow:"hidden",textOverflow:"ellipsis",maxWidth:120}}>{i+1}.{s}</button>)}
 <button onClick={()=>setPg("saves")} className="whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold ml-2" style={{background:"white",color:"#6B7280",border:"1px solid #E5E7EB"}}>保存/読込</button>
 </div>
 {steps[step]()}
@@ -531,7 +534,7 @@ return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'N
 <div><p className="text-sm font-bold text-gray-900">進捗状況</p>
 <p className="text-xs text-gray-500">ステップ {step+1} / 6</p></div>
 </div>
-<div style={{background:"#F3F4F6",borderRadius:8,height:6,overflow:"hidden"}}><div style={{background:O[500],height:"100%",width:((step+1)/6*100)+"%",borderRadius:8,transition:"width 0.3s"}}></div></div>
+<div style={{background:"#F3F4F6",borderRadius:8,height:6,overflow:"hidden"}}><div style={{background:"#E87830",height:"100%",width:((step+1)/6*100)+"%",borderRadius:8,transition:"width 0.3s"}}></div></div>
 <p className="text-xs text-gray-400 mt-2 text-right">{Math.round((step+1)/6*100)}%</p>
 </div>
 
@@ -555,7 +558,7 @@ Googleでログイン</button>
 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
 <p className="text-sm font-bold text-gray-900 mb-3">入力チェックリスト</p>
 <div className="space-y-2.5">
-{[{l:"氏名",ok:!!f.name},{l:"住所",ok:!!f.address},{l:"連絡先",ok:!!(f.mobile||f.phone||f.email)},{l:"学歴",ok:!!(f.education[0]&&f.education[0].name)},{l:"職歴",ok:!!(f.work[0]&&f.work[0].company)},{l:"障がい",ok:!!f.dis1name},{l:"自己PR",ok:!!f.selfPR},{l:"志望動機",ok:!!f.motivation}].map(function(it,i){return <div key={i} className="flex items-center gap-2.5"><span style={{width:18,height:18,borderRadius:"50%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"white",background:it.ok?O[500]:"#E5E1DA"}}>{it.ok?"✓":""}</span><span className="text-sm" style={{color:it.ok?"#3B3228":"#A0937D",fontWeight:it.ok?700:400}}>{it.l}</span></div>;})}
+{[{l:"氏名",ok:!!f.name},{l:"住所",ok:!!f.address},{l:"連絡先",ok:!!(f.mobile||f.phone||f.email)},{l:"学歴",ok:!!(f.education[0]&&f.education[0].name)},{l:"職歴",ok:!!(f.work[0]&&f.work[0].company)},{l:"障がい",ok:!!f.dis1name},{l:"自己PR",ok:!!f.selfPR},{l:"志望動機",ok:!!f.motivation}].map(function(it,i){return <div key={i} className="flex items-center gap-2.5"><span style={{width:18,height:18,borderRadius:"50%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:"white",background:it.ok?"#E87830":"#E5E1DA"}}>{it.ok?"✓":""}</span><span className="text-sm" style={{color:it.ok?"#3B3228":"#A0937D",fontWeight:it.ok?700:400}}>{it.l}</span></div>;})}
 </div>
 </div>
 
