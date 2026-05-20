@@ -29,7 +29,14 @@ var googleProvider=new firebase.auth.GoogleAuthProvider();
 <style>body{font-family:'Noto Sans JP',sans-serif;margin:0;-webkit-font-smoothing:antialiased;letter-spacing:0.01em;}
     *{box-sizing:border-box;}
     input,select,textarea{font-family:inherit;}
-    .glass{backdrop-filter:blur(20px);background:rgba(255,255,255,0.85);}</style>
+    .glass{backdrop-filter:blur(20px);background:rgba(255,255,255,0.85);}
+    .print-resume{display:none;}
+    @page{size:A4;margin:12mm;}
+    @media print{
+      .noprint{display:none!important;}
+      .print-resume{display:block!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      html,body{background:#fff!important;margin:0;padding:0;}
+    }</style>
 </head>
 <body>
 <div id="root"></div>
@@ -334,13 +341,76 @@ const generateDocx=async function(){
   setGenerating(false);
 };
 
+const PrintResume=function(){
+var eR=f.education.filter(function(e){return e.name;}).map(function(e){return {y:e.year,m:e.month,t:eduF(e)};});
+var wR=f.work.filter(function(w){return w.company;}).map(function(w){return {y:w.year,m:w.month,t:w.company+(w.sfx?(" "+w.sfx):"")};});
+var qR=f.quals.filter(function(q){return (q.name&&q.name!=="その他（自由記入）")||q.custom;}).map(function(q){return {y:q.year,m:q.month,t:(q.name==="その他（自由記入）"?q.custom:q.name)};});
+var hist=[{y:"",m:"",t:"学歴",c:true}];
+eR.forEach(function(e){hist.push(e);});
+hist.push({y:"",m:"",t:"職歴",c:true});
+wR.forEach(function(w){hist.push(w);});
+if(eR.length||wR.length)hist.push({y:"",m:"",t:"以上",r:true});
+var dis=[dn(1),dn(2),dn(3),dn(4)].filter(Boolean);
+var techo=[];
+if(dg(1))techo.push(((f.techo1||"")+" "+dg(1)).trim());
+if(dg(2))techo.push(((f.techo2||"")+" "+dg(2)).trim());
+if(dg(3))techo.push(((f.techo3||"")+" "+dg(3)).trim());
+var B="1px solid #555";
+var tbl={width:"100%",borderCollapse:"collapse",marginBottom:8,tableLayout:"fixed"};
+var th={border:B,padding:"4px 6px",background:"#eee",fontWeight:700,fontSize:10,textAlign:"center",verticalAlign:"middle"};
+var td={border:B,padding:"4px 6px",fontSize:11,verticalAlign:"top",wordBreak:"break-word"};
+var tdC={border:B,padding:"4px 6px",fontSize:11,textAlign:"center"};
+var now=new Date();
+return <div className="print-resume" style={{color:"#111",fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.4}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:8}}>
+<div style={{fontSize:22,fontWeight:900,letterSpacing:10}}>履歴書</div>
+<div style={{fontSize:10}}>{now.getFullYear()}年{now.getMonth()+1}月{now.getDate()}日 現在</div>
+</div>
+<table style={tbl}><colgroup><col style={{width:"14%"}}/><col/><col style={{width:"14%"}}/><col/><col style={{width:"110px"}}/></colgroup><tbody>
+<tr><td style={th}>ふりがな</td><td style={td} colSpan={3}>{f.furigana}</td><td rowSpan={4} style={{...td,textAlign:"center",verticalAlign:"middle"}}>{f.photoPreview?<img src={f.photoPreview} style={{width:90,height:120,objectFit:"cover"}}/>:<div style={{width:90,height:120,border:"1px dashed #999",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#999",fontSize:10,margin:"0 auto"}}>写真</div>}</td></tr>
+<tr><td style={th}>氏名</td><td style={{...td,fontSize:16,fontWeight:700}} colSpan={3}>{f.name}</td></tr>
+<tr><td style={th}>生年月日</td><td style={td} colSpan={3}>{f.birthYear&&(f.birthYear+"年 "+f.birthMonth+"月 "+f.birthDay+"日生　（満"+age+"歳）")}</td></tr>
+<tr><td style={th}>性別</td><td style={td} colSpan={3}>{f.gender}</td></tr>
+</tbody></table>
+<table style={tbl}><colgroup><col style={{width:"14%"}}/><col/><col style={{width:"14%"}}/><col/></colgroup><tbody>
+<tr><td style={th}>ふりがな</td><td style={td} colSpan={3}>{f.furiganaAddr}</td></tr>
+<tr><td style={th}>現住所</td><td style={td} colSpan={3}>{(f.zip?("〒"+f.zip+"　"):"")+f.address}</td></tr>
+<tr><td style={th}>電話</td><td style={td}>{f.phone}</td><td style={th}>携帯</td><td style={td}>{f.mobile}</td></tr>
+<tr><td style={th}>E-mail</td><td style={td} colSpan={3}>{f.email}</td></tr>
+</tbody></table>
+<table style={tbl}><colgroup><col style={{width:"12%"}}/><col style={{width:"10%"}}/><col/></colgroup><tbody>
+<tr><td style={th}>年</td><td style={th}>月</td><td style={th}>学歴・職歴</td></tr>
+{hist.map(function(r,i){return <tr key={"h"+i}><td style={tdC}>{r.y}</td><td style={tdC}>{r.m}</td><td style={r.c?{...td,textAlign:"center",fontWeight:700,background:"#f7f7f7"}:(r.r?{...td,textAlign:"right",fontWeight:700}:td)}>{r.t}</td></tr>;})}
+</tbody></table>
+{qR.length>0&&<table style={tbl}><colgroup><col style={{width:"12%"}}/><col style={{width:"10%"}}/><col/></colgroup><tbody>
+<tr><td style={th}>年</td><td style={th}>月</td><td style={th}>免許・資格</td></tr>
+{qR.map(function(r,i){return <tr key={"q"+i}><td style={tdC}>{r.y}</td><td style={tdC}>{r.m}</td><td style={td}>{r.t}</td></tr>;})}
+</tbody></table>}
+<table style={tbl}><colgroup><col style={{width:"18%"}}/><col/><col style={{width:"24%"}}/><col/></colgroup><tbody>
+<tr><td style={th}>通勤時間</td><td style={td}>{(f.commuteH||f.commuteM)?("約"+(f.commuteH||0)+"時間"+(f.commuteM||0)+"分"):""}</td><td style={th}>扶養家族（配偶者を除く）</td><td style={td}>{f.familyCount!==""?f.familyCount+"人":""}</td></tr>
+<tr><td style={th}>配偶者</td><td style={td}>{f.spouse}</td><td style={th}>配偶者の扶養義務</td><td style={td}>{f.dependent}</td></tr>
+</tbody></table>
+{(dis.length>0||techo.length>0||f.visit==="している"||f.med==="している")&&<table style={tbl}><colgroup><col style={{width:"18%"}}/><col/></colgroup><tbody>
+{dis.length>0&&<tr><td style={th}>障がい</td><td style={td}>{dis.join("　／　")}</td></tr>}
+{techo.length>0&&<tr><td style={th}>障害者手帳</td><td style={td}>{techo.join("　／　")}</td></tr>}
+{f.visit==="している"&&<tr><td style={th}>通院</td><td style={td}>{f.visitFreq==="その他"?f.visitFreqOther:f.visitFreq}</td></tr>}
+{f.med==="している"&&<tr><td style={th}>服薬</td><td style={td}>{f.medName}</td></tr>}
+</tbody></table>}
+{(f.motivation||f.selfPR||f.accoms)&&<table style={tbl}><colgroup><col style={{width:"18%"}}/><col/></colgroup><tbody>
+{f.motivation&&<tr><td style={th}>志望動機</td><td style={{...td,whiteSpace:"pre-wrap"}}>{f.motivation}</td></tr>}
+{f.selfPR&&<tr><td style={th}>自己PR</td><td style={{...td,whiteSpace:"pre-wrap"}}>{f.selfPR}</td></tr>}
+{f.accoms&&<tr><td style={th}>本人希望記入欄</td><td style={{...td,whiteSpace:"pre-wrap"}}>{f.accoms}</td></tr>}
+</tbody></table>}
+</div>;
+};
+
 const S5=function(){
 var eR=f.education.filter(function(e){return e.name;}).map(function(e){return {y:e.year,m:e.month,t:eduF(e)};});
 var wR=f.work.filter(function(w){return w.company;}).map(function(w){return {y:w.year,m:w.month,t:w.company+" "+w.sfx};});
 return <div className="space-y-4">
 <div className="p-5 rounded-2xl" style={{background:O[50],border:"1px solid "+O[200]}}>
-<p className="text-sm font-bold mb-2">履歴書DOCXをダウンロード</p>
-<p className="text-xs text-gray-600">入力データをWordテンプレートに書き込みます。そのまま提出・印刷OK。</p>
+<p className="text-sm font-bold mb-2">履歴書をダウンロード</p>
+<p className="text-xs text-gray-600">Word形式は提出用テンプレートに書き込みます。PDF形式は印刷ダイアログで「PDFに保存」を選んでください。</p>
 </div>
 <div className="bg-white rounded-lg border p-4 space-y-1">
 <p className="text-xs font-bold text-gray-500 border-b pb-1 mb-1">基本情報</p>
@@ -360,12 +430,15 @@ return <div className="space-y-4">
 </div>}
 {f.selfPR&&<div><p className="text-xs font-bold text-gray-500 border-b pb-1 mb-1 mt-2">自己PR</p><p className="text-sm whitespace-pre-wrap">{f.selfPR}</p></div>}
 </div>
-<div className="flex gap-2">
-<button onClick={generateDocx} disabled={generating||!zipReady} className="text-white px-10 py-3.5 rounded-xl text-sm font-bold shadow-md disabled:opacity-40 transition-all" style={{background:O[500]}}>
-{generating?"生成中...":"📄 履歴書DOCXをダウンロード"}
+<div className="flex flex-col sm:flex-row gap-3">
+<button onClick={generateDocx} disabled={generating||!zipReady} className="flex-1 text-white px-6 py-3.5 rounded-xl text-sm font-bold shadow-md disabled:opacity-40 transition-all" style={{background:O[500]}}>
+{generating?"生成中...":"📝 Word形式でダウンロード"}
 </button>
-<button onClick={function(){setStep(0);}} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200">編集に戻る</button>
+<button onClick={function(){window.print();}} className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold transition-all" style={{background:"white",color:O[500],border:"2px solid "+O[500]}}>
+📄 PDF形式でダウンロード
+</button>
 </div>
+<button onClick={function(){setStep(0);}} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200">編集に戻る</button>
 </div>;
 };
 
@@ -496,6 +569,7 @@ Googleでログイン</button>
 <button onClick={function(){document.getElementById("ppModal").style.display="none";}} style={{marginTop:16,padding:"8px 24px",background:"#3B3228",color:"white",border:"none",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:700}}>閉じる</button>
 </div>
 </div>
+{PrintResume()}
 </div>;}
 
 ReactDOM.render(React.createElement(App),document.getElementById("root"));
