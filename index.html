@@ -32,8 +32,8 @@ var googleProvider=new firebase.auth.GoogleAuthProvider();
     .glass{backdrop-filter:blur(20px);background:rgba(255,255,255,0.85);}
     .hc-orange{border-left:4px solid #E87830;padding-left:12px;}
     .focus-orange:focus{outline:none!important;border-color:#E87830!important;box-shadow:0 0 0 3px rgba(232,120,48,0.25)!important;}
-    .header-logo{height:20px;}
-    .header-title{font-size:12px;line-height:1.2;}
+    .header-logo{height:18px;}
+    .header-title{font-size:11px;line-height:1.2;}
     @media(min-width:640px){.header-logo{height:24px;}.header-title{font-size:14px;}}
     .print-resume{display:none;}
     @page{size:A4;margin:12mm;}
@@ -493,20 +493,13 @@ const SavePg=()=>
 
 return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'Noto Sans JP',sans-serif"}}>
 <header className="noprint" style={{position:"sticky",top:0,zIndex:100,background:"white",borderBottom:"2px solid #E87830",marginBottom:24,overflow:"hidden"}}>
-<div style={{paddingLeft:24,paddingRight:24,height:60,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"nowrap"}}>
+<div style={{padding:"8px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"nowrap"}}>
 <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0,flex:1,overflow:"hidden"}}>
 <img className="header-logo" src="https://raw.githubusercontent.com/betectinc-create/resume-maker/main/logo.png" alt="CONNECT こねくと" style={{flexShrink:0}}/>
 <p className="header-title" style={{fontWeight:700,color:"#1F2937",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",margin:0}}>障がい者雇用 履歴書メーカー</p>
 </div>
-<div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-{user?<>
-<img src={user.photoURL} alt="" style={{width:32,height:32,borderRadius:"50%"}} onError={function(e){e.target.style.display="none";}}/>
-<button onClick={function(){setPg("saves");}} className="rounded-xl font-bold text-white whitespace-nowrap" style={{background:"#E87830",padding:"8px 14px",fontSize:13,border:"none",cursor:"pointer"}}>
-<span className="hidden sm:inline">保存履歴</span><span className="sm:hidden">履歴</span>
-</button>
-</>:<button onClick={doLogin} className="rounded-xl font-bold whitespace-nowrap" style={{background:"white",border:"1px solid #D1D5DB",color:"#374151",padding:"8px 14px",fontSize:13,cursor:"pointer"}}>
-<span className="hidden sm:inline">Googleでログイン</span><span className="sm:hidden">ログイン</span>
-</button>}
+<div style={{display:"flex",alignItems:"center",flexShrink:0}}>
+{user?<img src={user.photoURL} alt="" style={{width:24,height:24,borderRadius:"50%",flexShrink:0}} onError={function(e){e.target.style.display="none";}}/>:<button onClick={doLogin} style={{background:"none",border:"none",color:"#E87830",fontSize:11,fontWeight:700,cursor:"pointer",padding:"4px 8px",whiteSpace:"nowrap"}}>ログイン</button>}
 </div>
 </div>
 </header>
