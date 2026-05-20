@@ -456,7 +456,8 @@ return <div className="space-y-4">
 </div>}
 {f.selfPR&&<div><p className="text-xs font-bold text-gray-500 border-b pb-1 mb-1 mt-2">自己PR</p><p className="text-sm whitespace-pre-wrap">{f.selfPR}</p></div>}
 </div>
-<div className="flex flex-col sm:flex-row gap-3">
+<p className="block md:hidden text-xs font-bold text-center mb-2" style={{color:"#E87830"}}>📱 スマホではPDF形式がおすすめ</p>
+<div className="flex flex-col-reverse md:flex-row gap-3">
 <button onClick={generateDocx} disabled={generating||!zipReady} className="flex-1 text-white px-6 py-3.5 rounded-xl text-sm font-bold shadow-md disabled:opacity-40 transition-all" style={{background:O[500]}}>
 {generating?"生成中...":"📝 Word形式でダウンロード"}
 </button>
@@ -464,6 +465,7 @@ return <div className="space-y-4">
 📄 印刷 / PDFで保存
 </button>
 </div>
+<p className="block md:hidden text-xs mt-2" style={{color:"#9CA3AF"}}>※ Word形式はPCで開くとレイアウトが正確に表示されます</p>
 <button onClick={function(){setStep(0);}} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200">編集に戻る</button>
 </div>;
 };
