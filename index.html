@@ -90,7 +90,7 @@ const sc2=ic+" bg-gray-50";
 const lc="block text-sm font-medium text-gray-700 mb-1.5";
 const cc="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6";
 const hc="text-lg font-bold text-gray-900 mb-4";
-const STP=["基本情報","学歴・職歴","資格・免許","障害について","強み・自己PR","確認・出力"];
+const STP=["基本情報","学歴・職歴","資格","障害","強み・PR","確認"];
 const eduF=ed=>{let n=fS(ed.name,ed.type);if(ed.dept){const dt=ST[ed.type];n+=` ${ed.dept}${dt?.d||""}`;if(ed.sub&&dt?.s)n+=` ${ed.sub}${dt.s}`;}if(ed.sfx)n+=` ${ed.sfx}`;return n;};
 const qn=q=>q.name==="その他（自由記入）"?q.custom:q.name;
 const dn=n=>{const v=f["dis"+n+"name"];return v==="その他"?f["dis"+n+"other"]:v;};
@@ -337,8 +337,13 @@ const generateDocx=async function(){
     zp.file("word/document.xml",xml);
     var blob=await zp.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
     var url=URL.createObjectURL(blob);
-    var a=document.createElement("a");a.href=url;a.download="履歴書_"+(f.name||"output")+".docx";a.click();
-    URL.revokeObjectURL(url);
+    var a=document.createElement("a");
+    a.href=url;
+    a.download="履歴書_"+(f.name||"output")+".docx";
+    a.style.display="none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
     tt("ダウンロード完了！");
   }catch(err){console.error(err);tt("エラー: "+err.message);}
   setGenerating(false);
@@ -491,7 +496,7 @@ return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'N
 <div className="rounded-xl p-3 mb-6 text-xs" style={{background:O[50],border:"1px solid "+O[200],color:O[800],borderRadius:16}}><b>個人情報は収集しません。</b>ブラウザ上のみで処理。</div>
 {pg==="form"&&<>
 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-{STP.map((s,i)=> <button key={i} onClick={()=>setStep(i)} className="whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold" style={{background:step===i?"white":"transparent",color:step===i?O[600]:"#9CA3AF",border:step===i?"2px solid "+O[500]:"1px solid #E5E7EB",fontWeight:700,minWidth:80,padding:"10px 4px"}}>{i+1}.{s}</button>)}
+{STP.map((s,i)=> <button key={i} onClick={()=>setStep(i)} className="whitespace-nowrap rounded-xl font-bold flex-shrink-0" style={{background:step===i?"white":"transparent",color:step===i?O[600]:"#9CA3AF",border:step===i?"2px solid "+O[500]:"1px solid #E5E7EB",fontWeight:700,fontSize:10,padding:"8px 10px",overflow:"hidden",textOverflow:"ellipsis",maxWidth:120}}>{i+1}.{s}</button>)}
 <button onClick={()=>setPg("saves")} className="whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold ml-2" style={{background:"white",color:"#6B7280",border:"1px solid #E5E7EB"}}>保存/読込</button>
 </div>
 {steps[step]()}
