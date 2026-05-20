@@ -331,6 +331,9 @@ const generateDocx=async function(){
     while(prSec.indexOf("dotted")!==-1){prSec=prSec.replace("dotted","nil");}
     xml=xml.substring(0,prIdx)+prSec+xml.substring(prEnd);}
     // Borders fixed in template
+    // Force a page break before 免許・資格 so page1=基本情報+学歴職歴, page2=資格+自己PR+障がい+通勤
+    var qpos=xml.indexOf("免許・資格");
+    if(qpos!==-1){var qtbl=xml.lastIndexOf("<w:tbl>",qpos);if(qtbl!==-1){xml=xml.substring(0,qtbl)+'<w:p><w:pPr><w:pageBreakBefore/><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/><w:rPr><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr></w:pPr></w:p>'+xml.substring(qtbl);}}
     zp.file("word/document.xml",xml);
     var blob=await zp.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
     var url=URL.createObjectURL(blob);
@@ -350,57 +353,69 @@ eR.forEach(function(e){hist.push(e);});
 hist.push({y:"",m:"",t:"職歴",c:true});
 wR.forEach(function(w){hist.push(w);});
 if(eR.length||wR.length)hist.push({y:"",m:"",t:"以上",r:true});
-var dis=[dn(1),dn(2),dn(3),dn(4)].filter(Boolean);
-var techo=[];
-if(dg(1))techo.push(((f.techo1||"")+" "+dg(1)).trim());
-if(dg(2))techo.push(((f.techo2||"")+" "+dg(2)).trim());
-if(dg(3))techo.push(((f.techo3||"")+" "+dg(3)).trim());
-var B="1px solid #555";
-var tbl={width:"100%",borderCollapse:"collapse",marginBottom:8,tableLayout:"fixed"};
-var th={border:B,padding:"4px 6px",background:"#eee",fontWeight:700,fontSize:10,textAlign:"center",verticalAlign:"middle"};
-var td={border:B,padding:"4px 6px",fontSize:11,verticalAlign:"top",wordBreak:"break-word"};
-var tdC={border:B,padding:"4px 6px",fontSize:11,textAlign:"center"};
+var d1=dn(1),d2=dn(2),d3=dn(3),d4=dn(4);
+var th1=((f.techo1||"")+(dg(1)?(" "+dg(1)):"")).trim();
+var th2=((f.techo2||"")+(dg(2)?(" "+dg(2)):"")).trim();
+var th3=((f.techo3||"")+(dg(3)?(" "+dg(3)):"")).trim();
+var visitV=f.visit?(f.visit+(f.visit==="している"&&f.visitFreq?("（"+(f.visitFreq==="その他"?f.visitFreqOther:f.visitFreq)+"）"):"")):"";
+var medV=f.med?(f.med+(f.med==="している"&&f.medName?("（"+f.medName+"）"):"")):"";
+var hasContact=f.contactZip||f.contactAddr||f.contactPhone||f.contactMobile;
+var OUT="2px solid #333",IN="1px solid #888";
+var tbl={width:"100%",borderCollapse:"collapse",tableLayout:"fixed",border:OUT,marginBottom:4};
+var lab={border:IN,padding:"3px 5px",background:"#f2f2f2",fontWeight:700,fontSize:10,textAlign:"center",verticalAlign:"middle",lineHeight:1.25};
+var val={border:IN,padding:"3px 6px",fontSize:11,verticalAlign:"top",wordBreak:"break-word",lineHeight:1.35};
+var valC={border:IN,padding:"3px 6px",fontSize:11,textAlign:"center",verticalAlign:"middle"};
+var hd={border:IN,padding:"3px",background:"#e6e6e6",fontWeight:700,fontSize:11,textAlign:"center"};
 var now=new Date();
-return <div className="print-resume" style={{color:"#111",fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.4}}>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:8}}>
-<div style={{fontSize:22,fontWeight:900,letterSpacing:10}}>履歴書</div>
+var photo=f.photoPreview?<img src={f.photoPreview} style={{width:96,height:128,objectFit:"cover"}}/>:<div style={{width:96,height:128,border:"1px dashed #aaa",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#999",fontSize:8,textAlign:"center",margin:"0 auto",lineHeight:1.5}}>写真貼付欄<br/>縦40mm<br/>横30mm</div>;
+return <div className="print-resume" style={{color:"#111",fontFamily:"'Noto Sans JP',sans-serif"}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:6}}>
+<div style={{fontSize:24,fontWeight:900,letterSpacing:12}}>履 歴 書</div>
 <div style={{fontSize:10}}>{now.getFullYear()}年{now.getMonth()+1}月{now.getDate()}日 現在</div>
 </div>
-<table style={tbl}><colgroup><col style={{width:"14%"}}/><col/><col style={{width:"14%"}}/><col/><col style={{width:"110px"}}/></colgroup><tbody>
-<tr><td style={th}>ふりがな</td><td style={td} colSpan={3}>{f.furigana}</td><td rowSpan={4} style={{...td,textAlign:"center",verticalAlign:"middle"}}>{f.photoPreview?<img src={f.photoPreview} style={{width:90,height:120,objectFit:"cover"}}/>:<div style={{width:90,height:120,border:"1px dashed #999",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#999",fontSize:10,margin:"0 auto"}}>写真</div>}</td></tr>
-<tr><td style={th}>氏名</td><td style={{...td,fontSize:16,fontWeight:700}} colSpan={3}>{f.name}</td></tr>
-<tr><td style={th}>生年月日</td><td style={td} colSpan={3}>{f.birthYear&&(f.birthYear+"年 "+f.birthMonth+"月 "+f.birthDay+"日生　（満"+age+"歳）")}</td></tr>
-<tr><td style={th}>性別</td><td style={td} colSpan={3}>{f.gender}</td></tr>
+<table style={tbl}><colgroup><col style={{width:"13%"}}/><col/><col style={{width:"12%"}}/><col style={{width:"20%"}}/><col style={{width:"104px"}}/></colgroup><tbody>
+<tr><td style={lab}>ふりがな</td><td style={val} colSpan={3}>{f.furigana}</td><td rowSpan={4} style={{...val,textAlign:"center",verticalAlign:"top",padding:4}}>{photo}</td></tr>
+<tr><td style={lab}>氏名</td><td style={{...val,fontSize:16,fontWeight:700,verticalAlign:"middle"}} colSpan={3}>{f.name}</td></tr>
+<tr><td style={lab}>生年月日</td><td style={{...val,verticalAlign:"middle"}} colSpan={3}>{f.birthYear&&(f.birthYear+"年 "+f.birthMonth+"月 "+f.birthDay+"日生　（満 "+age+" 歳）　　"+f.gender)}</td></tr>
+<tr><td style={lab}>ふりがな</td><td style={val} colSpan={3}>{f.furiganaAddr}</td></tr>
+<tr><td style={lab}>現住所</td><td style={{...val,verticalAlign:"middle"}} colSpan={4}>{(f.zip?("〒"+f.zip+"　"):"")+f.address}</td></tr>
+<tr><td style={lab}>電話</td><td style={val}>{f.phone}</td><td style={lab}>携帯</td><td style={val} colSpan={2}>{f.mobile}</td></tr>
+<tr><td style={lab}>最寄り駅</td><td style={val} colSpan={4}>{(f.nearLine||f.nearStation||f.walkMin)?((f.nearLine||"")+"線　"+(f.nearStation||"")+"駅　徒歩"+(f.walkMin||"")+"分"):""}</td></tr>
+<tr><td style={lab}>E-mail</td><td style={val} colSpan={4}>{f.email}</td></tr>
+{hasContact&&<tr><td style={lab}>連絡先</td><td style={val} colSpan={4}>{(f.contactZip?("〒"+f.contactZip+"　"):"")+(f.contactAddr||"")+(f.contactPhone?("　電話 "+f.contactPhone):"")+(f.contactMobile?("　携帯 "+f.contactMobile):"")}</td></tr>}
 </tbody></table>
-<table style={tbl}><colgroup><col style={{width:"14%"}}/><col/><col style={{width:"14%"}}/><col/></colgroup><tbody>
-<tr><td style={th}>ふりがな</td><td style={td} colSpan={3}>{f.furiganaAddr}</td></tr>
-<tr><td style={th}>現住所</td><td style={td} colSpan={3}>{(f.zip?("〒"+f.zip+"　"):"")+f.address}</td></tr>
-<tr><td style={th}>電話</td><td style={td}>{f.phone}</td><td style={th}>携帯</td><td style={td}>{f.mobile}</td></tr>
-<tr><td style={th}>E-mail</td><td style={td} colSpan={3}>{f.email}</td></tr>
+<table style={tbl}><colgroup><col style={{width:"11%"}}/><col style={{width:"9%"}}/><col/></colgroup><tbody>
+<tr><td style={hd}>年</td><td style={hd}>月</td><td style={hd}>学歴・職歴</td></tr>
+{hist.map(function(r,i){return <tr key={"h"+i}><td style={{...valC,height:23}}>{r.y}</td><td style={{...valC,height:23}}>{r.m}</td><td style={r.c?{...val,textAlign:"center",fontWeight:700,background:"#f7f7f7",verticalAlign:"middle"}:(r.r?{...val,textAlign:"right",fontWeight:700}:{...val,verticalAlign:"middle"})}>{r.t}</td></tr>;})}
 </tbody></table>
-<table style={tbl}><colgroup><col style={{width:"12%"}}/><col style={{width:"10%"}}/><col/></colgroup><tbody>
-<tr><td style={th}>年</td><td style={th}>月</td><td style={th}>学歴・職歴</td></tr>
-{hist.map(function(r,i){return <tr key={"h"+i}><td style={tdC}>{r.y}</td><td style={tdC}>{r.m}</td><td style={r.c?{...td,textAlign:"center",fontWeight:700,background:"#f7f7f7"}:(r.r?{...td,textAlign:"right",fontWeight:700}:td)}>{r.t}</td></tr>;})}
+<div style={{breakBefore:"page",pageBreakBefore:"always"}}>
+<table style={tbl}><colgroup><col style={{width:"11%"}}/><col style={{width:"9%"}}/><col/></colgroup><tbody>
+<tr><td style={hd}>年</td><td style={hd}>月</td><td style={hd}>免許・資格</td></tr>
+{qR.length>0?qR.map(function(r,i){return <tr key={"q"+i}><td style={{...valC,height:23}}>{r.y}</td><td style={{...valC,height:23}}>{r.m}</td><td style={{...val,verticalAlign:"middle"}}>{r.t}</td></tr>;}):<tr><td style={{...valC,height:23}}></td><td style={valC}></td><td style={val}></td></tr>}
 </tbody></table>
-{qR.length>0&&<table style={tbl}><colgroup><col style={{width:"12%"}}/><col style={{width:"10%"}}/><col/></colgroup><tbody>
-<tr><td style={th}>年</td><td style={th}>月</td><td style={th}>免許・資格</td></tr>
-{qR.map(function(r,i){return <tr key={"q"+i}><td style={tdC}>{r.y}</td><td style={tdC}>{r.m}</td><td style={td}>{r.t}</td></tr>;})}
+{f.motivation&&<table style={tbl}><tbody>
+<tr><td style={hd}>志望動機</td></tr>
+<tr><td style={{...val,height:64,whiteSpace:"pre-wrap"}}>{f.motivation}</td></tr>
 </tbody></table>}
-<table style={tbl}><colgroup><col style={{width:"18%"}}/><col/><col style={{width:"24%"}}/><col/></colgroup><tbody>
-<tr><td style={th}>通勤時間</td><td style={td}>{(f.commuteH||f.commuteM)?("約"+(f.commuteH||0)+"時間"+(f.commuteM||0)+"分"):""}</td><td style={th}>扶養家族（配偶者を除く）</td><td style={td}>{f.familyCount!==""?f.familyCount+"人":""}</td></tr>
-<tr><td style={th}>配偶者</td><td style={td}>{f.spouse}</td><td style={th}>配偶者の扶養義務</td><td style={td}>{f.dependent}</td></tr>
+<table style={tbl}><tbody>
+<tr><td style={hd}>自己PR</td></tr>
+<tr><td style={{...val,height:84,whiteSpace:"pre-wrap"}}>{f.selfPR}</td></tr>
 </tbody></table>
-{(dis.length>0||techo.length>0||f.visit==="している"||f.med==="している")&&<table style={tbl}><colgroup><col style={{width:"18%"}}/><col/></colgroup><tbody>
-{dis.length>0&&<tr><td style={th}>障がい</td><td style={td}>{dis.join("　／　")}</td></tr>}
-{techo.length>0&&<tr><td style={th}>障害者手帳</td><td style={td}>{techo.join("　／　")}</td></tr>}
-{f.visit==="している"&&<tr><td style={th}>通院</td><td style={td}>{f.visitFreq==="その他"?f.visitFreqOther:f.visitFreq}</td></tr>}
-{f.med==="している"&&<tr><td style={th}>服薬</td><td style={td}>{f.medName}</td></tr>}
-</tbody></table>}
-{(f.motivation||f.selfPR||f.accoms)&&<table style={tbl}><colgroup><col style={{width:"18%"}}/><col/></colgroup><tbody>
-{f.motivation&&<tr><td style={th}>志望動機</td><td style={{...td,whiteSpace:"pre-wrap"}}>{f.motivation}</td></tr>}
-{f.selfPR&&<tr><td style={th}>自己PR</td><td style={{...td,whiteSpace:"pre-wrap"}}>{f.selfPR}</td></tr>}
-{f.accoms&&<tr><td style={th}>本人希望記入欄</td><td style={{...td,whiteSpace:"pre-wrap"}}>{f.accoms}</td></tr>}
-</tbody></table>}
+<table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
+<tr><td style={hd} colSpan={4}>障がいについて</td></tr>
+<tr><td style={lab}>障がい①</td><td style={val}>{d1}</td><td style={lab}>障がい②</td><td style={val}>{d2}</td></tr>
+<tr><td style={lab}>障がい③</td><td style={val}>{d3}</td><td style={lab}>障がい④</td><td style={val}>{d4}</td></tr>
+<tr><td style={lab}>手帳①</td><td style={val}>{th1}</td><td style={lab}>手帳②</td><td style={val}>{th2}</td></tr>
+<tr><td style={lab}>手帳③</td><td style={val}>{th3}</td><td style={lab}></td><td style={val}></td></tr>
+<tr><td style={lab}>通院</td><td style={val}>{visitV}</td><td style={lab}>服薬</td><td style={val}>{medV}</td></tr>
+<tr><td style={lab}>現状</td><td style={{...val,height:40,whiteSpace:"pre-wrap"}} colSpan={3}>{f.chars}</td></tr>
+<tr><td style={lab}>必要な配慮</td><td style={{...val,height:48,whiteSpace:"pre-wrap"}} colSpan={3}>{f.accoms}</td></tr>
+</tbody></table>
+<table style={tbl}><colgroup><col style={{width:"16%"}}/><col/><col style={{width:"24%"}}/><col/></colgroup><tbody>
+<tr><td style={lab}>通勤時間</td><td style={valC}>{(f.commuteH||f.commuteM)?("約 "+(f.commuteH||0)+" 時間 "+(f.commuteM||0)+" 分"):""}</td><td style={lab}>扶養家族数（配偶者を除く）</td><td style={valC}>{f.familyCount!==""?f.familyCount+" 人":""}</td></tr>
+<tr><td style={lab}>配偶者</td><td style={valC}>{f.spouse}</td><td style={lab}>配偶者の扶養義務</td><td style={valC}>{f.dependent}</td></tr>
+</tbody></table>
+</div>
 </div>;
 };
 
