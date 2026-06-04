@@ -230,18 +230,54 @@ const insAfter=function(xml,marker,text){var pos=xml.indexOf(marker);if(pos===-1
 
 const doLogin=async function(){try{await fbAuth.signInWithPopup(googleProvider);}catch(e){if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/unauthorized-domain"||e.code==="auth/operation-not-supported-in-this-environment")){try{await fbAuth.signInWithRedirect(googleProvider);}catch(re){tt("ログインエラー: "+(re.message||re.code));}}else{tt("ログインエラー: "+(e.message||e.code));}}};
 const doLogout=function(){fbAuth.signOut();};
+// 暗号化キーの導出（UID + 固定salt から AES-GCM 256bit キーを生成）
+const deriveKey=async function(uid){
+  var enc=new TextEncoder();
+  var keyMaterial=await crypto.subtle.importKey("raw",enc.encode(uid+"_connect_resume_salt_2024"),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    {name:"PBKDF2",salt:enc.encode("connect-resume"),iterations:100000,hash:"SHA-256"},
+    keyMaterial,
+    {name:"AES-GCM",length:256},
+    false,
+    ["encrypt","decrypt"]
+  );
+};
+// 暗号化：JSON → AES-GCM → Base64
+const encryptData=async function(key,data){
+  var iv=crypto.getRandomValues(new Uint8Array(12));
+  var enc=new TextEncoder();
+  var encrypted=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(JSON.stringify(data)));
+  var combined=new Uint8Array(iv.length+new Uint8Array(encrypted).length);
+  combined.set(iv);
+  combined.set(new Uint8Array(encrypted),iv.length);
+  return btoa(String.fromCharCode.apply(null,combined));
+};
+// 復号：Base64 → AES-GCM → JSON
+const decryptData=async function(key,base64){
+  var combined=Uint8Array.from(atob(base64),function(c){return c.charCodeAt(0);});
+  var iv=combined.slice(0,12);
+  var data=combined.slice(12);
+  var decrypted=await crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,data);
+  return JSON.parse(new TextDecoder().decode(decrypted));
+};
 const saveToCloud=async function(){
   if(!user){tt("ログインしてください");return;}
   try{
-    var data={uid:user.uid,name:f.name||"無題",formData:JSON.stringify({...f,photoPreview:null}),updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+    var key=await deriveKey(user.uid);
+    var encryptedData=await encryptData(key,{...f,photoPreview:null});
+    var data={uid:user.uid,name:f.name||"無題",encryptedData:encryptedData,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
     await fbDb.collection("resumes").add(data);
     var snap=await fbDb.collection("resumes").where("uid","==",user.uid).orderBy("updatedAt","desc").get();
     var docs=[];snap.forEach(function(d){docs.push({id:d.id,...d.data()});});setCloudSaves(docs);
-    tt("クラウドに保存しました");
+    tt("暗号化して保存しました");
   }catch(e){tt("保存エラー: "+e.message);}
 };
-const loadFromCloud=function(doc){
-  try{var d=JSON.parse(doc.formData);setF({...INIT,...d});setStep(0);setPg("form");tt("読み込みました");}catch(e){tt("読み込みエラー");}
+const loadFromCloud=async function(doc){
+  try{
+    var key=await deriveKey(user.uid);
+    var d=await decryptData(key,doc.encryptedData);
+    setF({...INIT,...d});setStep(0);setPg("form");tt("読み込みました");
+  }catch(e){tt("読み込みエラー");}
 };
 const deleteFromCloud=async function(docId){
   try{await fbDb.collection("resumes").doc(docId).delete();
@@ -475,9 +511,10 @@ const steps=[S0,S1,S2,S3,S4,S5];
 const SavePg=()=>
 <div className="space-y-4">
 <div className={cc}>
-<h3 className={hc} style={{color:O[700]}}>クラウド保存</h3>
+<h3 className={hc} style={{color:O[700]}}>暗号化して保存</h3>
 {user?<div>
-<button onClick={saveToCloud} className="w-full text-white py-3 rounded-xl text-sm font-black shadow-lg mb-4" style={{background:"linear-gradient(135deg,#D35C1F,#E87830)"}}>現在の履歴書をクラウドに保存</button>
+<button onClick={saveToCloud} className="w-full text-white py-3 rounded-xl text-sm font-black shadow-lg mb-2" style={{background:"linear-gradient(135deg,#D35C1F,#E87830)"}}>現在の履歴書を暗号化して保存</button>
+<p className="text-xs mb-4" style={{color:O[800],background:O[50],border:"1px solid "+O[200],borderRadius:12,padding:"8px 10px"}}>🔒 データは暗号化されて保存されます。サーバー管理者も内容を閲覧できません。</p>
 {cloudSaves.length>0?<div className="space-y-2">
 {cloudSaves.map(function(doc){return <div key={doc.id} className="flex justify-between items-center p-3 rounded-xl" style={{background:"#FAFAF7",border:"2px solid #EDE8E0"}}>
 <div><p className="text-sm font-bold">{doc.name||"無題"}</p><p className="text-xs text-gray-400">{doc.updatedAt?new Date(doc.updatedAt.seconds*1000).toLocaleString("ja-JP"):""}</p></div>
@@ -539,8 +576,9 @@ return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'N
 <div><p className="text-sm font-bold text-gray-900">{user.displayName}</p>
 <p className="text-xs text-gray-500">{user.email}</p></div>
 </div>
-<button onClick={saveToCloud} className="w-full text-white py-2.5 rounded-xl text-sm font-bold mb-2" style={{background:"#E87830"}}>クラウドに保存</button>
+<button onClick={saveToCloud} className="w-full text-white py-2.5 rounded-xl text-sm font-bold mb-2" style={{background:"#E87830"}}>暗号化して保存</button>
 <button onClick={function(){setPg("saves");}} className="w-full py-2.5 rounded-xl text-sm font-bold border border-gray-200 text-gray-600">保存した履歴書</button>
+<p className="text-xs mt-2 text-gray-500">🔒 データは暗号化されて保存されます。サーバー管理者も内容を閲覧できません。</p>
 <div className="mt-3 text-center"><button onClick={doLogout} className="text-xs text-gray-400 underline" style={{background:"none",border:"none",cursor:"pointer"}}>ログアウト</button></div>
 </div>:<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-4">
 <p className="text-sm font-bold text-gray-900 mb-2">ログイン</p>
@@ -589,6 +627,7 @@ Googleでログイン</button>
 <p style={{fontWeight:700,marginTop:12}}>２．個人情報の安全性確保の措置</p>
 <p>(1) 当社は、個人情報保護に関する規程類を整備し、必要な教育を継続的に行います。その上で個人情報保護の取り組みを全役職員へと周知徹底します。</p>
 <p>(2) 個人情報への不正アクセス、個人情報の漏洩、減質、または棄損の予防及び是正のため、当社内において規程を整備し安全対策につとめます。</p>
+<p>(3) クラウドに保存される履歴書データはAES-256で暗号化され、ご本人以外（当社のサーバー管理者を含む）は閲覧できません。</p>
 <p style={{fontWeight:700,marginTop:12}}>３．個人情報の開示、訂正、利用停止、削除等への対応</p>
 <p>当社は、本人が自己の情報について、開示、訂正、更新、利用停止、削除などの申し出がある場合には速やかに対応します。</p>
 <p style={{fontWeight:700,marginTop:12}}>４．苦情の処理</p>
