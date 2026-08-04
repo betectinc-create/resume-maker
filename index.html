@@ -37,9 +37,10 @@ var googleProvider=new firebase.auth.GoogleAuthProvider();
     @media(min-width:640px){.header-logo{height:24px;}.header-title{font-size:14px;}}
     .lc-tight{font-size:11px!important;white-space:nowrap;}
     .print-resume{display:none;}
-    @page{size:A4;margin:12mm;}
+    @page{size:A4;margin:10mm;}
     @media print{
       .noprint{display:none!important;}
+      header,footer{display:none!important;}
       .print-resume{display:block!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
       html,body{background:#fff!important;margin:0;padding:0;}
     }</style>
@@ -366,7 +367,14 @@ const generateDocx=async function(){
         var ct2=await zp.file("[Content_Types].xml").async("string");
         if(ct2.indexOf('Extension="'+pext+'"')===-1){ct2=ct2.replace("</Types>",'<Default Extension="'+pext+'" ContentType="'+pmime+'"/></Types>');zp.file("[Content_Types].xml",ct2);}
         var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5230000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>1010000</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
-        var titlePos=xml.indexOf("履　歴　書");if(titlePos===-1)titlePos=xml.indexOf("履 歴 書");if(titlePos===-1)titlePos=xml.indexOf("履歴書");if(titlePos!==-1){var titleEnd=xml.indexOf("</w:p>",titlePos);if(titleEnd!==-1){xml=xml.substring(0,titleEnd)+phXml+xml.substring(titleEnd);}}else{var bstart=xml.indexOf("<w:body>");var fp=xml.indexOf("</w:p>",bstart);if(fp!==-1){xml=xml.substring(0,fp)+phXml+xml.substring(fp);}}
+        // 写真は「履 歴 書」タイトル段落の </w:p> 直前に差し込む（新しい段落は作らない＝余分な行が増えない）
+        var titlePos=xml.indexOf("履 歴 書");
+        if(titlePos===-1)titlePos=xml.indexOf("履　歴　書");
+        if(titlePos===-1)titlePos=xml.indexOf("履歴書");
+        var phAt=-1;
+        if(titlePos!==-1)phAt=xml.indexOf("</w:p>",titlePos);
+        if(phAt===-1)phAt=xml.indexOf("</w:p>",xml.indexOf("<w:body>"));
+        if(phAt!==-1)xml=xml.substring(0,phAt)+phXml+xml.substring(phAt);
       }catch(pe){console.log("Photo error:",pe);}
     }
     var prIdx=xml.indexOf("自己");if(prIdx!==-1){var prEnd=xml.indexOf("</w:tbl>",prIdx);
@@ -374,6 +382,12 @@ const generateDocx=async function(){
     while(prSec.indexOf("dotted")!==-1){prSec=prSec.replace("dotted","nil");}
     xml=xml.substring(0,prIdx)+prSec+xml.substring(prEnd);}
     // Borders fixed in template
+    // 表と表の間の空段落は1つだけ残して最小行高に（余分な空行で3ページ目に溢れるのを防ぐ）
+    var thinP='<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="60" w:lineRule="exact"/><w:rPr><w:sz w:val="6"/><w:szCs w:val="6"/></w:rPr></w:pPr></w:p>';
+    xml=xml.replace(/<\/w:tbl>((?:<w:p\b(?:(?!<\/w:p>)[\s\S])*?<\/w:p>)+)(?=<w:tbl)/g,function(whole,gap){
+      if(/<w:r[ >]/.test(gap)||gap.indexOf("<w:tbl")!==-1)return whole;
+      return "</w:tbl>"+thinP;
+    });
     // Force a page break before 免許・資格 so page1=基本情報+学歴職歴, page2=資格+自己PR+障がい+通勤
     var qpos=xml.indexOf("免許・資格");
     if(qpos!==-1){var qtbl=xml.lastIndexOf("<w:tbl>",qpos);if(qtbl!==-1){xml=xml.substring(0,qtbl)+'<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/><w:rPr><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr></w:pPr><w:r><w:rPr><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr><w:br w:type="page"/></w:r></w:p>'+xml.substring(qtbl);}}
