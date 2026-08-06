@@ -85,7 +85,7 @@ const uE=(i,k,v)=>{const a=[...f.education];a[i]={...a[i],[k]:v};setF(p=>({...p,
 const uW=(i,k,v)=>{const a=[...f.work];a[i]={...a[i],[k]:v};setF(p=>({...p,work:a}));};
 const uQ=(i,k,v)=>{const a=[...f.quals];a[i]={...a[i],[k]:v};setF(p=>({...p,quals:a}));};
 const handlePhoto=e=>{const file=e.target.files?.[0];if(file){const img=new Image();img.onload=function(){const canvas=document.createElement("canvas");canvas.width=227;canvas.height=303;const ctx=canvas.getContext("2d");const sx=Math.max(0,(img.width-img.height*0.75)/2);const sy=Math.max(0,(img.height-img.width/0.75)/2);const sw=Math.min(img.width,img.height*0.75);const sh=Math.min(img.height,img.width/0.75);ctx.drawImage(img,sx,sy,sw,sh,0,0,227,303);setF(p=>({...p,photoPreview:canvas.toDataURL("image/jpeg",0.9)}));};img.src=URL.createObjectURL(file);}};
-const insAc=text=>{setF(p=>({...p,accoms:p.accoms?(p.accoms+"\n"+text):text}));tt("追加しました");};
+const insAc=text=>{const nx=f.accoms?(f.accoms+"\n"+text):text;if(nx.length>80){tt("80文字までです（残り"+(80-f.accoms.length)+"文字）");return;}setF(p=>({...p,accoms:nx}));tt("追加しました");};
 const pS=id=>setF(p=>({...p,strId:id,scene:"",sceneOther:"",selfPR:gP(id,"",""),motivation:gM(id)}));
 const pSc=sc=>{setF(p=>({...p,scene:sc,selfPR:gP(f.strId,sc,f.sceneOther)}));};
 useEffect(()=>{if(f.strId&&f.scene)setF(p=>({...p,selfPR:gP(f.strId,f.scene,f.sceneOther)}));},[f.sceneOther]);
@@ -197,7 +197,7 @@ const S3=()=> <div className="space-y-4">
 <div className="grid grid-cols-2 gap-3"><div><label className={lc}>服薬</label><select className={sc2} value={f.med} onChange={u("med")}><option value="">選択</option><option>している</option><option>していない</option></select></div>{f.med==="している"&&<div><label className={lc}>薬名</label><input className={ic} value={f.medName} onChange={u("medName")}/></div>}</div>
 </div>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>障害特性（現状）</h3><textarea className={ic+" h-28"} value={f.chars} onChange={e=>{if(e.target.value.length<=250)setF(p=>({...p,chars:e.target.value}));}}/><div className="flex justify-between mt-1"><p className="text-xs" style={{color:f.chars.length>=230?"#E87830":"#999"}}>{f.chars.length>=230?"残り"+(250-f.chars.length)+"文字":"枠内に収まる文字数です"}</p><p className="text-xs" style={{color:f.chars.length>=230?"#E87830":"#999"}}>{f.chars.length}/250</p></div>{f.dis1name&&DI[f.dis1name]&&<div className="mt-3 rounded-xl p-3" style={{background:"#FEF3C7"}}><p className="text-xs text-amber-900">{DI[f.dis1name]}</p></div>}</div>
-<div className={cc}><h3 className={hc} style={{color:O[700]}}>必要な配慮</h3><p className="text-xs text-gray-500 mb-2">例文タップで追加</p><textarea className={ic+" h-24"} value={f.accoms} onChange={e=>{if(e.target.value.length<=80)setF(p=>({...p,accoms:e.target.value}));}}/><div className="flex justify-between mt-1"><p className="text-xs" style={{color:f.accoms.length>=60?"#E87830":"#999"}}>{f.accoms.length>=60?"残り"+(80-f.accoms.length)+"文字":"枠内に収まる文字数です"}</p><p className="text-xs" style={{color:f.accoms.length>=60?"#E87830":"#999"}}>{f.accoms.length}/80</p></div>
+<div className={cc}><h3 className={hc} style={{color:O[700]}}>必要な配慮</h3><p className="text-xs text-gray-500 mb-2">例文タップで追加</p><textarea className={ic+" h-24"} maxLength={80} value={f.accoms} onChange={e=>{setF(p=>({...p,accoms:e.target.value.slice(0,80)}));}}/><div className="flex justify-between mt-1"><p className="text-xs" style={{color:f.accoms.length>=60?"#E87830":"#999"}}>{f.accoms.length>=60?"残り"+(80-f.accoms.length)+"文字":"枠内に収まる文字数です"}</p><p className="text-xs" style={{color:f.accoms.length>=60?"#E87830":"#999"}}>{f.accoms.length}/80</p></div>
 <div className="mt-3 space-y-1.5">{AC.map((ex,i)=> <button key={i} onClick={()=>insAc(ex)} className="block w-full text-left text-xs rounded-lg px-3 py-2 border hover:border-yellow-600" style={{background:"#FAFAFA",borderColor:"#E5E7EB"}}>+ {ex}</button>)}</div>
 </div></div>;
 
@@ -511,7 +511,7 @@ return <div className="space-y-4">
 <button onClick={generateDocx} disabled={generating||!zipReady} className="flex-1 text-white px-6 py-3.5 rounded-xl text-sm font-bold shadow-md disabled:opacity-40 transition-all" style={{background:O[500]}}>
 {generating?"生成中...":"📝 Word形式でダウンロード"}
 </button>
-<button id="pdfBtn" onClick={function(){setTimeout(function(){window.print();},500);}} className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold transition-all" style={{background:"white",color:O[500],border:"2px solid "+O[500]}}>
+<button id="pdfBtn" onClick={function(){var ot=document.title;var rs=function(){document.title=ot;window.removeEventListener("afterprint",rs);};window.addEventListener("afterprint",rs);document.title="履歴書"+(f.name?"_"+f.name:"");setTimeout(function(){window.print();setTimeout(rs,60000);},500);}} className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold transition-all" style={{background:"white",color:O[500],border:"2px solid "+O[500]}}>
 📄 印刷 / PDFで保存
 </button>
 </div>
