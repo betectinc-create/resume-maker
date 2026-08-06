@@ -511,10 +511,20 @@ return <div className="space-y-4">
 <button onClick={generateDocx} disabled={generating||!zipReady} className="flex-1 text-white px-6 py-3.5 rounded-xl text-sm font-bold shadow-md disabled:opacity-40 transition-all" style={{background:O[500]}}>
 {generating?"生成中...":"📝 Word形式でダウンロード"}
 </button>
-<button id="pdfBtn" onClick={function(){var ot=document.title;var rs=function(){document.title=ot;window.removeEventListener("afterprint",rs);};window.addEventListener("afterprint",rs);document.title="履歴書"+(f.name?"_"+f.name:"");setTimeout(function(){window.print();setTimeout(rs,60000);},500);}} className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold transition-all" style={{background:"white",color:O[500],border:"2px solid "+O[500]}}>
+<button id="pdfBtn" onClick={function(){
+  if(typeof window.print!=="function"){tt("この画面では保存できません。Safari/Chromeで開いてください");return;}
+  var ot=document.title;
+  var rs=function(){document.title=ot;window.removeEventListener("afterprint",rs);};
+  window.addEventListener("afterprint",rs);
+  document.title="";
+  // iOSのSafariはタップ直後でないとprint()を無視するため、setTimeoutを挟まずその場で呼ぶ
+  try{window.print();}catch(er){tt("印刷画面を開けませんでした。Safari/Chromeでお試しください");rs();return;}
+  setTimeout(rs,60000);
+}} className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold transition-all" style={{background:"white",color:O[500],border:"2px solid "+O[500]}}>
 📄 印刷 / PDFで保存
 </button>
 </div>
+{/Line\/|FBAN|FBAV|Instagram|MicroMessenger|TikTok/i.test(navigator.userAgent)&&<p className="text-xs mt-2 font-bold" style={{color:"#E87830"}}>※ LINEなどアプリ内のブラウザではPDF保存が動きません。右上のメニューから「Safariで開く」「ブラウザで開く」を選んでからお試しください</p>}
 <p className="block md:hidden text-xs mt-2" style={{color:"#9CA3AF"}}>※ Word形式はPCで開くとレイアウトが正確に表示されます</p>
 <button onClick={function(){setStep(0);}} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200">編集に戻る</button>
 </div>;
