@@ -67,7 +67,7 @@ const DL=["ADHD（注意欠如・多動症）","ASD（自閉スペクトラム�
 const TC=["精神障害者保健福祉手帳","身体障害者手帳","療育手帳","愛の手帳（東京都）","みどりの手帳（さいたま市）","愛護手帳（名古屋市）","その他"];
 const GR={"精神障害者保健福祉手帳":["1級","2級","3級"],"身体障害者手帳":["1級","2級","3級","4級","5級","6級"],"療育手帳":["A1（最重度）","A2（重度）","B1（中度）","B2（軽度）","A","B"],"愛の手帳（東京都）":["1度","2度","3度","4度"],"みどりの手帳（さいたま市）":["A","B","C"],"愛護手帳（名古屋市）":["A","B","C"],"その他":[]};
 const VF=["週1回","隔週","月1回","月2回","2〜3ヶ月に1回","半年に1回","年1回","その他"];
-const AC=["業務指示はメモや文書で具体的にいただけると助かります","マルチタスクが苦手なため、一つずつ業務をいただけると正確に対応できます","静かな環境で作業させていただけると集中力を発揮できます","感覚過敏があるため、イヤーマフの使用を許可いただけると助かります","定期的な休憩を取らせていただけると安定したパフォーマンスを維持できます","急な予定変更がある場合は事前にお知らせいただけると助かります","通院のため月に1回程度のお休みをいただけると助かります","口頭よりも文字での指示の方が理解しやすいです","具体的な指示をいただけると正確に対応できます","体調に波があるため調子が悪い日は業務量を調整いただけると助かります"];
+const AC=["業務指示はメモや文書で具体的にいただけると幸いです","マルチタスクが苦手なため、一つずつ業務をいただけると正確に対応できます","静かな環境で作業させていただけると集中力を発揮できます","感覚過敏があるため、イヤーマフの使用を許可いただけると幸いです","定期的な休憩を取らせていただけると安定したパフォーマンスを維持できます","急な予定変更がある場合は事前にお知らせいただけると幸いです","通院のため月に1回程度のお休みをいただけると幸いです","口頭よりも文字での指示の方が理解しやすいです","具体的な指示をいただけると正確に対応できます","体調に波があるため調子が悪い日は業務量を調整いただけると幸いです"];
 const SR=[{id:"serious",label:"真面目さ・責任感"},{id:"focus",label:"集中力"},{id:"careful",label:"丁寧さ・正確性"},{id:"honest",label:"素直さ・協調性"},{id:"patience",label:"忍耐力・継続力"}];
 const SC={serious:["任されたタスクを期限内に必ず完了させた経験","ミスが起きた際に自ら報告・改善策を提案した経験","決められたルールや手順を正確に守り続けた経験","周囲が手を抜く場面でも最後まで丁寧に取り組んだ経験","その他（自由記述）"],focus:["一つの作業に長時間没頭して高い成果を出した経験","周囲の雑音に影響されず作業を継続した経験","細かいデータ入力や検品で高い正確性を発揮した経験","短期間で専門知識やスキルを習得した経験","その他（自由記述）"],careful:["書類やデータのチェックでミスを発見した経験","整理整頓や分類で周囲から信頼された経験","手順書やマニュアルを正確に遵守した経験","成果物の品質向上に貢献した経験","その他（自由記述）"],honest:["上司のアドバイスを素直に受け入れ改善した経験","チームメンバーと協力して課題を解決した経験","わからないことを率直に質問し成長につなげた経験","フィードバックを前向きに受け止め行動を変えた経験","その他（自由記述）"],patience:["長期間にわたる反復作業を安定して続けた経験","困難な課題に粘り強く取り組み達成した経験","習い事や学習を何年も継続した経験","体調管理やセルフケアを継続的に行っている経験","その他（自由記述）"]};
 const DI={"ADHD（注意欠如・多動症）":"特性：不注意・多動性・衝動性。強み：高い集中力、発想力。","ASD（自閉スペクトラム症）":"特性：コミュニケーション独特、こだわり、感覚過敏。強み：ルーティン安定性、細部注意力。","LD/SLD（学習障害）":"特性：読み書き・計算の困難。知的能力は問題なく特定領域限定。"};
@@ -236,6 +236,17 @@ const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"
 const rNth=function(str,old,rep,n){var idx=-1;for(var i=0;i<=n;i++){idx=str.indexOf(old,idx+1);if(idx===-1)return str;}return str.substring(0,idx)+rep+str.substring(idx+old.length);};
 const insEP=function(xml,marker,n,text){text=xesc(text);var pos=xml.indexOf(marker);if(pos===-1)return xml;var emp="</w:pPr></w:p>";var search=pos;for(var i=0;i<=n;i++){var p=xml.indexOf(emp,search);if(p===-1)return xml;if(i<n){search=p+emp.length;}else{var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+text+'</w:t></w:r>';return xml.substring(0,p+"</w:pPr>".length)+rn+xml.substring(p+"</w:pPr>".length);}}return xml;};
 const insAfter=function(xml,marker,text){var pos=xml.indexOf(marker);if(pos===-1)return xml;var ep=xml.indexOf("</w:pPr></w:p>",pos);if(ep===-1)return xml;var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+xesc(text)+'</w:t></w:r>';return xml.substring(0,ep+"</w:pPr>".length)+rn+xml.substring(ep+"</w:pPr>".length);};
+// ===== DOCXレイアウト固定用ヘルパー（入力量にかかわらず行高・ページ構成を一定に保つ） =====
+const xrun=function(text,sz,bold){var ps=String(text==null?"":text).split(/\r?\n/);var rp='<w:rPr>'+(bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr>';var o="";for(var i=0;i<ps.length;i++){if(i>0)o+='<w:r>'+rp+'<w:br/></w:r>';if(ps[i]!=="")o+='<w:r>'+rp+'<w:t xml:space="preserve">'+xesc(ps[i])+'</w:t></w:r>';}return o;};
+const xpara=function(text,sz,opt){var o=opt||{};var ln=o.line||Math.round(sz*11);var pr='<w:pPr><w:snapToGrid w:val="0"/><w:spacing w:before="0" w:after="0" w:line="'+ln+'" w:lineRule="exact"/>'+(o.jc?'<w:jc w:val="'+o.jc+'"/>':'')+'<w:rPr>'+(o.bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr></w:pPr>';return '<w:p>'+pr+xrun(text,sz,o.bold)+'</w:p>';};
+const rowsOf=function(t){return t.match(/<w:tr[ >][\s\S]*?<\/w:tr>/g)||[];};
+const setH=function(r,h){var tag='<w:trHeight w:hRule="exact" w:val="'+h+'"/>';if(/<w:trHeight[^>]*\/>/.test(r))return r.replace(/<w:trHeight[^>]*\/>/,tag);if(r.indexOf("<w:trPr>")!==-1)return r.replace("<w:trPr>","<w:trPr>"+tag);return r.replace(/^(<w:tr[^>]*>)/,"$1<w:trPr>"+tag+"</w:trPr>");};
+const eachCell=function(r,ci,fn){var i=0,n=0;while(true){var s=r.indexOf("<w:tc>",i);if(s===-1)return r;var e=r.indexOf("</w:tc>",s)+7;if(n===ci)return r.substring(0,s)+fn(r.substring(s,e))+r.substring(e);n++;i=e;}};
+const putCell=function(r,ci,body){return eachCell(r,ci,function(tc){var ps=tc.search(/<w:p[ >]/);if(ps===-1)return tc;var pe=tc.lastIndexOf("</w:p>")+6;return tc.substring(0,ps)+body+tc.substring(pe);});};
+const vMerge=function(r,ci,start){var tag=start?'<w:vMerge w:val="restart"/>':'<w:vMerge/>';return eachCell(r,ci,function(tc){if(tc.indexOf("<w:vMerge")!==-1)return tc.replace(/<w:vMerge[^>]*\/>/,tag);if(tc.indexOf("<w:gridSpan")!==-1)return tc.replace(/(<w:gridSpan[^>]*\/>)/,"$1"+tag);if(tc.indexOf("<w:tcW")!==-1)return tc.replace(/(<w:tcW[^>]*\/>)/,"$1"+tag);return tc;});};
+const putTbl=function(xml,marker,fn){var p=xml.indexOf(marker);if(p===-1)return xml;var st=xml.lastIndexOf("<w:tbl>",p);var en=xml.indexOf("</w:tbl>",p)+8;if(st===-1||en<st)return xml;return xml.substring(0,st)+fn(xml.substring(st,en))+xml.substring(en);};
+// 指定の幅×高さ(twips)に収まる最大の文字サイズ(half-point)を返す
+const fitSz=function(text,wTw,hTw,base,min){var t=String(text||"");if(!t)return base;for(var sz=base;sz>min;sz-=2){var per=Math.max(1,Math.floor((wTw-200)/(sz*10)));var ln=0;t.split(/\r?\n/).forEach(function(s){ln+=Math.max(1,Math.ceil(s.length/per));});if(ln*Math.round(sz*11)<=hTw-80)return sz;}return min;};
 
 const doLogin=async function(){try{await fbAuth.signInWithPopup(googleProvider);}catch(e){if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/unauthorized-domain"||e.code==="auth/operation-not-supported-in-this-environment")){try{await fbAuth.signInWithRedirect(googleProvider);}catch(re){tt("ログインエラー: "+(re.message||re.code));}}else{tt("ログインエラー: "+(e.message||e.code));}}};
 const doLogout=function(){fbAuth.signOut();};
@@ -324,35 +335,68 @@ const generateDocx=async function(){
     xml=xml.replace("E-mail：　","E-mail："+xesc(f.email));
     var eR2=f.education.filter(function(e){return e.name;}).map(function(e){return {y:e.year,m:e.month,t:eduF(e)};});
     var wR2=f.work.filter(function(w){return w.company;}).map(function(w){return {y:w.year,m:w.month,t:w.company+" "+w.sfx};});
-    var hist=[];
-    if(eR2.length){eR2.forEach(function(r){hist.push(r);});}
-    if(wR2.length){wR2.forEach(function(r){hist.push(r);});}
-    var hM="学歴・職歴（各部にまとめて書く）";
-    for(var i=Math.min(hist.length,16)-1;i>=0;i--){if(hist[i].t)xml=insEP(xml,hM,i*3+2,hist[i].t);if(hist[i].m)xml=insEP(xml,hM,i*3+1,hist[i].m);if(hist[i].y)xml=insEP(xml,hM,i*3,hist[i].y);}
-    var qM="免許・資格";
-    var qs=f.quals.filter(function(q){return q.name;});
-    for(var j=Math.min(qs.length,5)-1;j>=0;j--){var nm=qs[j].name==="その他（自由記入）"?qs[j].custom:qs[j].name;if(nm)xml=insEP(xml,qM,j*3+2,nm);if(qs[j].month)xml=insEP(xml,qM,j*3+1,qs[j].month);if(qs[j].year)xml=insEP(xml,qM,j*3,qs[j].year);}
-    if(f.selfPR){var prPos2=xml.indexOf("PR</w:t>");if(prPos2!==-1){var ep=xml.indexOf("</w:pPr></w:p>",prPos2);if(ep!==-1){var prRun='<w:r><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr><w:t>'+xesc(f.selfPR)+'</w:t></w:r>';xml=xml.substring(0,ep+"</w:pPr>".length)+prRun+xml.substring(ep+"</w:pPr>".length);}}}
+    // 学歴・職歴：「学歴」「職歴」の見出し行を入れて組み直し、行高を固定（総高は常に一定）
+    var HL=[];
+    if(eR2.length){HL.push({t:"学歴",c:1});eR2.forEach(function(r){HL.push(r);});}
+    if(wR2.length){HL.push({t:"職歴",c:1});wR2.forEach(function(r){HL.push(r);});}
+    if(HL.length)HL.push({t:"以上",r:1});
+    xml=putTbl(xml,"学歴・職歴（各部にまとめて書く）",function(t){
+      var rs=rowsOf(t);if(rs.length<2)return t;
+      var n=Math.max(16,HL.length),h=Math.max(280,Math.floor(7264/n)),body="";
+      for(var i=0;i<n;i++){
+        var L=HL[i]||{},r=setH(rs[1],h);
+        r=putCell(r,0,xpara(L.y||"",18,{jc:"center"}));
+        r=putCell(r,1,xpara(L.m||"",18,{jc:"center"}));
+        r=putCell(r,2,xpara(L.t||"",fitSz(L.t,6434,h,18,12),{jc:L.c?"center":(L.r?"right":"left"),bold:!!L.c}));
+        body+=r;
+      }
+      return t.substring(0,t.indexOf(rs[0]))+setH(rs[0],366)+body+"</w:tbl>";
+    });
+    // 免許・資格：5行固定
+    var qs=f.quals.filter(function(q){return q.name;}).map(function(q){return {y:q.year,m:q.month,t:q.name==="その他（自由記入）"?q.custom:q.name};});
+    xml=putTbl(xml,"免許・資格",function(t){
+      var rs=rowsOf(t);if(rs.length<2)return t;
+      var body="";
+      for(var i=0;i<5;i++){
+        var L=qs[i]||{},r=setH(rs[1],454);
+        r=putCell(r,0,xpara(L.y||"",18,{jc:"center"}));
+        r=putCell(r,1,xpara(L.m||"",18,{jc:"center"}));
+        r=putCell(r,2,xpara(L.t||"",fitSz(L.t,6434,454,18,12),{}));
+        body+=r;
+      }
+      return t.substring(0,t.indexOf(rs[0]))+setH(rs[0],366)+body+"</w:tbl>";
+    });
+    // 自己PR＋志望動機：行を縦結合して1つの枠にし、文字量に応じて自動縮小（枠は伸びない）
+    xml=putTbl(xml,"自己",function(t){
+      var rs=rowsOf(t);if(rs.length<7)return t;
+      // 総高3090を 見出し366／自己PR1200／志望動機見出し240／志望動機1284 に配分
+      var r1=putCell(setH(vMerge(rs[1],0,true),400),0,xpara(f.selfPR||"",fitSz(f.selfPR,8702,1200,18,12),{}));
+      var lab=putCell(setH(rs[4],240),0,xpara("志望動機",18,{bold:true}));
+      var r5=putCell(setH(vMerge(rs[5],0,true),642),0,xpara(f.motivation||"",fitSz(f.motivation,8702,1284,18,12),{}));
+      return t.substring(0,t.indexOf(rs[0]))+setH(rs[0],366)+r1
+        +setH(vMerge(rs[2],0,false),400)+setH(vMerge(rs[3],0,false),400)
+        +lab+r5+setH(vMerge(rs[6],0,false),642)+"</w:tbl>";
+    });
     var d1=f.dis1name==="その他"?f.dis1other:f.dis1name;
     var d2=f.dis2name==="その他"?f.dis2other:f.dis2name;
     var d3=f.dis3name==="その他"?f.dis3other:f.dis3name;
     var d4=f.dis4name==="その他"?f.dis4other:f.dis4name;
-    if(d1)xml=insAfter(xml,"障がい①</w:t>",d1);
-    if(d2)xml=insAfter(xml,"障がい②</w:t>",d2);
-    if(d3)xml=insAfter(xml,"障がい③</w:t>",d3);
-    if(d4)xml=insAfter(xml,"障がい④</w:t>",d4);
     var tc1=f.techo1||"";var g1v=dg(1);if(tc1&&g1v)tc1=tc1+" "+g1v;else if(g1v)tc1=g1v;
     var tc2=f.techo2||"";var g2v=dg(2);if(tc2&&g2v)tc2=tc2+" "+g2v;else if(g2v)tc2=g2v;
     var tc3=f.techo3||"";var g3v=dg(3);if(tc3&&g3v)tc3=tc3+" "+g3v;else if(g3v)tc3=g3v;
-    if(tc1)xml=insAfter(xml,"手帳①</w:t>",tc1);
-    if(tc2)xml=insAfter(xml,"手帳②</w:t>",tc2);
-    if(tc3)xml=insAfter(xml,"手帳③</w:t>",tc3);
     var vt=f.visit+(f.visit==="している"&&f.visitFreq?("（"+(f.visitFreq==="その他"?f.visitFreqOther:f.visitFreq)+"）"):"");
-    if(vt)xml=insAfter(xml,"通院</w:t>",vt);
     var mt=f.med+(f.med==="している"&&f.medName?("（"+f.medName+"）"):"");
-    if(mt)xml=insAfter(xml,"服薬</w:t>",mt);
-    if(f.chars)xml=insAfter(xml,"現状</w:t>",f.chars);
-    if(f.accoms)xml=insAfter(xml,"配慮</w:t>",f.accoms);
+    // 障がい欄：現状は5行分、必要な配慮は2行分を縦結合した固定枠に流し込む
+    xml=putTbl(xml,"障がい①",function(t){
+      var rs=rowsOf(t);if(rs.length<13)return t;
+      var two=function(r,h,a,b){r=setH(r,h);r=putCell(r,1,xpara(a||"",18,{}));r=putCell(r,3,xpara(b||"",18,{}));return r;};
+      var out=setH(rs[0],366)+two(rs[1],454,d1,d2)+two(rs[2],454,d3,d4)+two(rs[3],454,tc1,tc2)+two(rs[4],454,tc3,"")+two(rs[5],366,vt,mt);
+      out+=putCell(setH(vMerge(vMerge(rs[6],0,true),1,true),454),1,xpara(f.chars||"",fitSz(f.chars,7610,2270,18,12),{}));
+      for(var i=7;i<=10;i++)out+=setH(vMerge(vMerge(rs[i],0,false),1,false),454);
+      out+=putCell(setH(vMerge(vMerge(rs[11],0,true),1,true),284),1,xpara(f.accoms||"",fitSz(f.accoms,7610,567,18,12),{}));
+      out+=setH(vMerge(vMerge(rs[12],0,false),1,false),283);
+      return t.substring(0,t.indexOf(rs[0]))+out+"</w:tbl>";
+    });
     xml=xml.replace("約　　　　時間　　　　分","約　"+f.commuteH+"　時間　"+f.commuteM+"　分");
     var famPos=xml.indexOf("人　　　　</w:t>");
     if(famPos!==-1){xml=xml.substring(0,famPos)+f.familyCount+"人</w:t>"+xml.substring(famPos+"人　　　　</w:t>".length);}
@@ -374,11 +418,24 @@ const generateDocx=async function(){
         zp.file("word/_rels/document.xml.rels",rels2);
         var ct2=await zp.file("[Content_Types].xml").async("string");
         if(ct2.indexOf('Extension="'+pext+'"')===-1){ct2=ct2.replace("</Types>",'<Default Extension="'+pext+'" ContentType="'+pmime+'"/></Types>');zp.file("[Content_Types].xml",ct2);}
-        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5230000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>1010000</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
+        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5230000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>1081405</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
         // 写真は「履 歴 書」タイトル段落の </w:p> 直前に差し込む（新しい段落は作らない＝余分な行が増えない）
         var titlePos=xml.indexOf("履 歴 書");
         if(titlePos===-1)titlePos=xml.indexOf("履　歴　書");
         if(titlePos===-1)titlePos=xml.indexOf("履歴書");
+        // 写真を貼るときは「写真貼付欄」の枠と案内文（タイトルより前にある図形）を削除して重なりを防ぐ
+        if(titlePos!==-1){
+          while(true){
+            var ps2=xml.indexOf("<w:pict");if(ps2===-1||ps2>titlePos)break;
+            var pe2=xml.indexOf("</w:pict>",ps2);if(pe2===-1)break;pe2+=9;
+            var rs2s=xml.lastIndexOf("<w:r>",ps2),rs2b=xml.lastIndexOf("<w:r ",ps2);
+            if(rs2b>rs2s)rs2s=rs2b;
+            var re2=xml.indexOf("</w:r>",pe2);
+            if(rs2s===-1||re2===-1)break;
+            xml=xml.substring(0,rs2s)+xml.substring(re2+6);
+            titlePos=xml.indexOf("履 歴 書");if(titlePos===-1)titlePos=xml.indexOf("履歴書");
+          }
+        }
         var phAt=-1;
         if(titlePos!==-1)phAt=xml.indexOf("</w:p>",titlePos);
         if(phAt===-1)phAt=xml.indexOf("</w:p>",xml.indexOf("<w:body>"));
