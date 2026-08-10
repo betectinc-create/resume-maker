@@ -8,6 +8,8 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -37,10 +39,16 @@ var googleProvider=new firebase.auth.GoogleAuthProvider();
     @media(min-width:640px){.header-logo{height:24px;}.header-title{font-size:14px;}}
     .lc-tight{font-size:11px!important;white-space:nowrap;}
     .print-resume{display:none;}
+    /* PDFはA4比率の固定サイズ枠に描画する（入力量でレイアウトが変わらない） */
+    .pdf-page{width:760px;height:1116px;overflow:hidden;background:#fff;}
+    #pdfHost{position:fixed;left:-20000px;top:0;display:none;z-index:-1;}
+    #pdfHost .print-resume{display:block!important;}
     @page{size:A4;margin:10mm;}
     @media print{
       .noprint{display:none!important;}
       header,footer{display:none!important;}
+      #pdfHost{position:static!important;left:auto!important;display:block!important;}
+      .pdf-page{height:auto!important;}
       .print-resume{display:block!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
       .print-resume,.print-resume *{overflow-wrap:anywhere;word-break:break-word;}
       .print-resume table{table-layout:fixed;width:100%;}
@@ -245,6 +253,8 @@ const eachCell=function(r,ci,fn){var i=0,n=0;while(true){var s=r.indexOf("<w:tc>
 const putCell=function(r,ci,body){return eachCell(r,ci,function(tc){var ps=tc.search(/<w:p[ >]/);if(ps===-1)return tc;var pe=tc.lastIndexOf("</w:p>")+6;return tc.substring(0,ps)+body+tc.substring(pe);});};
 const vMerge=function(r,ci,start){var tag=start?'<w:vMerge w:val="restart"/>':'<w:vMerge/>';return eachCell(r,ci,function(tc){if(tc.indexOf("<w:vMerge")!==-1)return tc.replace(/<w:vMerge[^>]*\/>/,tag);if(tc.indexOf("<w:gridSpan")!==-1)return tc.replace(/(<w:gridSpan[^>]*\/>)/,"$1"+tag);if(tc.indexOf("<w:tcW")!==-1)return tc.replace(/(<w:tcW[^>]*\/>)/,"$1"+tag);return tc;});};
 const putTbl=function(xml,marker,fn){var p=xml.indexOf(marker);if(p===-1)return xml;var st=xml.lastIndexOf("<w:tbl>",p);var en=xml.indexOf("</w:tbl>",p)+8;if(st===-1||en<st)return xml;return xml.substring(0,st)+fn(xml.substring(st,en))+xml.substring(en);};
+// 指定の幅×高さ(px)に収まる最大のフォントサイズ(px)を返す（PDF側のレイアウト固定用）
+const fitPx=function(text,wPx,hPx,base,min){var t=String(text||"");if(!t)return base;for(var s=base;s>min;s--){var per=Math.max(1,Math.floor(wPx/s));var ln=0;t.split(/\r?\n/).forEach(function(l){ln+=Math.max(1,Math.ceil(l.length/per));});if(ln*s*1.4<=hPx-6)return s;}return min;};
 // 指定の幅×高さ(twips)に収まる最大の文字サイズ(half-point)を返す
 const fitSz=function(text,wTw,hTw,base,min){var t=String(text||"");if(!t)return base;for(var sz=base;sz>min;sz-=2){var per=Math.max(1,Math.floor((wTw-200)/(sz*10)));var ln=0;t.split(/\r?\n/).forEach(function(s){ln+=Math.max(1,Math.ceil(s.length/per));});if(ln*Math.round(sz*11)<=hTw-80)return sz;}return min;};
 
@@ -303,6 +313,34 @@ const deleteFromCloud=async function(docId){
   try{await fbDb.collection("resumes").doc(docId).delete();
     setCloudSaves(cloudSaves.filter(function(d){return d.id!==docId;}));tt("削除しました");
   }catch(e){tt("削除エラー");}
+};
+// PDFはブラウザの印刷機能を使わず自前で生成する（日付・URL・タイトルのヘッダー/フッターが付かない）
+const generatePdf=async function(){
+  var H2C=window.html2canvas,JSP=window.jspdf&&window.jspdf.jsPDF;
+  var host=document.getElementById("pdfHost");
+  if(!H2C||!JSP||!host){
+    tt("PDF機能を読み込めませんでした。印刷画面を開きます");
+    try{window.print();}catch(er){tt("Safari/Chromeでお試しください");}
+    return;
+  }
+  setGenerating(true);
+  try{
+    host.style.display="block";
+    if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+    var pdf=new JSP({unit:"mm",format:"a4",orientation:"portrait"});
+    var ids=["pdfPage1","pdfPage2"];
+    for(var i=0;i<ids.length;i++){
+      var el=document.getElementById(ids[i]);
+      if(!el)continue;
+      var cv=await H2C(el,{scale:2,backgroundColor:"#ffffff",useCORS:true,logging:false,windowWidth:el.offsetWidth});
+      if(i>0)pdf.addPage();
+      pdf.addImage(cv.toDataURL("image/jpeg",0.92),"JPEG",12,12,186,273);
+    }
+    pdf.save("履歴書_"+(f.name||"無題")+".pdf");
+    tt("PDFを保存しました");
+  }catch(er){tt("PDF作成エラー: "+er.message);}
+  host.style.display="none";
+  setGenerating(false);
 };
 const generateDocx=async function(){
   if(!window.JSZip){tt("テンプレート読み込み中...");return;}
@@ -479,6 +517,9 @@ eR.forEach(function(e){hist.push(e);});
 hist.push({y:"",m:"",t:"職歴",c:true});
 wR.forEach(function(w){hist.push(w);});
 if(eR.length||wR.length)hist.push({y:"",m:"",t:"以上",r:true});
+// 行数を固定して、入力量にかかわらず1ページ目の高さを一定に保つ
+var histFix=hist.slice(0,19);while(histFix.length<19)histFix.push({y:"",m:"",t:""});
+var qFix=qR.slice(0,5);while(qFix.length<5)qFix.push({y:"",m:"",t:""});
 var d1=dn(1),d2=dn(2),d3=dn(3),d4=dn(4);
 var th1=((f.techo1||"")+(dg(1)?(" "+dg(1)):"")).trim();
 var th2=((f.techo2||"")+(dg(2)?(" "+dg(2)):"")).trim();
@@ -495,6 +536,7 @@ var hd={border:IN,padding:"3px",background:"#e6e6e6",fontWeight:700,fontSize:11,
 var now=new Date();
 var photo=f.photoPreview?<img src={f.photoPreview} style={{width:96,height:128,objectFit:"cover"}}/>:<div style={{width:96,height:128,border:"1px dashed #aaa",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#999",fontSize:8,textAlign:"center",margin:"0 auto",lineHeight:1.5}}>写真貼付欄<br/>縦40mm<br/>横30mm</div>;
 return <div className="print-resume" style={{color:"#111",fontFamily:"'Noto Sans JP',sans-serif"}}>
+<div className="pdf-page" id="pdfPage1">
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:6}}>
 <div style={{fontSize:24,fontWeight:900,letterSpacing:12}}>履 歴 書</div>
 <div style={{fontSize:10}}>{now.getFullYear()}年{now.getMonth()+1}月{now.getDate()}日 現在</div>
@@ -512,20 +554,21 @@ return <div className="print-resume" style={{color:"#111",fontFamily:"'Noto Sans
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"11%"}}/><col style={{width:"9%"}}/><col/></colgroup><tbody>
 <tr><td style={hd}>年</td><td style={hd}>月</td><td style={hd}>学歴・職歴</td></tr>
-{hist.map(function(r,i){return <tr key={"h"+i}><td style={{...valC,height:23}}>{r.y}</td><td style={{...valC,height:23}}>{r.m}</td><td style={r.c?{...val,textAlign:"center",fontWeight:700,background:"#f7f7f7",verticalAlign:"middle"}:(r.r?{...val,textAlign:"right",fontWeight:700}:{...val,verticalAlign:"middle"})}>{r.t}</td></tr>;})}
+{histFix.map(function(r,i){return <tr key={"h"+i}><td style={{...valC,height:30}}>{r.y}</td><td style={{...valC,height:30}}>{r.m}</td><td style={r.c?{...val,textAlign:"center",fontWeight:700,background:"#f7f7f7",verticalAlign:"middle",height:30}:(r.r?{...val,textAlign:"right",fontWeight:700,height:30}:{...val,verticalAlign:"middle",height:30})}>{r.t}</td></tr>;})}
 </tbody></table>
-<div style={{breakBefore:"page",pageBreakBefore:"always"}}>
+</div>
+<div className="pdf-page" id="pdfPage2" style={{breakBefore:"page",pageBreakBefore:"always"}}>
 <table style={tbl}><colgroup><col style={{width:"11%"}}/><col style={{width:"9%"}}/><col/></colgroup><tbody>
 <tr><td style={hd}>年</td><td style={hd}>月</td><td style={hd}>免許・資格</td></tr>
-{qR.length>0?qR.map(function(r,i){return <tr key={"q"+i}><td style={{...valC,height:23}}>{r.y}</td><td style={{...valC,height:23}}>{r.m}</td><td style={{...val,verticalAlign:"middle"}}>{r.t}</td></tr>;}):<tr><td style={{...valC,height:23}}></td><td style={valC}></td><td style={val}></td></tr>}
+{qFix.map(function(r,i){return <tr key={"q"+i}><td style={{...valC,height:30}}>{r.y}</td><td style={{...valC,height:30}}>{r.m}</td><td style={{...val,verticalAlign:"middle",height:30}}>{r.t}</td></tr>;})}
 </tbody></table>
-{f.motivation&&<table style={tbl}><tbody>
+{<table style={tbl}><tbody>
 <tr><td style={hd}>志望動機</td></tr>
-<tr><td style={{...val,height:64,whiteSpace:"pre-wrap"}}>{f.motivation}</td></tr>
+<tr><td style={{...val,height:100,whiteSpace:"pre-wrap",overflow:"hidden",fontSize:fitPx(f.motivation,712,100,11,7)}}>{f.motivation}</td></tr>
 </tbody></table>}
 <table style={tbl}><tbody>
 <tr><td style={hd}>自己PR</td></tr>
-<tr><td style={{...val,height:84,whiteSpace:"pre-wrap"}}>{f.selfPR}</td></tr>
+<tr><td style={{...val,height:120,whiteSpace:"pre-wrap",overflow:"hidden",fontSize:fitPx(f.selfPR,712,120,11,7)}}>{f.selfPR}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
 <tr><td style={hd} colSpan={4}>障がいについて</td></tr>
@@ -534,8 +577,8 @@ return <div className="print-resume" style={{color:"#111",fontFamily:"'Noto Sans
 <tr><td style={lab}>手帳①</td><td style={val}>{th1}</td><td style={lab}>手帳②</td><td style={val}>{th2}</td></tr>
 <tr><td style={lab}>手帳③</td><td style={val}>{th3}</td><td style={lab}></td><td style={val}></td></tr>
 <tr><td style={lab}>通院</td><td style={val}>{visitV}</td><td style={lab}>服薬</td><td style={val}>{medV}</td></tr>
-<tr><td style={lab}>現状</td><td style={{...val,height:40,whiteSpace:"pre-wrap"}} colSpan={3}>{f.chars}</td></tr>
-<tr><td style={lab}>必要な配慮</td><td style={{...val,height:48,whiteSpace:"pre-wrap"}} colSpan={3}>{f.accoms}</td></tr>
+<tr><td style={lab}>現状</td><td style={{...val,height:90,whiteSpace:"pre-wrap",overflow:"hidden",fontSize:fitPx(f.chars,600,90,11,7)}} colSpan={3}>{f.chars}</td></tr>
+<tr><td style={lab}>必要な配慮</td><td style={{...val,height:60,whiteSpace:"pre-wrap",overflow:"hidden",fontSize:fitPx(f.accoms,600,60,11,7)}} colSpan={3}>{f.accoms}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"16%"}}/><col/><col style={{width:"24%"}}/><col/></colgroup><tbody>
 <tr><td style={lab}>通勤時間</td><td style={valC}>{(f.commuteH||f.commuteM)?("約 "+(f.commuteH||0)+" 時間 "+(f.commuteM||0)+" 分"):""}</td><td style={lab}>扶養家族数（配偶者を除く）</td><td style={valC}>{f.familyCount!==""?f.familyCount+" 人":""}</td></tr>
@@ -576,17 +619,8 @@ return <div className="space-y-4">
 <button onClick={generateDocx} disabled={generating||!zipReady} className="flex-1 text-white px-6 py-3.5 rounded-xl text-sm font-bold shadow-md disabled:opacity-40 transition-all" style={{background:O[500]}}>
 {generating?"生成中...":"📝 Word形式でダウンロード"}
 </button>
-<button id="pdfBtn" onClick={function(){
-  if(typeof window.print!=="function"){tt("この画面では保存できません。Safari/Chromeで開いてください");return;}
-  var ot=document.title;
-  var rs=function(){document.title=ot;window.removeEventListener("afterprint",rs);};
-  window.addEventListener("afterprint",rs);
-  document.title="";
-  // iOSのSafariはタップ直後でないとprint()を無視するため、setTimeoutを挟まずその場で呼ぶ
-  try{window.print();}catch(er){tt("印刷画面を開けませんでした。Safari/Chromeでお試しください");rs();return;}
-  setTimeout(rs,60000);
-}} className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold transition-all" style={{background:"white",color:O[500],border:"2px solid "+O[500]}}>
-📄 印刷 / PDFで保存
+<button id="pdfBtn" onClick={generatePdf} disabled={generating} className="flex-1 px-6 py-3.5 rounded-xl text-sm font-bold transition-all disabled:opacity-40" style={{background:"white",color:O[500],border:"2px solid "+O[500]}}>
+{generating?"作成中...":"📄 PDFでダウンロード"}
 </button>
 </div>
 {/Line\/|FBAN|FBAV|Instagram|MicroMessenger|TikTok/i.test(navigator.userAgent)&&<p className="text-xs mt-2 font-bold" style={{color:"#E87830"}}>※ LINEなどアプリ内のブラウザではPDF保存が動きません。右上のメニューから「Safariで開く」「ブラウザで開く」を選んでからお試しください</p>}
@@ -731,7 +765,7 @@ Googleでログイン</button>
 <button onClick={function(){document.getElementById("ppModal").style.display="none";}} style={{marginTop:16,padding:"8px 24px",background:"#3B3228",color:"white",border:"none",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:700}}>閉じる</button>
 </div>
 </div>
-{PrintResume()}
+<div id="pdfHost">{PrintResume()}</div>
 </div>;}
 
 ReactDOM.render(React.createElement(App),document.getElementById("root"));
