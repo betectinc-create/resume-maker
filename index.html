@@ -87,6 +87,10 @@ const INIT={name:"",furigana:"",furiganaAddr:"",furiganaContact:"",birthYear:"",
 
 function App(){
 const[pg,setPg]=useState("form");const[step,setStep]=useState(0);const[f,setF]=useState({...INIT});const[saves,setSaves]=useState([null,null,null]);const[toast,setToast]=useState("");const[zipReady,setZipReady]=useState(false);const[generating,setGenerating]=useState(false);const[user,setUser]=useState(null);const[cloudSaves,setCloudSaves]=useState([]);const[loadingAuth,setLoadingAuth]=useState(true);
+const[agreed,setAgreed]=useState(function(){try{return localStorage.getItem("rmTermsAgreed")===TERMS_VER;}catch(e){return false;}});
+const[termsOpen,setTermsOpen]=useState(false);
+const[termsRead,setTermsRead]=useState(false);
+const agree=function(){try{localStorage.setItem("rmTermsAgreed",TERMS_VER);localStorage.setItem("rmTermsAgreedAt",new Date().toISOString());}catch(e){}setAgreed(true);};
 useEffect(()=>{try{const r=localStorage.getItem("rs5");if(r)setSaves(JSON.parse(r));}catch{}},[]);
 
 const tt=m=>{setToast(m);setTimeout(()=>setToast(""),2200);};
@@ -241,6 +245,52 @@ useEffect(function(){
   return function(){unsub();};
 },[]);
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
+// ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
+const TERMS_VER="2026-08-10";
+const TERMS_DOC=[
+{h1:"履歴書簡単メーカー 利用規約"},
+{p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
+{h2:"第1条（適用）"},
+{p:"本規約は、ユーザーと当社との間の本サービスの利用に関わる一切の関係に適用されるものとします。"},
+{h2:"第2条（利用環境およびアカウント管理）"},
+{ol:["ユーザーは、自己の責任と負担において、本サービスを利用するために必要な通信機器、ソフトウェア、通信回線等の環境を準備するものとします。","外部サービス（Google等）のアカウント（以下「外部アカウント」といいます。）を利用して本サービスにログインする場合、ユーザーは自己の責任において当該外部アカウントを適切に管理するものとします。","外部アカウントの管理不十分、使用上の過誤、第三者の使用等によって生じた損害の責任はユーザーが負うものとし、当社は一切の責任を負いません。","ユーザーが未成年者、成年被後見人、被保佐人または被補助人のいずれかである場合は、法定代理人、後見人、保佐人または補助人の同意を得た上で本サービスを利用するものとします。"]},
+{h2:"第3条（禁止事項）"},
+{p:"ユーザーは、本サービスの利用にあたり、以下の行為をしてはならないものとします。"},
+{ul:["法令または公序良俗に反する行為","他人の情報、または虚偽の情報を入力して履歴書を作成する行為","本サービスのサーバーやネットワークの機能を破壊したり、妨害したりする行為","本サービスを逆アセンブル、逆コンパイル、リバースエンジニアリングする行為、またはその他本サービスのソースコードを解析する行為","その他、当社が不適切と判断する行為"]},
+{h2:"第4条（本サービスの提供の停止等）"},
+{p:"当社は、以下のいずれかの事由があると判断した場合、ユーザーに事前に通知することなく本サービスの全部または一部の提供を停止または中断することができるものとします。"},
+{ul:["本サービスに係るコンピュータシステムの保守点検または更新を行う場合","地震、落雷、火災、停電または天災などの不可抗力により、本サービスの提供が困難となった場合","その他、当社が本サービスの提供が困難と判断した場合"]},
+{h2:"第5条（免責事項）"},
+{ol:["当社は、本サービスに事実上または法律上の瑕疵（安全性、信頼性、正確性、完全性、有効性、特定の目的への適合性、セキュリティなどに関する欠陥、エラーやバグ、権利侵害などを含みます。）がないことを明示的にも黙示的にも保証しておりません。","当社は、本サービスの利用、または本サービスを利用できなかったことによりユーザーに生じたあらゆる損害（データの消失、作成した履歴書の不備による就職・転職活動における不利益、システムエラー等を含みますが、これらに限られません）について、一切の責任を負いません。","前項の規定にかかわらず、当社とユーザーとの間の契約が消費者契約法に定める消費者契約となる場合、本規約のうち当社の責任を完全に免責する規定は適用されません。この場合、当社は、当社の過失（故意または重大な過失を除きます。）による債務不履行または不法行為によりユーザーに生じた損害のうち、現実に発生した直接かつ通常の損害に限り、賠償責任を負うものとします。"]},
+{h2:"第6条（サービス内容の変更・終了）"},
+{p:"当社は、ユーザーに通知することなく、本サービスの内容を変更し、または本サービスの提供を中止・終了することができるものとし、これによってユーザーに生じた損害について一切の責任を負いません。"},
+{h2:"第7条（規約の変更）"},
+{p:"当社は、必要と判断した場合には、ユーザーに通知することなくいつでも本規約を変更することができるものとします。なお、本規約の変更後、ユーザーが本サービスを利用したときは、ユーザーは変更後の規約に同意したものとみなします。"},
+{h1:"プライバシーポリシー"},
+{p:"当社は、本サービスにおいて取得するユーザーの個人情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。"},
+{h2:"第1条（取得する情報および利用目的）"},
+{ol:["当社は、本サービスにおいて以下の情報を取得し、それぞれの目的のために利用します。"]},
+{ul:["Googleログイン時に取得する情報（ユーザーID、メールアドレス等）","利用目的：本サービスにおける履歴書データの保存、同期、ユーザー認証、および当社が運営する就労移行支援事業等に関するご案内（公式LINE等を通じた情報配信を含みます）のため","ユーザーが入力した履歴書データ（氏名、生年月日、職歴、および本人希望記入欄等に記載された障害の状況や病歴等の要配慮個人情報を含みます）","利用目的：履歴書のPDF出力機能およびデータ保存機能を提供するため"]},
+{p:"2. ユーザーが本サービスにおいて、自身の障害、病歴等の要配慮個人情報を入力した場合、当社が本サービスの提供（データの保存・暗号化）を目的として、当該情報を取得することに同意したものとみなします。"},
+{h2:"第2条（データの暗号化および安全管理）"},
+{ol:["ユーザーが本サービスに入力した履歴書データは、技術的に暗号化された状態で保存されます。","当社は、ユーザーの同意がある場合、または法令に基づく場合を除き、暗号化されたユーザーの履歴書データを復号して閲覧することはありません。"]},
+{h2:"第3条（個人情報の第三者提供）"},
+{p:"当社は、個人情報保護法その他の法令に基づき開示が認められる場合を除き、ユーザーの同意を得ることなく、第三者に個人情報を提供することはありません。"},
+{h2:"お問い合わせ先（運営者）"},
+{p:"株式会社mooble"},
+{p:"〒530-0002 大阪市北区曽根崎新地２丁目３番１３号 若杉大阪駅前ビル801"},
+{p:"電話：0120-270-330（平日9:00〜16:30）"},
+{p:"メール：privacy@connect-syurou.com"}
+];
+const TermsBody=function(){return <div style={{fontSize:12,lineHeight:1.85,color:"#3B3228"}}>
+{TERMS_DOC.map(function(b,i){
+  if(b.h1)return <h2 key={i} style={{fontSize:16,fontWeight:900,margin:i===0?"0 0 12px":"28px 0 12px",paddingBottom:6,borderBottom:"2px solid #E87830"}}>{b.h1}</h2>;
+  if(b.h2)return <h3 key={i} style={{fontSize:13,fontWeight:800,margin:"18px 0 6px"}}>{b.h2}</h3>;
+  if(b.ol)return <ol key={i} style={{margin:"0 0 8px",paddingLeft:22}}>{b.ol.map(function(t,j){return <li key={j} style={{marginBottom:4}}>{t}</li>;})}</ol>;
+  if(b.ul)return <ul key={i} style={{margin:"0 0 8px",paddingLeft:22,listStyle:"disc"}}>{b.ul.map(function(t,j){return <li key={j} style={{marginBottom:4}}>{t}</li>;})}</ul>;
+  return <p key={i} style={{margin:"0 0 8px"}}>{b.p}</p>;
+})}
+</div>;};
 const rNth=function(str,old,rep,n){var idx=-1;for(var i=0;i<=n;i++){idx=str.indexOf(old,idx+1);if(idx===-1)return str;}return str.substring(0,idx)+rep+str.substring(idx+old.length);};
 const insEP=function(xml,marker,n,text){text=xesc(text);var pos=xml.indexOf(marker);if(pos===-1)return xml;var emp="</w:pPr></w:p>";var search=pos;for(var i=0;i<=n;i++){var p=xml.indexOf(emp,search);if(p===-1)return xml;if(i<n){search=p+emp.length;}else{var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+text+'</w:t></w:r>';return xml.substring(0,p+"</w:pPr>".length)+rn+xml.substring(p+"</w:pPr>".length);}}return xml;};
 const insAfter=function(xml,marker,text){var pos=xml.indexOf(marker);if(pos===-1)return xml;var ep=xml.indexOf("</w:pPr></w:p>",pos);if(ep===-1)return xml;var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+xesc(text)+'</w:t></w:r>';return xml.substring(0,ep+"</w:pPr>".length)+rn+xml.substring(ep+"</w:pPr>".length);};
@@ -666,7 +716,31 @@ const SavePg=()=>
 <button onClick={function(){setPg("form");}} className="bg-white text-gray-600 px-6 py-3 rounded-xl text-sm font-bold border-2 border-gray-200">← 戻る</button>
 </div>
 
+// 同意していない場合は本文を出さず、同意画面だけを表示する
+if(!agreed)return <div className="min-h-screen" style={{background:"#F5F5F4",fontFamily:"'Noto Sans JP',sans-serif",padding:"24px 12px"}}>
+<div style={{maxWidth:720,margin:"0 auto",background:"white",borderRadius:16,boxShadow:"0 2px 12px rgba(0,0,0,0.08)",overflow:"hidden"}}>
+<div style={{padding:"20px 24px",borderBottom:"1px solid #EEE"}}>
+<p style={{fontSize:18,fontWeight:900,color:"#3B3228",margin:0}}>ご利用前に必ずお読みください</p>
+<p style={{fontSize:12,color:"#6B6259",margin:"6px 0 0"}}>本サービスのご利用には、利用規約およびプライバシーポリシーへの同意が必要です。障害の状況や病歴等の要配慮個人情報を入力される場合があるため、取り扱いについてもご確認ください。</p>
+</div>
+<div onScroll={function(e){var el=e.target;if(el.scrollTop+el.clientHeight>=el.scrollHeight-40)setTermsRead(true);}} style={{maxHeight:"52vh",overflow:"auto",padding:"16px 24px",background:"#FCFBF9"}}>
+<TermsBody/>
+</div>
+<div style={{padding:"16px 24px"}}>
+{!termsRead&&<p style={{fontSize:11,color:"#B4483A",margin:"0 0 8px"}}>※ 最後までスクロールしてお読みください</p>}
+<button onClick={agree} disabled={!termsRead} className="disabled:opacity-40" style={{width:"100%",padding:"14px",borderRadius:12,border:"none",background:"#E87830",color:"white",fontSize:14,fontWeight:900,cursor:termsRead?"pointer":"not-allowed"}}>同意して利用を開始する</button>
+<p style={{fontSize:11,color:"#9C948B",textAlign:"center",margin:"10px 0 0"}}>同意いただけない場合、本サービスはご利用いただけません。</p>
+</div>
+</div>
+</div>;
+
 return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'Noto Sans JP',sans-serif"}}>
+{termsOpen&&<div onClick={function(e){if(e.target===e.currentTarget)setTermsOpen(false);}} className="noprint" style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+<div style={{background:"white",borderRadius:16,maxWidth:720,width:"100%",maxHeight:"85vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+<div style={{padding:"16px 20px",overflow:"auto"}}><TermsBody/></div>
+<div style={{padding:12,borderTop:"1px solid #EEE"}}><button onClick={function(){setTermsOpen(false);}} style={{width:"100%",padding:"12px",borderRadius:12,border:"none",background:"#3B3228",color:"white",fontWeight:700,cursor:"pointer"}}>閉じる</button></div>
+</div>
+</div>}
 <header className="noprint" style={{position:"sticky",top:0,zIndex:100,background:"white",borderBottom:"2px solid #E87830",marginBottom:24,overflow:"hidden"}}>
 <div style={{padding:"8px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"nowrap"}}>
 <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0,flex:1,overflow:"hidden"}}>
@@ -736,47 +810,7 @@ Googleでログイン</button>
 
 <div className="text-center pb-8 noprint" style={{borderTop:"2px solid #E87830",paddingTop:24,marginTop:32}}>
 <p className="text-xs mb-2" style={{color:"#C0B5A5"}}>© CONNECT こねくと</p>
-<button onClick={function(){document.getElementById("ppModal").style.display="flex";}} className="text-xs underline" style={{color:"#C0B5A5",background:"none",border:"none",cursor:"pointer"}}>プライバシーポリシー</button>
-</div>
-<div id="ppModal" style={{display:"none",position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",zIndex:9999,alignItems:"center",justifyContent:"center"}} onClick={function(e){if(e.target.id==="ppModal")e.target.style.display="none";}}>
-<div style={{background:"white",borderRadius:16,padding:24,maxWidth:500,maxHeight:"80vh",overflow:"auto",margin:16}}>
-<h2 style={{fontSize:18,fontWeight:900,marginBottom:12}}>個人情報の取り扱いについて</h2>
-<div style={{fontSize:12,lineHeight:1.8,color:"#555"}}>
-<p style={{fontWeight:700,fontSize:13,marginBottom:8}}>CONNECTにおける個人情報の取り扱いについて</p>
-<p style={{marginBottom:8}}>就労移行支援事業所CONNECTこねくと（以下「当社」）は、以下のとおり個人情報保護方針を定め、個人情報保護の仕組みを構築し、全従業員に個人情報保護の重要性の認識と取組みを徹底させることにより、個人情報の保護を推進致します。</p>
-<p style={{fontWeight:700,marginTop:12}}>１．個人情報の適切な取得、管理、利用、開示委託、第三者提供</p>
-<p>(1) 個人情報の取得にあたり、利用目的を明示した上で必要な情報を取得し、利用目的を通知または公表し、その範囲で利用します。</p>
-<p>(2) 個人情報の取得・利用・第三者提供にあたり、本人または家族の同意を得ることとします。</p>
-<p>(3) 当社が個人情報の取扱いを外部に委託する場合、業務の委託にあたり、個人情報保護法とガイドラインの趣旨を理解し、これに沿った対応を行う事業者と機密保持を盛り込んだ委託契約を締結した上で、情報提供し、委託先への適切な監督を行います。</p>
-<p>(4) 当社では個人情報を以下の目的で利用いたします。</p>
-<p style={{marginLeft:12}}>・お問い合わせへの対応および、説明会や見学の日程等の調整のため</p>
-<p style={{marginLeft:12}}>・資料送付等サービスおよびイベント等のご案内のため</p>
-<p style={{marginLeft:12}}>・サービス提供および運営のため</p>
-<p style={{marginLeft:12}}>・データ分析など各種分析的業務のため</p>
-<p>(5) 第三者への提供はご本人の同意を得て行う他、以下の場合に提供を行います。</p>
-<p style={{marginLeft:12}}>・法令に基づく場合</p>
-<p style={{marginLeft:12}}>・人の生命、身体又は財産の保護のために必要がある場合であって、本人の同意を得ることが困難であるとき</p>
-<p style={{marginLeft:12}}>・公衆衛生の向上又は児童の健全な育成の推進のために特に必要がある場合であって、本人の同意を得ることが困難であるとき</p>
-<p style={{marginLeft:12}}>・国の機関若しくは地方公共団体又はその委託を受けた者が法令の定める事務を遂行することに対して協力する必要がある場合であって、本人の同意を得ることにより当該事務の遂行に支障を及ぼすおそれがあるとき</p>
-<p style={{marginLeft:12}}>・その他提供目的及び提供先を明示し、同意を得て提供する場合</p>
-<p style={{marginTop:8}}>個人データを第三者に提供したとき、あるいは第三者から提供をうけたとき、提供・取得経緯等の確認を行うとともに、提供先・提供者の氏名等、法令で定める事項を記録し、保管いたします。</p>
-<p style={{fontWeight:700,marginTop:12}}>２．個人情報の安全性確保の措置</p>
-<p>(1) 当社は、個人情報保護に関する規程類を整備し、必要な教育を継続的に行います。その上で個人情報保護の取り組みを全役職員へと周知徹底します。</p>
-<p>(2) 個人情報への不正アクセス、個人情報の漏洩、減質、または棄損の予防及び是正のため、当社内において規程を整備し安全対策につとめます。</p>
-<p>(3) クラウドに保存される履歴書データはAES-256で暗号化され、ご本人以外（当社のサーバー管理者を含む）は閲覧できません。</p>
-<p style={{fontWeight:700,marginTop:12}}>３．個人情報の開示、訂正、利用停止、削除等への対応</p>
-<p>当社は、本人が自己の情報について、開示、訂正、更新、利用停止、削除などの申し出がある場合には速やかに対応します。</p>
-<p style={{fontWeight:700,marginTop:12}}>４．苦情の処理</p>
-<p>当社は、個人情報取り扱いに関する苦情に対し、適切かつ迅速な処理に努めます。</p>
-<p style={{fontWeight:700,marginTop:12}}>お問い合わせ先：</p>
-<p>株式会社mooble</p>
-<p>〒530-0002 大阪市北区曽根崎新地２丁目３番１３号 若杉大阪駅前ビル801</p>
-<p>個人情報に関する受付窓口</p>
-<p>電話：0120-270-330（平日9:00～16:30）</p>
-<p>メール：privacy@connect-syurou.com</p>
-</div>
-<button onClick={function(){document.getElementById("ppModal").style.display="none";}} style={{marginTop:16,padding:"8px 24px",background:"#3B3228",color:"white",border:"none",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:700}}>閉じる</button>
-</div>
+<button onClick={function(){setTermsOpen(true);}} className="text-xs underline" style={{color:"#C0B5A5",background:"none",border:"none",cursor:"pointer"}}>利用規約・プライバシーポリシー</button>
 </div>
 <div id="pdfHost">{PrintResume()}</div>
 </div>;}
