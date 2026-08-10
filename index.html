@@ -245,8 +245,11 @@ const rNth=function(str,old,rep,n){var idx=-1;for(var i=0;i<=n;i++){idx=str.inde
 const insEP=function(xml,marker,n,text){text=xesc(text);var pos=xml.indexOf(marker);if(pos===-1)return xml;var emp="</w:pPr></w:p>";var search=pos;for(var i=0;i<=n;i++){var p=xml.indexOf(emp,search);if(p===-1)return xml;if(i<n){search=p+emp.length;}else{var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+text+'</w:t></w:r>';return xml.substring(0,p+"</w:pPr>".length)+rn+xml.substring(p+"</w:pPr>".length);}}return xml;};
 const insAfter=function(xml,marker,text){var pos=xml.indexOf(marker);if(pos===-1)return xml;var ep=xml.indexOf("</w:pPr></w:p>",pos);if(ep===-1)return xml;var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+xesc(text)+'</w:t></w:r>';return xml.substring(0,ep+"</w:pPr>".length)+rn+xml.substring(ep+"</w:pPr>".length);};
 // ===== DOCXレイアウト固定用ヘルパー（入力量にかかわらず行高・ページ構成を一定に保つ） =====
-const xrun=function(text,sz,bold){var ps=String(text==null?"":text).split(/\r?\n/);var rp='<w:rPr>'+(bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr>';var o="";for(var i=0;i<ps.length;i++){if(i>0)o+='<w:r>'+rp+'<w:br/></w:r>';if(ps[i]!=="")o+='<w:r>'+rp+'<w:t xml:space="preserve">'+xesc(ps[i])+'</w:t></w:r>';}return o;};
-const xpara=function(text,sz,opt){var o=opt||{};var ln=o.line||Math.round(sz*11);var pr='<w:pPr><w:snapToGrid w:val="0"/><w:spacing w:before="0" w:after="0" w:line="'+ln+'" w:lineRule="exact"/>'+(o.jc?'<w:jc w:val="'+o.jc+'"/>':'')+'<w:rPr>'+(o.bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr></w:pPr>';return '<w:p>'+pr+xrun(text,sz,o.bold)+'</w:p>';};
+// フォントは明示指定する（未指定だと環境の既定フォントに依存し、Windowsで行が詰まって崩れる）
+const WFONT='<w:rFonts w:ascii="ＭＳ 明朝" w:eastAsia="ＭＳ 明朝" w:hAnsi="ＭＳ 明朝" w:cs="ＭＳ 明朝" w:hint="eastAsia"/>';
+const LINEF=12.5; // 行送り＝文字サイズの125%。これ未満だとWindowsのWordで文字の上下が欠ける
+const xrun=function(text,sz,bold){var ps=String(text==null?"":text).split(/\r?\n/);var rp='<w:rPr>'+WFONT+(bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr>';var o="";for(var i=0;i<ps.length;i++){if(i>0)o+='<w:r>'+rp+'<w:br/></w:r>';if(ps[i]!=="")o+='<w:r>'+rp+'<w:t xml:space="preserve">'+xesc(ps[i])+'</w:t></w:r>';}return o;};
+const xpara=function(text,sz,opt){var o=opt||{};var ln=o.line||Math.round(sz*LINEF);var pr='<w:pPr><w:widowControl w:val="0"/><w:wordWrap w:val="0"/><w:snapToGrid w:val="0"/><w:spacing w:before="0" w:after="0" w:line="'+ln+'" w:lineRule="exact"/><w:jc w:val="'+(o.jc||"left")+'"/><w:rPr>'+WFONT+(o.bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr></w:pPr>';return '<w:p>'+pr+xrun(text,sz,o.bold)+'</w:p>';};
 const rowsOf=function(t){return t.match(/<w:tr[ >][\s\S]*?<\/w:tr>/g)||[];};
 const setH=function(r,h){var tag='<w:trHeight w:hRule="exact" w:val="'+h+'"/>';if(/<w:trHeight[^>]*\/>/.test(r))return r.replace(/<w:trHeight[^>]*\/>/,tag);if(r.indexOf("<w:trPr>")!==-1)return r.replace("<w:trPr>","<w:trPr>"+tag);return r.replace(/^(<w:tr[^>]*>)/,"$1<w:trPr>"+tag+"</w:trPr>");};
 const eachCell=function(r,ci,fn){var i=0,n=0;while(true){var s=r.indexOf("<w:tc>",i);if(s===-1)return r;var e=r.indexOf("</w:tc>",s)+7;if(n===ci)return r.substring(0,s)+fn(r.substring(s,e))+r.substring(e);n++;i=e;}};
@@ -256,7 +259,7 @@ const putTbl=function(xml,marker,fn){var p=xml.indexOf(marker);if(p===-1)return 
 // 指定の幅×高さ(px)に収まる最大のフォントサイズ(px)を返す（PDF側のレイアウト固定用）
 const fitPx=function(text,wPx,hPx,base,min){var t=String(text||"");if(!t)return base;for(var s=base;s>min;s--){var per=Math.max(1,Math.floor(wPx/s));var ln=0;t.split(/\r?\n/).forEach(function(l){ln+=Math.max(1,Math.ceil(l.length/per));});if(ln*s*1.4<=hPx-6)return s;}return min;};
 // 指定の幅×高さ(twips)に収まる最大の文字サイズ(half-point)を返す
-const fitSz=function(text,wTw,hTw,base,min){var t=String(text||"");if(!t)return base;for(var sz=base;sz>min;sz-=2){var per=Math.max(1,Math.floor((wTw-200)/(sz*10)));var ln=0;t.split(/\r?\n/).forEach(function(s){ln+=Math.max(1,Math.ceil(s.length/per));});if(ln*Math.round(sz*11)<=hTw-80)return sz;}return min;};
+const fitSz=function(text,wTw,hTw,base,min){var t=String(text||"");if(!t)return base;for(var sz=base;sz>min;sz-=2){var per=Math.max(1,Math.floor((wTw-260)/(sz*10)));var ln=0;t.split(/\r?\n/).forEach(function(s){ln+=Math.max(1,Math.ceil(s.length/per));});if(ln*Math.round(sz*LINEF)<=hTw-120)return sz;}return min;};
 
 const doLogin=async function(){try{await fbAuth.signInWithPopup(googleProvider);}catch(e){if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/unauthorized-domain"||e.code==="auth/operation-not-supported-in-this-environment")){try{await fbAuth.signInWithRedirect(googleProvider);}catch(re){tt("ログインエラー: "+(re.message||re.code));}}else{tt("ログインエラー: "+(e.message||e.code));}}};
 const doLogout=function(){fbAuth.signOut();};
@@ -407,13 +410,13 @@ const generateDocx=async function(){
     // 自己PR＋志望動機：行を縦結合して1つの枠にし、文字量に応じて自動縮小（枠は伸びない）
     xml=putTbl(xml,"自己",function(t){
       var rs=rowsOf(t);if(rs.length<7)return t;
-      // 総高3090を 見出し366／自己PR1200／志望動機見出し240／志望動機1284 に配分
-      var r1=putCell(setH(vMerge(rs[1],0,true),400),0,xpara(f.selfPR||"",fitSz(f.selfPR,8702,1200,18,12),{}));
+      // 見出し366／自己PR1800／志望動機見出し240／志望動機1800（400字でも8pt程度を保てる高さ）
+      var r1=putCell(setH(vMerge(rs[1],0,true),600),0,xpara(f.selfPR||"",fitSz(f.selfPR,8702,1800,18,12),{}));
       var lab=putCell(setH(rs[4],240),0,xpara("志望動機",18,{bold:true}));
-      var r5=putCell(setH(vMerge(rs[5],0,true),642),0,xpara(f.motivation||"",fitSz(f.motivation,8702,1284,18,12),{}));
+      var r5=putCell(setH(vMerge(rs[5],0,true),900),0,xpara(f.motivation||"",fitSz(f.motivation,8702,1800,18,12),{}));
       return t.substring(0,t.indexOf(rs[0]))+setH(rs[0],366)+r1
-        +setH(vMerge(rs[2],0,false),400)+setH(vMerge(rs[3],0,false),400)
-        +lab+r5+setH(vMerge(rs[6],0,false),642)+"</w:tbl>";
+        +setH(vMerge(rs[2],0,false),600)+setH(vMerge(rs[3],0,false),600)
+        +lab+r5+setH(vMerge(rs[6],0,false),900)+"</w:tbl>";
     });
     var d1=f.dis1name==="その他"?f.dis1other:f.dis1name;
     var d2=f.dis2name==="その他"?f.dis2other:f.dis2name;
