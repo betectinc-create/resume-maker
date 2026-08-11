@@ -299,7 +299,12 @@ const insAfter=function(xml,marker,text){var pos=xml.indexOf(marker);if(pos===-1
 const WFONT='<w:rFonts w:ascii="ＭＳ 明朝" w:eastAsia="ＭＳ 明朝" w:hAnsi="ＭＳ 明朝" w:cs="ＭＳ 明朝" w:hint="eastAsia"/>';
 const LINEF=12.5; // 行送り＝文字サイズの125%。これ未満だとWindowsのWordで文字の上下が欠ける
 const xrun=function(text,sz,bold){var ps=String(text==null?"":text).split(/\r?\n/);var rp='<w:rPr>'+WFONT+(bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr>';var o="";for(var i=0;i<ps.length;i++){if(i>0)o+='<w:r>'+rp+'<w:br/></w:r>';if(ps[i]!=="")o+='<w:r>'+rp+'<w:t xml:space="preserve">'+xesc(ps[i])+'</w:t></w:r>';}return o;};
-const xpara=function(text,sz,opt){var o=opt||{};var ln=o.line||Math.round(sz*LINEF);var pr='<w:pPr><w:widowControl w:val="0"/><w:wordWrap w:val="0"/><w:snapToGrid w:val="0"/><w:spacing w:before="0" w:after="0" w:line="'+ln+'" w:lineRule="exact"/><w:jc w:val="'+(o.jc||"left")+'"/><w:rPr>'+WFONT+(o.bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr></w:pPr>';return '<w:p>'+pr+xrun(text,sz,o.bold)+'</w:p>';};
+// o.auto=true のときは行送りを既定のまま（＝ラベル側の段落と同じ組み方）にして、上下位置を揃える。
+// 行数を計算で押さえたい長文欄だけ行送りを固定する。
+const xpara=function(text,sz,opt){var o=opt||{};
+  var sp=o.auto?'':'<w:snapToGrid w:val="0"/><w:spacing w:before="0" w:after="0" w:line="'+(o.line||Math.round(sz*LINEF))+'" w:lineRule="exact"/>';
+  var pr='<w:pPr><w:widowControl w:val="0"/><w:wordWrap w:val="0"/>'+sp+'<w:jc w:val="'+(o.jc||"left")+'"/><w:rPr>'+WFONT+(o.bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr></w:pPr>';
+  return '<w:p>'+pr+xrun(text,sz,o.bold)+'</w:p>';};
 const rowsOf=function(t){return t.match(/<w:tr[ >][\s\S]*?<\/w:tr>/g)||[];};
 // 表の先頭セルの段落に改ページ指定を入れる（空段落を足さずに改ページできる＝空白ページが出ない）
 const brkBefore=function(r){return eachCell(r,0,function(tc){
@@ -447,9 +452,9 @@ const generateDocx=async function(){
       var n=Math.max(16,HL.length),h=Math.max(280,Math.floor(7264/n)),body="";
       for(var i=0;i<n;i++){
         var L=HL[i]||{},r=setH(rs[1],h);
-        r=putCell(r,0,xpara(L.y||"",18,{jc:"center"}));
-        r=putCell(r,1,xpara(L.m||"",18,{jc:"center"}));
-        r=putCell(r,2,xpara(L.t||"",fitSz(L.t,6434,h,18,12),{jc:L.c?"center":(L.r?"right":"left"),bold:!!L.c}));
+        r=putCell(r,0,xpara(L.y||"",18,{jc:"center",auto:true}));
+        r=putCell(r,1,xpara(L.m||"",18,{jc:"center",auto:true}));
+        r=putCell(r,2,xpara(L.t||"",18,{jc:L.c?"center":(L.r?"right":"left"),bold:!!L.c,auto:true}));
         body+=r;
       }
       return t.substring(0,t.indexOf(rs[0]))+setH(rs[0],366)+body+"</w:tbl>";
@@ -461,9 +466,9 @@ const generateDocx=async function(){
       var body="";
       for(var i=0;i<5;i++){
         var L=qs[i]||{},r=setH(rs[1],454);
-        r=putCell(r,0,xpara(L.y||"",18,{jc:"center"}));
-        r=putCell(r,1,xpara(L.m||"",18,{jc:"center"}));
-        r=putCell(r,2,xpara(L.t||"",fitSz(L.t,6434,454,18,12),{}));
+        r=putCell(r,0,xpara(L.y||"",18,{jc:"center",auto:true}));
+        r=putCell(r,1,xpara(L.m||"",18,{jc:"center",auto:true}));
+        r=putCell(r,2,xpara(L.t||"",18,{auto:true}));
         body+=r;
       }
       // 見出し行に改ページ指定を入れて、ここから必ず2ページ目にする
@@ -474,7 +479,7 @@ const generateDocx=async function(){
       var rs=rowsOf(t);if(rs.length<7)return t;
       // 見出し366／自己PR1800／志望動機見出し240／志望動機1800（400字でも8pt程度を保てる高さ）
       var r1=putCell(setH(vMerge(rs[1],0,true),600),0,xpara(f.selfPR||"",fitSz(f.selfPR,8702,1800,18,12),{}));
-      var lab=putCell(setH(rs[4],240),0,xpara("志望動機",18,{bold:true}));
+      var lab=putCell(setH(rs[4],240),0,xpara("志望動機",18,{bold:true,line:220}));
       var r5=putCell(setH(vMerge(rs[5],0,true),900),0,xpara(f.motivation||"",fitSz(f.motivation,8702,1800,18,12),{}));
       return t.substring(0,t.indexOf(rs[0]))+setH(rs[0],366)+r1
         +setH(vMerge(rs[2],0,false),600)+setH(vMerge(rs[3],0,false),600)
@@ -492,7 +497,7 @@ const generateDocx=async function(){
     // 障がい欄：現状は5行分、必要な配慮は2行分を縦結合した固定枠に流し込む
     xml=putTbl(xml,"障がい①",function(t){
       var rs=rowsOf(t);if(rs.length<13)return t;
-      var two=function(r,h,a,b){r=setH(r,h);r=putCell(r,1,xpara(a||"",18,{}));r=putCell(r,3,xpara(b||"",18,{}));return r;};
+      var two=function(r,h,a,b){r=setH(r,h);r=putCell(r,1,xpara(a||"",18,{auto:true}));r=putCell(r,3,xpara(b||"",18,{auto:true}));return r;};
       var out=setH(rs[0],366)+two(rs[1],454,d1,d2)+two(rs[2],454,d3,d4)+two(rs[3],454,tc1,tc2)+two(rs[4],454,tc3,"")+two(rs[5],366,vt,mt);
       out+=putCell(setH(vMerge(vMerge(rs[6],0,true),1,true),454),1,xpara(f.chars||"",fitSz(f.chars,7610,2270,18,12),{}));
       for(var i=7;i<=10;i++)out+=setH(vMerge(vMerge(rs[i],0,false),1,false),454);
@@ -590,19 +595,21 @@ var th3=((f.techo3||"")+(dg(3)?(" "+dg(3)):"")).trim();
 var visitV=f.visit?(f.visit+(f.visit==="している"&&f.visitFreq?("（"+(f.visitFreq==="その他"?f.visitFreqOther:f.visitFreq)+"）"):"")):"";
 var medV=f.med?(f.med+(f.med==="している"&&f.medName?("（"+f.medName+"）"):"")):"";
 var hasContact=f.contactZip||f.contactAddr||f.contactPhone||f.contactMobile;
-var OUT="2px solid #333",IN="1px solid #888";
-var tbl={width:"100%",borderCollapse:"collapse",tableLayout:"fixed",border:OUT,marginBottom:4};
-var lab={border:IN,padding:"3px 5px",background:"#f2f2f2",fontWeight:700,fontSize:10,textAlign:"center",verticalAlign:"middle",lineHeight:1.25};
-var val={border:IN,padding:"3px 6px",fontSize:11,verticalAlign:"top",wordBreak:"break-word",lineHeight:1.35};
-var valC={border:IN,padding:"3px 6px",fontSize:11,textAlign:"center",verticalAlign:"middle"};
-var hd={border:IN,padding:"3px",background:"#e6e6e6",fontWeight:700,fontSize:11,textAlign:"center"};
+// Word（ＭＳ 明朝の履歴書様式）に合わせた体裁。枠線は黒、文字サイズは固定。
+var OUT="1.5px solid #000",IN="1px solid #000";
+var tbl={width:"100%",borderCollapse:"collapse",tableLayout:"fixed",border:OUT,marginBottom:6};
+var lab={border:IN,padding:"2px 4px",background:"#F2F2F2",fontWeight:700,fontSize:10.5,textAlign:"center",verticalAlign:"middle",lineHeight:1.3,letterSpacing:0.5};
+var val={border:IN,padding:"3px 7px",fontSize:11,verticalAlign:"middle",wordBreak:"break-word",lineHeight:1.4};
+var valC={border:IN,padding:"3px 6px",fontSize:11,textAlign:"center",verticalAlign:"middle",lineHeight:1.4};
+var hd={border:IN,padding:"3px",background:"#E6E6E6",fontWeight:700,fontSize:11,textAlign:"center",letterSpacing:1};
+var box={...val,verticalAlign:"top",whiteSpace:"pre-wrap",overflow:"hidden",fontSize:10.5,lineHeight:1.5,padding:"5px 8px"};
 var now=new Date();
 var photo=f.photoPreview?<img src={f.photoPreview} style={{width:96,height:128,objectFit:"cover"}}/>:<div style={{width:96,height:128,border:"1px dashed #aaa",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#999",fontSize:8,textAlign:"center",margin:"0 auto",lineHeight:1.5}}>写真貼付欄<br/>縦40mm<br/>横30mm</div>;
-return <div className="print-resume" style={{color:"#111",fontFamily:"'Noto Sans JP',sans-serif"}}>
+return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho','YuMincho','Hiragino Mincho ProN','MS Mincho','Noto Serif JP',serif"}}>
 <div className="pdf-page" id="pdfPage1">
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:6}}>
-<div style={{fontSize:24,fontWeight:900,letterSpacing:12}}>履 歴 書</div>
-<div style={{fontSize:10}}>{now.getFullYear()}年{now.getMonth()+1}月{now.getDate()}日 現在</div>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:8,padding:"2px 2px 0"}}>
+<div style={{fontSize:22,fontWeight:700,letterSpacing:14}}>履 歴 書</div>
+<div style={{fontSize:10.5,paddingBottom:3}}>{now.getFullYear()}年　{now.getMonth()+1}月　{now.getDate()}日　現在</div>
 </div>
 <table style={tbl}><colgroup><col style={{width:"13%"}}/><col/><col style={{width:"12%"}}/><col style={{width:"20%"}}/><col style={{width:"104px"}}/></colgroup><tbody>
 <tr><td style={lab}>ふりがな</td><td style={val} colSpan={3}>{f.furigana}</td><td rowSpan={4} style={{...val,textAlign:"center",verticalAlign:"top",padding:4}}>{photo}</td></tr>
@@ -616,37 +623,38 @@ return <div className="print-resume" style={{color:"#111",fontFamily:"'Noto Sans
 {hasContact&&<tr><td style={lab}>連絡先</td><td style={val} colSpan={4}>{(f.contactZip?("〒"+f.contactZip+"　"):"")+(f.contactAddr||"")+(f.contactPhone?("　電話 "+f.contactPhone):"")+(f.contactMobile?("　携帯 "+f.contactMobile):"")}</td></tr>}
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"11%"}}/><col style={{width:"9%"}}/><col/></colgroup><tbody>
-<tr><td style={hd}>年</td><td style={hd}>月</td><td style={hd}>学歴・職歴</td></tr>
-{histFix.map(function(r,i){return <tr key={"h"+i}><td style={{...valC,height:30}}>{r.y}</td><td style={{...valC,height:30}}>{r.m}</td><td style={r.c?{...val,textAlign:"center",fontWeight:700,background:"#f7f7f7",verticalAlign:"middle",height:30}:(r.r?{...val,textAlign:"right",fontWeight:700,height:30}:{...val,verticalAlign:"middle",height:30})}>{r.t}</td></tr>;})}
+<tr><td style={{...hd,width:"11%"}}>年</td><td style={hd}>月</td><td style={hd}>学歴・職歴（各項目ごとにまとめて書く）</td></tr>
+{histFix.map(function(r,i){return <tr key={"h"+i}><td style={{...valC,height:34}}>{r.y}</td><td style={{...valC,height:34}}>{r.m}</td><td style={r.c?{...val,textAlign:"center",fontWeight:700,background:"#f7f7f7",verticalAlign:"middle",height:34}:(r.r?{...val,textAlign:"right",fontWeight:700,height:34}:{...val,verticalAlign:"middle",height:34})}>{r.t}</td></tr>;})}
 </tbody></table>
 </div>
 <div className="pdf-page" id="pdfPage2" style={{breakBefore:"page",pageBreakBefore:"always"}}>
 <table style={tbl}><colgroup><col style={{width:"11%"}}/><col style={{width:"9%"}}/><col/></colgroup><tbody>
 <tr><td style={hd}>年</td><td style={hd}>月</td><td style={hd}>免許・資格</td></tr>
-{qFix.map(function(r,i){return <tr key={"q"+i}><td style={{...valC,height:30}}>{r.y}</td><td style={{...valC,height:30}}>{r.m}</td><td style={{...val,verticalAlign:"middle",height:30}}>{r.t}</td></tr>;})}
+{qFix.map(function(r,i){return <tr key={"q"+i}><td style={{...valC,height:34}}>{r.y}</td><td style={{...valC,height:34}}>{r.m}</td><td style={{...val,verticalAlign:"middle",height:34}}>{r.t}</td></tr>;})}
 </tbody></table>
-{<table style={tbl}><tbody>
-<tr><td style={hd}>志望動機</td></tr>
-<tr><td style={{...val,height:100,whiteSpace:"pre-wrap",overflow:"hidden",fontSize:fitPx(f.motivation,712,100,11,7)}}>{f.motivation}</td></tr>
-</tbody></table>}
 <table style={tbl}><tbody>
 <tr><td style={hd}>自己PR</td></tr>
-<tr><td style={{...val,height:120,whiteSpace:"pre-wrap",overflow:"hidden",fontSize:fitPx(f.selfPR,712,120,11,7)}}>{f.selfPR}</td></tr>
+<tr><td style={{...box,height:150}}>{f.selfPR}</td></tr>
+</tbody></table>
+<table style={tbl}><tbody>
+<tr><td style={hd}>志望動機</td></tr>
+<tr><td style={{...box,height:130}}>{f.motivation}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
 <tr><td style={hd} colSpan={4}>障がいについて</td></tr>
-<tr><td style={lab}>障がい①</td><td style={val}>{d1}</td><td style={lab}>障がい②</td><td style={val}>{d2}</td></tr>
-<tr><td style={lab}>障がい③</td><td style={val}>{d3}</td><td style={lab}>障がい④</td><td style={val}>{d4}</td></tr>
-<tr><td style={lab}>手帳①</td><td style={val}>{th1}</td><td style={lab}>手帳②</td><td style={val}>{th2}</td></tr>
-<tr><td style={lab}>手帳③</td><td style={val}>{th3}</td><td style={lab}></td><td style={val}></td></tr>
-<tr><td style={lab}>通院</td><td style={val}>{visitV}</td><td style={lab}>服薬</td><td style={val}>{medV}</td></tr>
-<tr><td style={lab}>現状</td><td style={{...val,height:90,whiteSpace:"pre-wrap",overflow:"hidden",fontSize:fitPx(f.chars,600,90,11,7)}} colSpan={3}>{f.chars}</td></tr>
-<tr><td style={lab}>必要な配慮</td><td style={{...val,height:60,whiteSpace:"pre-wrap",overflow:"hidden",fontSize:fitPx(f.accoms,600,60,11,7)}} colSpan={3}>{f.accoms}</td></tr>
+<tr style={{height:26}}><td style={lab}>障がい①</td><td style={val}>{d1}</td><td style={lab}>障がい②</td><td style={val}>{d2}</td></tr>
+<tr style={{height:26}}><td style={lab}>障がい③</td><td style={val}>{d3}</td><td style={lab}>障がい④</td><td style={val}>{d4}</td></tr>
+<tr style={{height:26}}><td style={lab}>手帳①</td><td style={val}>{th1}</td><td style={lab}>手帳②</td><td style={val}>{th2}</td></tr>
+<tr style={{height:26}}><td style={lab}>手帳③</td><td style={val}>{th3}</td><td style={lab}></td><td style={val}></td></tr>
+<tr style={{height:26}}><td style={lab}>通院</td><td style={val}>{visitV}</td><td style={lab}>服薬</td><td style={val}>{medV}</td></tr>
+<tr><td style={lab}>現状</td><td style={{...box,height:110}} colSpan={3}>{f.chars}</td></tr>
+<tr><td style={lab}>必要な配慮</td><td style={{...box,height:64}} colSpan={3}>{f.accoms}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"16%"}}/><col/><col style={{width:"24%"}}/><col/></colgroup><tbody>
 <tr><td style={lab}>通勤時間</td><td style={valC}>{(f.commuteH||f.commuteM)?("約 "+(f.commuteH||0)+" 時間 "+(f.commuteM||0)+" 分"):""}</td><td style={lab}>扶養家族数（配偶者を除く）</td><td style={valC}>{f.familyCount!==""?f.familyCount+" 人":""}</td></tr>
 <tr><td style={lab}>配偶者</td><td style={valC}>{f.spouse}</td><td style={lab}>配偶者の扶養義務</td><td style={valC}>{f.dependent}</td></tr>
 </tbody></table>
+<p style={{fontSize:10.5,marginTop:10,lineHeight:1.6}}>上記記載内容につきまして、事実と相違ございません。</p>
 </div>
 </div>;
 };
