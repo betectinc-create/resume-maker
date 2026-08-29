@@ -267,9 +267,13 @@ const TERMS_DOC=[
 {h1:"プライバシーポリシー"},
 {p:"当社は、本サービスにおいて取得するユーザーの個人情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。"},
 {h2:"第1条（取得する情報および利用目的）"},
-{ol:["当社は、本サービスにおいて以下の情報を取得し、それぞれの目的のために利用します。"]},
-{ul:["Googleログイン時に取得する情報（ユーザーID、メールアドレス等）","利用目的：本サービスにおける履歴書データの保存、同期、ユーザー認証、および当社が運営する就労移行支援事業等に関するご案内（公式LINE等を通じた情報配信を含みます）のため","ユーザーが入力した履歴書データ（氏名、生年月日、職歴、および本人希望記入欄等に記載された障害の状況や病歴等の要配慮個人情報を含みます）","利用目的：履歴書のPDF出力機能およびデータ保存機能を提供するため"]},
-{p:"2. ユーザーが本サービスにおいて、自身の障害、病歴等の要配慮個人情報を入力した場合、当社が本サービスの提供（データの保存・暗号化）を目的として、当該情報を取得することに同意したものとみなします。"},
+{ol:[
+ {t:"当社は、本サービスにおいて以下の情報を取得し、それぞれの目的のために利用します。",sub:[
+   {t:"Googleログイン時に取得する情報（ユーザーID、メールアドレス等）",sub:["利用目的：本サービスにおける履歴書データの保存、同期、ユーザー認証、および当社が運営する就労移行支援事業等に関するご案内（公式LINE等を通じた情報配信を含みます）のため"]},
+   {t:"ユーザーが入力した履歴書データ（氏名、生年月日、職歴、および本人希望記入欄等に記載された障害の状況や病歴等の要配慮個人情報を含みます）",sub:["利用目的：履歴書のPDF出力機能およびデータ保存機能を提供するため"]}
+ ]},
+ "ユーザーが本サービスにおいて、自身の障害、病歴等の要配慮個人情報を入力した場合、当社が本サービスの提供（データの保存・暗号化）を目的として、当該情報を取得することに同意したものとみなします。"
+]},
 {h2:"第2条（データの暗号化および安全管理）"},
 {ol:["ユーザーが本サービスに入力した履歴書データは、技術的に暗号化された状態で保存されます。","当社は、ユーザーの同意がある場合、または法令に基づく場合を除き、暗号化されたユーザーの履歴書データを復号して閲覧することはありません。"]},
 {h2:"第3条（個人情報の第三者提供）"},
@@ -280,12 +284,23 @@ const TERMS_DOC=[
 {p:"電話：0120-270-330（平日9:00〜16:30）"},
 {p:"メール：privacy@connect-syurou.com"}
 ];
+// 入れ子（1. → a. → i.）に対応したリスト。文字列でも {t,sub} でも書ける
+const LIST_STYLE=["decimal","lower-alpha","lower-roman"];
+const List=function(p){
+  var st=p.disc?"disc":LIST_STYLE[p.depth]||"decimal";
+  return <ol style={{margin:"0 0 8px",paddingLeft:p.depth?20:22,listStyle:st}}>
+    {p.items.map(function(it,j){
+      var t=(typeof it==="string")?it:it.t;
+      return <li key={j} style={{marginBottom:4}}>{t}{(it&&it.sub)?<List items={it.sub} depth={p.depth+1}/>:null}</li>;
+    })}
+  </ol>;
+};
 const TermsBody=function(){return <div style={{fontSize:12,lineHeight:1.85,color:"#3B3228"}}>
 {TERMS_DOC.map(function(b,i){
   if(b.h1)return <h2 key={i} style={{fontSize:16,fontWeight:900,margin:i===0?"0 0 12px":"28px 0 12px",paddingBottom:6,borderBottom:"2px solid #E87830"}}>{b.h1}</h2>;
   if(b.h2)return <h3 key={i} style={{fontSize:13,fontWeight:800,margin:"18px 0 6px"}}>{b.h2}</h3>;
-  if(b.ol)return <ol key={i} style={{margin:"0 0 8px",paddingLeft:22}}>{b.ol.map(function(t,j){return <li key={j} style={{marginBottom:4}}>{t}</li>;})}</ol>;
-  if(b.ul)return <ul key={i} style={{margin:"0 0 8px",paddingLeft:22,listStyle:"disc"}}>{b.ul.map(function(t,j){return <li key={j} style={{marginBottom:4}}>{t}</li>;})}</ul>;
+  if(b.ol)return <List key={i} items={b.ol} depth={0}/>;
+  if(b.ul)return <List key={i} items={b.ul} depth={0} disc={true}/>;
   return <p key={i} style={{margin:"0 0 8px"}}>{b.p}</p>;
 })}
 </div>;};
