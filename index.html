@@ -637,13 +637,14 @@ var visitV=f.visit?(f.visit+(f.visit==="している"&&f.visitFreq?("（"+(f.vis
 var medV=f.med?(f.med+(f.med==="している"&&f.medName?("（"+f.medName+"）"):"")):"";
 var hasContact=f.contactZip||f.contactAddr||f.contactPhone||f.contactMobile;
 // Word（ＭＳ 明朝の履歴書様式）に合わせた体裁。枠線は黒、文字サイズは固定。
-var OUT="1.5px solid #000",IN="1px solid #000";
-var tbl={width:"100%",borderCollapse:"collapse",tableLayout:"fixed",border:OUT,marginBottom:6};
-var lab={border:IN,padding:"2px 4px",background:"#F2F2F2",fontWeight:700,fontSize:10.5,textAlign:"center",verticalAlign:"middle",lineHeight:1.3,letterSpacing:0.5};
+// Wordテンプレートに合わせた体裁：網掛けなし・太字なし・外枠1.5pt/内側0.5ptの黒罫のみ
+var OUT="1.5px solid #000",IN="0.5px solid #000";
+var tbl={width:"100%",borderCollapse:"collapse",tableLayout:"fixed",border:OUT,marginBottom:4};
+var lab={border:IN,padding:"2px 4px",fontSize:10.5,textAlign:"center",verticalAlign:"middle",lineHeight:1.3};
 var val={border:IN,padding:"3px 7px",fontSize:11,verticalAlign:"middle",wordBreak:"break-word",lineHeight:1.4};
 var valC={border:IN,padding:"3px 6px",fontSize:11,textAlign:"center",verticalAlign:"middle",lineHeight:1.4};
-var hd={border:IN,padding:"3px",background:"#E6E6E6",fontWeight:700,fontSize:11,textAlign:"center",letterSpacing:1};
-var box={...val,verticalAlign:"top",whiteSpace:"pre-wrap",overflow:"hidden",fontSize:10.5,lineHeight:1.5,padding:"5px 8px"};
+var hd={border:IN,padding:"3px",fontSize:10.5,textAlign:"center",letterSpacing:1};
+var box={...val,verticalAlign:"top",whiteSpace:"pre-wrap",overflow:"hidden",fontSize:10.5,lineHeight:1.55,padding:"5px 8px"};
 var now=new Date();
 var photo=f.photoPreview?<img src={f.photoPreview} style={{width:96,height:128,objectFit:"cover"}}/>:<div style={{width:96,height:128,border:"1px dashed #aaa",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#999",fontSize:8,textAlign:"center",margin:"0 auto",lineHeight:1.5}}>写真貼付欄<br/>縦40mm<br/>横30mm</div>;
 // 高さを固定した内枠。文字量が増えても枠が広がらず、他の行が押し下げられない
@@ -668,7 +669,7 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"11%"}}/><col style={{width:"9%"}}/><col/></colgroup><tbody>
 <tr><td style={hd}>年</td><td style={hd}>月</td><td style={hd}>学歴・職歴（各項目ごとにまとめて書く）</td></tr>
-{histFix.map(function(r,i){return <tr key={"h"+i}><td style={valC}>{fix(r.y,26,{lineHeight:"26px"})}</td><td style={valC}>{fix(r.m,26,{lineHeight:"26px"})}</td><td style={r.c?{...val,background:"#F7F7F7"}:val}>{fix(r.t,26,{lineHeight:"26px",textAlign:r.c?"center":(r.r?"right":"left"),fontWeight:(r.c||r.r)?700:400})}</td></tr>;})}
+{histFix.map(function(r,i){return <tr key={"h"+i}><td style={valC}>{fix(r.y,26,{lineHeight:"26px"})}</td><td style={valC}>{fix(r.m,26,{lineHeight:"26px"})}</td><td style={val}>{fix(r.t,26,{lineHeight:"26px",textAlign:r.c?"center":(r.r?"right":"left"),fontWeight:(r.c||r.r)?700:400})}</td></tr>;})}
 </tbody></table>
 </div>
 <div className="pdf-page" id="pdfPage2" style={{breakBefore:"page",pageBreakBefore:"always"}}>
