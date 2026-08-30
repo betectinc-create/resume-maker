@@ -316,7 +316,7 @@ const xrun=function(text,sz,bold){var ps=String(text==null?"":text).split(/\r?\n
 // 行数を計算で押さえたい長文欄だけ行送りを固定する。
 const xpara=function(text,sz,opt){var o=opt||{};
   var sp=o.auto?'':'<w:snapToGrid w:val="0"/><w:spacing w:before="0" w:after="0" w:line="'+(o.line||Math.round(sz*LINEF))+'" w:lineRule="exact"/>';
-  var pr='<w:pPr><w:widowControl w:val="0"/><w:wordWrap w:val="0"/>'+sp+'<w:jc w:val="'+(o.jc||"left")+'"/><w:rPr>'+WFONT+(o.bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr></w:pPr>';
+  var pr='<w:pPr><w:widowControl w:val="0"/><w:wordWrap w:val="1"/><w:overflowPunct w:val="0"/>'+sp+'<w:jc w:val="'+(o.jc||"left")+'"/><w:rPr>'+WFONT+(o.bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr></w:pPr>';
   return '<w:p>'+pr+xrun(text,sz,o.bold)+'</w:p>';};
 const rowsOf=function(t){return t.match(/<w:tr[ >][\s\S]*?<\/w:tr>/g)||[];};
 // 表の先頭セルの段落に改ページ指定を入れる（空段落を足さずに改ページできる＝空白ページが出ない）
