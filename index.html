@@ -291,7 +291,9 @@ const List=function(p){
   return <ol style={{margin:"0 0 8px",paddingLeft:p.depth?20:22,listStyle:st}}>
     {p.items.map(function(it,j){
       var t=(typeof it==="string")?it:it.t;
-      return <li key={j} style={{marginBottom:4}}>{t}{(it&&it.sub)?<List items={it.sub} depth={p.depth+1}/>:null}</li>;
+      // 文字列にも String.prototype.sub が存在するため、必ず配列かどうかで判定する
+      var sub=(it&&typeof it==="object"&&Array.isArray(it.sub))?it.sub:null;
+      return <li key={j} style={{marginBottom:4}}>{t}{sub?<List items={sub} depth={p.depth+1}/>:null}</li>;
     })}
   </ol>;
 };
