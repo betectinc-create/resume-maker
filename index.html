@@ -620,6 +620,36 @@ const generateDocx=async function(){
       return "</w:tbl>"+thinP;
     });
     // 改ページは免許・資格の見出し行のpageBreakBeforeで行う（改ページ用の段落は入れない）
+    // 全ての表を固定幅にする（既定の自動調整のままだと、セル構成を変えたときに
+    // Wordが列幅を計算し直し、表ごとに横幅が食い違う）
+    (function(){
+      var out="",i=0;
+      while(true){
+        var st=xml.indexOf("<w:tbl>",i);
+        if(st===-1){out+=xml.substring(i);break;}
+        var en=xml.indexOf("</w:tbl>",st)+8,t=xml.substring(st,en);
+        var gEnd=t.indexOf("</w:tblGrid>");
+        var sum=0,m,re=/<w:gridCol w:w="(\d+)"/g,g=t.substring(0,gEnd);
+        while((m=re.exec(g))!==null)sum+=parseInt(m[1]);
+        if(sum>0&&sum!==8702){
+          // 表ごとに数十twipsの幅の違いがあるので、最終列を伸縮させて8702に揃える
+          var diff=8702-sum;
+          t=t.substring(0,gEnd).replace(/<w:gridCol w:w="(\d+)"\/>(?![\s\S]*<w:gridCol)/,function(w,v){return '<w:gridCol w:w="'+(parseInt(v)+diff)+'"/>';})+t.substring(gEnd);
+          t=t.replace(/<w:tr[ >][\s\S]*?<\/w:tr>/g,function(row){
+            return row.replace(/<w:tcW w:w="(\d+)"([^>]*)\/>(?![\s\S]*<w:tcW)/,function(w,v,rest){return '<w:tcW w:w="'+(parseInt(v)+diff)+'"'+rest+'/>';});
+          });
+          sum=8702;
+        }
+        if(sum>0){
+          t=t.replace(/<w:tblPr>([\s\S]*?)<\/w:tblPr>/,function(w,inner){
+            var b=inner.replace(/<w:tblW[^>]*\/>/,"").replace(/<w:tblLayout[^>]*\/>/,"");
+            return '<w:tblPr><w:tblW w:w="'+sum+'" w:type="dxa"/><w:tblLayout w:type="fixed"/>'+b+'</w:tblPr>';
+          });
+        }
+        out+=xml.substring(i,st)+t;i=en;
+      }
+      xml=out;
+    })();
     zp.file("word/document.xml",xml);
     var blob=await zp.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
     var url=URL.createObjectURL(blob);
