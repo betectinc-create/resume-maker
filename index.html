@@ -518,11 +518,13 @@ const generateDocx=async function(){
     // 自己PR＋志望動機：行を縦結合して1つの枠にし、文字量に応じて自動縮小（枠は伸びない）
     xml=putTbl(xml,"自己",function(t){
       var rs=rowsOf(t);if(rs.length<7)return t;
-      // 見出し366／自己PR1800／志望動機見出し240／志望動機1800（400字でも8pt程度を保てる高さ）
-      var r1=putCell(setH(vMerge(rs[1],0,true),600),0,xpara(f.selfPR||"",fitSz(f.selfPR,8702,1800,18,12),{}));
-      var lab=setBorders(putCell(setH(rs[4],260),0,xpara("志望動機",18,{bold:true,line:240})),0,RULE);
-      var r5=putCell(setH(vMerge(rs[5],0,true),900),0,xpara(f.motivation||"",fitSz(f.motivation,8702,1800,18,12),{}));
-      return t.substring(0,t.indexOf(rs[0]))+setH(rs[0],366)+r1
+      var head=t.substring(0,t.indexOf(rs[0])); // 表の定義部。行を書き換える前に確保しておく
+      var hd0=putCell(setH(rs[0],366),0,xpara("志望動機",18,{jc:"center",bold:true,auto:true}));
+      // 上の大きい枠が志望動機、下の枠が自己PR
+      var r1=putCell(setH(vMerge(rs[1],0,true),600),0,xpara(f.motivation||"",fitSz(f.motivation,8702,1800,18,12),{}));
+      var lab=setBorders(putCell(setH(rs[4],260),0,xpara("自己PR",18,{bold:true,line:240})),0,RULE);
+      var r5=putCell(setH(vMerge(rs[5],0,true),900),0,xpara(f.selfPR||"",fitSz(f.selfPR,8702,1800,18,12),{}));
+      return head+hd0+r1
         +setH(vMerge(rs[2],0,false),600)+setH(vMerge(rs[3],0,false),600)
         +lab+r5+setH(vMerge(rs[6],0,false),900)+"</w:tbl>";
     });
@@ -725,12 +727,10 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 {qFix.map(function(r,i){return <tr key={"q"+i}><td style={valC}>{fix(r.y,28,{lineHeight:"28px"})}</td><td style={valC}>{fix(r.m,28,{lineHeight:"28px"})}</td><td style={val}>{fix(r.t,28,{lineHeight:"28px"})}</td></tr>;})}
 </tbody></table>
 <table style={tbl}><tbody>
-<tr><td style={hd}>自己PR</td></tr>
-<tr><td style={box}>{fix(f.selfPR,150)}</td></tr>
-</tbody></table>
-<table style={tbl}><tbody>
 <tr><td style={hd}>志望動機</td></tr>
-<tr><td style={box}>{fix(f.motivation,130)}</td></tr>
+<tr><td style={{...box,borderBottom:"none"}}>{fix(f.motivation,150)}</td></tr>
+<tr><td style={{...lab,textAlign:"left",padding:"1px 7px"}}>自己PR</td></tr>
+<tr><td style={{...box,borderTop:"none"}}>{fix(f.selfPR,120)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
 <tr><td style={hd} colSpan={4}>障がいについて</td></tr>
