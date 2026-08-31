@@ -336,6 +336,15 @@ const setH=function(r,h){var tag='<w:trHeight w:hRule="exact" w:val="'+h+'"/>';i
 const eachCell=function(r,ci,fn){var i=0,n=0;while(true){var s=r.indexOf("<w:tc>",i);if(s===-1)return r;var e=r.indexOf("</w:tc>",s)+7;if(n===ci)return r.substring(0,s)+fn(r.substring(s,e))+r.substring(e);n++;i=e;}};
 const putCell=function(r,ci,body){return eachCell(r,ci,function(tc){var ps=tc.search(/<w:p[ >]/);if(ps===-1)return tc;var pe=tc.lastIndexOf("</w:p>")+6;return tc.substring(0,ps)+body+tc.substring(pe);});};
 const vMerge=function(r,ci,start){var tag=start?'<w:vMerge w:val="restart"/>':'<w:vMerge/>';return eachCell(r,ci,function(tc){if(tc.indexOf("<w:vMerge")!==-1)return tc.replace(/<w:vMerge[^>]*\/>/,tag);if(tc.indexOf("<w:gridSpan")!==-1)return tc.replace(/(<w:gridSpan[^>]*\/>)/,"$1"+tag);if(tc.indexOf("<w:tcW")!==-1)return tc.replace(/(<w:tcW[^>]*\/>)/,"$1"+tag);return tc;});};
+// セルの罫線を上書きする（テンプレートは自己PR欄の内側罫線をnilにしているため、
+// 途中に見出し行を差し込むと区切り線が無く1つの枠に見えてしまう）
+const setBorders=function(r,ci,spec){return eachCell(r,ci,function(tc){
+  var b="<w:tcBorders>"+spec+"</w:tcBorders>";
+  if(/<w:tcBorders>[\s\S]*?<\/w:tcBorders>/.test(tc))return tc.replace(/<w:tcBorders>[\s\S]*?<\/w:tcBorders>/,b);
+  if(tc.indexOf("<w:tcW")!==-1)return tc.replace(/(<w:tcW[^>]*\/>)/,"$1"+b);
+  return tc;
+});};
+const RULE='<w:top w:val="single" w:sz="6" w:space="0" w:color="auto"/><w:bottom w:val="single" w:sz="6" w:space="0" w:color="auto"/>';
 const putTbl=function(xml,marker,fn){var p=xml.indexOf(marker);if(p===-1)return xml;var st=xml.lastIndexOf("<w:tbl>",p);var en=xml.indexOf("</w:tbl>",p)+8;if(st===-1||en<st)return xml;return xml.substring(0,st)+fn(xml.substring(st,en))+xml.substring(en);};
 // 指定の幅×高さ(px)に収まる最大のフォントサイズ(px)を返す（PDF側のレイアウト固定用）
 const fitPx=function(text,wPx,hPx,base,min){var t=String(text||"");if(!t)return base;for(var s=base;s>min;s--){var per=Math.max(1,Math.floor(wPx/s));var ln=0;t.split(/\r?\n/).forEach(function(l){ln+=Math.max(1,Math.ceil(l.length/per));});if(ln*s*1.4<=hPx-6)return s;}return min;};
@@ -445,6 +454,7 @@ const generatePdf=async function(){
 const generateDocx=async function(){
   if(!window.JSZip){tt("テンプレート読み込み中...");return;}
   setGenerating(true);
+  var photoXml="";
   try{
     var bin=Uint8Array.from(atob(TMPL_B64),function(c){return c.charCodeAt(0);});
     var zp=await window.JSZip.loadAsync(bin);
@@ -480,7 +490,7 @@ const generateDocx=async function(){
     if(HL.length)HL.push({t:"以上",r:1});
     xml=putTbl(xml,"学歴・職歴（各部にまとめて書く）",function(t){
       var rs=rowsOf(t);if(rs.length<2)return t;
-      var n=Math.max(16,HL.length),h=Math.max(280,Math.floor(6900/n)),body="";
+      var n=Math.max(16,HL.length),h=Math.max(280,Math.floor(6500/n)),body="";
       for(var i=0;i<n;i++){
         var L=HL[i]||{},r=setH(rs[1],h);
         r=putCell(r,0,xpara(L.y||"",18,{jc:"center",auto:true}));
@@ -510,7 +520,7 @@ const generateDocx=async function(){
       var rs=rowsOf(t);if(rs.length<7)return t;
       // 見出し366／自己PR1800／志望動機見出し240／志望動機1800（400字でも8pt程度を保てる高さ）
       var r1=putCell(setH(vMerge(rs[1],0,true),600),0,xpara(f.selfPR||"",fitSz(f.selfPR,8702,1800,18,12),{}));
-      var lab=putCell(setH(rs[4],240),0,xpara("志望動機",18,{bold:true,line:220}));
+      var lab=setBorders(putCell(setH(rs[4],260),0,xpara("志望動機",18,{bold:true,line:240})),0,RULE);
       var r5=putCell(setH(vMerge(rs[5],0,true),900),0,xpara(f.motivation||"",fitSz(f.motivation,8702,1800,18,12),{}));
       return t.substring(0,t.indexOf(rs[0]))+setH(rs[0],366)+r1
         +setH(vMerge(rs[2],0,false),600)+setH(vMerge(rs[3],0,false),600)
@@ -557,35 +567,40 @@ const generateDocx=async function(){
         zp.file("word/_rels/document.xml.rels",rels2);
         var ct2=await zp.file("[Content_Types].xml").async("string");
         if(ct2.indexOf('Extension="'+pext+'"')===-1){ct2=ct2.replace("</Types>",'<Default Extension="'+pext+'" ContentType="'+pmime+'"/></Types>');zp.file("[Content_Types].xml",ct2);}
-        var phXml='<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="251660288" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>5230000</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>1081405</wp:posOffset></wp:positionV><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
-        // 写真は「履 歴 書」タイトル段落の </w:p> 直前に差し込む（新しい段落は作らない＝余分な行が増えない）
-        var titlePos=xml.indexOf("履 歴 書");
-        if(titlePos===-1)titlePos=xml.indexOf("履　歴　書");
-        if(titlePos===-1)titlePos=xml.indexOf("履歴書");
-        // 写真を貼るときは「写真貼付欄」の枠と案内文（タイトルより前にある図形）を削除して重なりを防ぐ
-        if(titlePos!==-1){
+        // 写真はセル内に収める（浮かぶ図形にすると位置が本文量で変わり、電話欄に重なる）
+        photoXml='<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="1080000" cy="1440000"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="99" name="Photo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="99" name="photo1"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdP99" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1080000" cy="1440000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
+        // 「写真貼付欄」の枠と案内文（浮かぶ図形）は削除する
+        var tp=xml.indexOf("履 歴 書");if(tp===-1)tp=xml.indexOf("履歴書");
+        if(tp!==-1){
           while(true){
-            var ps2=xml.indexOf("<w:pict");if(ps2===-1||ps2>titlePos)break;
+            var ps2=xml.indexOf("<w:pict");if(ps2===-1||ps2>tp)break;
             var pe2=xml.indexOf("</w:pict>",ps2);if(pe2===-1)break;pe2+=9;
             var rs2s=xml.lastIndexOf("<w:r>",ps2),rs2b=xml.lastIndexOf("<w:r ",ps2);
             if(rs2b>rs2s)rs2s=rs2b;
             var re2=xml.indexOf("</w:r>",pe2);
             if(rs2s===-1||re2===-1)break;
             xml=xml.substring(0,rs2s)+xml.substring(re2+6);
-            titlePos=xml.indexOf("履 歴 書");if(titlePos===-1)titlePos=xml.indexOf("履歴書");
+            tp=xml.indexOf("履 歴 書");if(tp===-1)tp=xml.indexOf("履歴書");
           }
         }
-        var phAt=-1;
-        if(titlePos!==-1)phAt=xml.indexOf("</w:p>",titlePos);
-        if(phAt===-1)phAt=xml.indexOf("</w:p>",xml.indexOf("<w:body>"));
-        if(phAt!==-1)xml=xml.substring(0,phAt)+phXml+xml.substring(phAt);
       }catch(pe){console.log("Photo error:",pe);}
     }
     // 基本情報表：全行の高さを固定（住所などが長くても表が伸びず、1ページ目が溢れない）
     xml=putTbl(xml,"ふりがな",function(t){
       var rs=rowsOf(t);if(rs.length<10)return t;
-      var H=[280,1000,360,260,900,300,260,900,300,380];
-      var out="";for(var i=0;i<rs.length;i++)out+=setH(rs[i],H[i]||360);
+      // 写真欄(右上)は3行分を縦結合したセル。写真4cm＋余白が入る高さを確保する
+      var H=[400,1100,950,260,900,300,260,900,300,380];
+      var out="";
+      for(var i=0;i<rs.length;i++){
+        var r=setH(rs[i],H[i]||360);
+        if(photoXml&&i<3){
+          var body=(i===0)?('<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/><w:jc w:val="center"/></w:pPr>'+photoXml+'</w:p>')
+                          :'<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr></w:p>';
+          var vm=(i===0)?'<w:vMerge w:val="restart"/>':'<w:vMerge/>';
+          r=r.replace(/<\/w:tr>$/,'<w:tc><w:tcPr><w:tcW w:w="2654" w:type="dxa"/>'+vm+'<w:vAlign w:val="center"/></w:tcPr>'+body+'</w:tc></w:tr>');
+        }
+        out+=r;
+      }
       return t.substring(0,t.indexOf(rs[0]))+out+"</w:tbl>";
     });
     // 通勤時間表も固定
