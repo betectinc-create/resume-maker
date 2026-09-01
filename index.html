@@ -245,7 +245,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-01-e"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-01-g"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -548,10 +548,10 @@ const generateDocx=async function(){
       var rs=rowsOf(t);if(rs.length<13)return t;
       var two=function(r,h,a,b){r=setH(r,h);r=putCell(r,1,xpara(a||"",18,{auto:true}));r=putCell(r,3,xpara(b||"",18,{auto:true}));return r;};
       var out=setH(rs[0],366)+two(rs[1],454,d1,d2)+two(rs[2],454,d3,d4)+two(rs[3],454,tc1,tc2)+two(rs[4],454,tc3,"")+two(rs[5],366,vt,mt);
-      out+=putCell(setH(vMerge(vMerge(rs[6],0,true),1,true),454),1,xpara(f.chars||"",fitSz(f.chars,7610,2270,18,12),{}));
-      for(var i=7;i<=10;i++)out+=setH(vMerge(vMerge(rs[i],0,false),1,false),454);
-      out+=putCell(setH(vMerge(vMerge(rs[11],0,true),1,true),1000),1,xpara(f.accoms||"",fitSz(f.accoms,7610,2000,18,12),{}));
-      out+=setH(vMerge(vMerge(rs[12],0,false),1,false),1027);
+      out+=putCell(setH(vMerge(vMerge(rs[6],0,true),1,true),320),1,xpara(f.chars||"",fitSz(f.chars,7610,1600,18,12),{}));
+      for(var i=7;i<=10;i++)out+=setH(vMerge(vMerge(rs[i],0,false),1,false),320);
+      out+=putCell(setH(vMerge(vMerge(rs[11],0,true),1,true),650),1,xpara(f.accoms||"",fitSz(f.accoms,7610,1300,18,12),{}));
+      out+=setH(vMerge(vMerge(rs[12],0,false),1,false),650);
       return t.substring(0,t.indexOf(rs[0]))+out+"</w:tbl>";
     });
     xml=xml.replace("約　　　　時間　　　　分","約　"+f.commuteH+"　時間　"+f.commuteM+"　分");
@@ -674,7 +674,9 @@ const generateDocx=async function(){
             else if(b.indexOf("<w:tblCellMar>")!==-1)b=b.replace("<w:tblCellMar>",LAY+"<w:tblCellMar>");
             else if(b.indexOf("<w:tblLook")!==-1)b=b.replace("<w:tblLook",LAY+"<w:tblLook");
             else b=b+LAY;
-            return '<w:tblPr><w:tblW w:w="'+sum+'" w:type="dxa"/>'+b+'</w:tblPr>';
+            // 幅は「本文幅に対して100%」で指定する。dxaの絶対値指定だけだと
+            // 自動調整に負けて表ごとに幅が変わることがある（pctは50分の1%単位）
+            return '<w:tblPr><w:tblW w:w="5000" w:type="pct"/>'+b+'</w:tblPr>';
           });
         }
         out+=xml.substring(i,st)+t;i=en;
@@ -775,8 +777,8 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 <tr><td style={LB}>手帳①</td><td style={val}>{fix(th1,24)}</td><td style={LB}>手帳②</td><td style={val}>{fix(th2,24)}</td></tr>
 <tr><td style={LB}>手帳③</td><td style={val}>{fix(th3,24)}</td><td style={LB}></td><td style={val}>{fix("",24)}</td></tr>
 <tr><td style={LB}>通院</td><td style={val}>{fix(visitV,24)}</td><td style={LB}>服薬</td><td style={val}>{fix(medV,24)}</td></tr>
-<tr><td style={LB}>現状</td><td style={box} colSpan={3}>{fix(f.chars,110)}</td></tr>
-<tr><td style={LB}>必要な配慮</td><td style={box} colSpan={3}>{fix(f.accoms,174)}</td></tr>
+<tr><td style={LB}>現状</td><td style={box} colSpan={3}>{fix(f.chars,100)}</td></tr>
+<tr><td style={LB}>必要な配慮</td><td style={box} colSpan={3}>{fix(f.accoms,84)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"27%"}}/><col style={{width:"20%"}}/></colgroup><tbody>
 <tr><td style={LB}>通勤時間</td><td style={valC}>{fix((f.commuteH||f.commuteM)?("約 "+(f.commuteH||0)+" 時間 "+(f.commuteM||0)+" 分"):"",26,{lineHeight:"26px"})}</td><td style={{...LB,fontSize:9.5}}>扶養家族数（配偶者除く）</td><td style={valC}>{fix(f.familyCount!==""?f.familyCount+" 人":"",26,{lineHeight:"26px"})}</td></tr>
