@@ -311,7 +311,8 @@ const insEP=function(xml,marker,n,text){text=xesc(text);var pos=xml.indexOf(mark
 const insAfter=function(xml,marker,text){var pos=xml.indexOf(marker);if(pos===-1)return xml;var ep=xml.indexOf("</w:pPr></w:p>",pos);if(ep===-1)return xml;var rn='<w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>'+xesc(text)+'</w:t></w:r>';return xml.substring(0,ep+"</w:pPr>".length)+rn+xml.substring(ep+"</w:pPr>".length);};
 // ===== DOCXレイアウト固定用ヘルパー（入力量にかかわらず行高・ページ構成を一定に保つ） =====
 // フォントは明示指定する（未指定だと環境の既定フォントに依存し、Windowsで行が詰まって崩れる）
-const WFONT='<w:rFonts w:ascii="ＭＳ 明朝" w:eastAsia="ＭＳ 明朝" w:hAnsi="ＭＳ 明朝" w:cs="ＭＳ 明朝" w:hint="eastAsia"/>';
+const DOCFONT="游明朝"; // WindowsにもMacにも標準搭載されている明朝体
+const WFONT='<w:rFonts w:ascii="'+DOCFONT+'" w:eastAsia="'+DOCFONT+'" w:hAnsi="'+DOCFONT+'" w:cs="'+DOCFONT+'" w:hint="eastAsia"/>';
 const LINEF=12.5; // 行送り＝文字サイズの125%。これ未満だとWindowsのWordで文字の上下が欠ける
 const xrun=function(text,sz,bold){var ps=String(text==null?"":text).split(/\r?\n/);var rp='<w:rPr>'+WFONT+(bold?'<w:b/>':'')+'<w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr>';var o="";for(var i=0;i<ps.length;i++){if(i>0)o+='<w:r>'+rp+'<w:br/></w:r>';if(ps[i]!=="")o+='<w:r>'+rp+'<w:t xml:space="preserve">'+xesc(ps[i])+'</w:t></w:r>';}return o;};
 // o.auto=true のときは行送りを既定のまま（＝ラベル側の段落と同じ組み方）にして、上下位置を揃える。
@@ -459,6 +460,10 @@ const generateDocx=async function(){
     var bin=Uint8Array.from(atob(TMPL_B64),function(c){return c.charCodeAt(0);});
     var zp=await window.JSZip.loadAsync(bin);
     var xml=await zp.file("word/document.xml").async("string");
+    // テンプレート由来のフォント指定も游明朝に置き換える（Macで「見つからないフォント」になるため）
+    xml=xml.replace(/ＭＳ 明朝|ＭＳ ゴシック|ＭＳ Ｐ明朝|ＭＳ Ｐゴシック|Century/g,DOCFONT);
+    var st0=await zp.file("word/styles.xml").async("string");
+    zp.file("word/styles.xml",st0.replace(/ＭＳ 明朝|ＭＳ ゴシック|ＭＳ Ｐ明朝|ＭＳ Ｐゴシック|Century/g,DOCFONT));
     var yr=String(now.getFullYear()),mo=String(now.getMonth()+1),dy=String(now.getDate());
     var ag=f.birthYear?String(now.getFullYear()-parseInt(f.birthYear)):"";
     xml=xml.replace("年　　月　　日",yr+"年　"+mo+"月　"+dy+"日");
@@ -633,14 +638,14 @@ const generateDocx=async function(){
         var gEnd=t.indexOf("</w:tblGrid>");
         var sum=0,m,re=/<w:gridCol w:w="(\d+)"/g,g=t.substring(0,gEnd);
         while((m=re.exec(g))!==null)sum+=parseInt(m[1]);
-        if(sum>0&&sum!==8702){
-          // 表ごとに数十twipsの幅の違いがあるので、最終列を伸縮させて8702に揃える
-          var diff=8702-sum;
+        if(sum>0&&sum!==8504){
+          // 表ごとに幅が違ううえ、いずれも本文幅(8504)を超過している。最終列で調整して揃える
+          var diff=8504-sum;
           t=t.substring(0,gEnd).replace(/<w:gridCol w:w="(\d+)"\/>(?![\s\S]*<w:gridCol)/,function(w,v){return '<w:gridCol w:w="'+(parseInt(v)+diff)+'"/>';})+t.substring(gEnd);
           t=t.replace(/<w:tr[ >][\s\S]*?<\/w:tr>/g,function(row){
             return row.replace(/<w:tcW w:w="(\d+)"([^>]*)\/>(?![\s\S]*<w:tcW)/,function(w,v,rest){return '<w:tcW w:w="'+(parseInt(v)+diff)+'"'+rest+'/>';});
           });
-          sum=8702;
+          sum=8504;
         }
         if(sum>0){
           t=t.replace(/<w:tblPr>([\s\S]*?)<\/w:tblPr>/,function(w,inner){
