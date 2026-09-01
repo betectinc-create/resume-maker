@@ -245,6 +245,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
+const APP_VER="2026-09-01-b"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -658,6 +659,10 @@ const generateDocx=async function(){
       }
       xml=out;
     })();
+    // どの版で生成されたファイルか後から判別できるよう版数を埋め込む
+    try{var cx=await zp.file("docProps/core.xml").async("string");
+      zp.file("docProps/core.xml",cx.replace(/<dc:description>[\s\S]*?<\/dc:description>/,"").replace("</cp:coreProperties>","<dc:description>resume-maker "+APP_VER+"</dc:description></cp:coreProperties>"));
+    }catch(ve){}
     zp.file("word/document.xml",xml);
     var blob=await zp.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
     var url=URL.createObjectURL(blob);
