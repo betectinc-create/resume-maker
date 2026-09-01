@@ -40,7 +40,7 @@ var googleProvider=new firebase.auth.GoogleAuthProvider();
     .lc-tight{font-size:11px!important;white-space:nowrap;}
     .print-resume{display:none;}
     /* PDFはA4比率の固定サイズ枠に描画する（入力量でレイアウトが変わらない） */
-    .pdf-page{width:760px;height:1116px;overflow:hidden;background:#fff;padding:0 38px;}
+    .pdf-page{width:760px;height:1116px;overflow:hidden;background:#fff;padding:0 62px;}
     #pdfHost{position:fixed;left:-20000px;top:0;display:none;z-index:-1;}
     #pdfHost .print-resume{display:block!important;}
     @page{size:A4;margin:10mm;}
@@ -105,7 +105,7 @@ const uE=(i,k,v)=>{const a=[...f.education];a[i]={...a[i],[k]:clip(LIMR,k,v)};se
 const uW=(i,k,v)=>{const a=[...f.work];a[i]={...a[i],[k]:clip(LIMR,k,v)};setF(p=>({...p,work:a}));};
 const uQ=(i,k,v)=>{const a=[...f.quals];a[i]={...a[i],[k]:clip(LIMR,k,v)};setF(p=>({...p,quals:a}));};
 const handlePhoto=e=>{const file=e.target.files?.[0];if(file){const img=new Image();img.onload=function(){const canvas=document.createElement("canvas");canvas.width=227;canvas.height=303;const ctx=canvas.getContext("2d");const sx=Math.max(0,(img.width-img.height*0.75)/2);const sy=Math.max(0,(img.height-img.width/0.75)/2);const sw=Math.min(img.width,img.height*0.75);const sh=Math.min(img.height,img.width/0.75);ctx.drawImage(img,sx,sy,sw,sh,0,0,227,303);setF(p=>({...p,photoPreview:canvas.toDataURL("image/jpeg",0.9)}));};img.src=URL.createObjectURL(file);}};
-const insAc=text=>{const nx=f.accoms?(f.accoms+"\n"+text):text;if(nx.length>80){tt("80文字までです（残り"+(80-f.accoms.length)+"文字）");return;}setF(p=>({...p,accoms:nx}));tt("追加しました");};
+const insAc=text=>{const nx=f.accoms?(f.accoms+"\n"+text):text;if(nx.length>200){tt("200文字までです（残り"+(200-f.accoms.length)+"文字）");return;}setF(p=>({...p,accoms:nx}));tt("追加しました");};
 const pS=id=>setF(p=>({...p,strId:id,scene:"",sceneOther:"",selfPR:gP(id,"",""),motivation:gM(id)}));
 const pSc=sc=>{setF(p=>({...p,scene:sc,selfPR:gP(f.strId,sc,f.sceneOther)}));};
 useEffect(()=>{if(f.strId&&f.scene)setF(p=>({...p,selfPR:gP(f.strId,f.scene,f.sceneOther)}));},[f.sceneOther]);
@@ -217,7 +217,7 @@ const S3=()=> <div className="space-y-4">
 <div className="grid grid-cols-2 gap-3"><div><label className={lc}>服薬</label><select className={sc2} value={f.med} onChange={u("med")}><option value="">選択</option><option>している</option><option>していない</option></select></div>{f.med==="している"&&<div><label className={lc}>薬名</label><input className={ic} value={f.medName} onChange={u("medName")}/></div>}</div>
 </div>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>障害特性（現状）</h3><textarea className={ic+" h-28"} value={f.chars} onChange={e=>{if(e.target.value.length<=250)setF(p=>({...p,chars:e.target.value}));}}/><div className="flex justify-between mt-1"><p className="text-xs" style={{color:f.chars.length>=230?"#E87830":"#999"}}>{f.chars.length>=230?"残り"+(250-f.chars.length)+"文字":"枠内に収まる文字数です"}</p><p className="text-xs" style={{color:f.chars.length>=230?"#E87830":"#999"}}>{f.chars.length}/250</p></div>{f.dis1name&&DI[f.dis1name]&&<div className="mt-3 rounded-xl p-3" style={{background:"#FEF3C7"}}><p className="text-xs text-amber-900">{DI[f.dis1name]}</p></div>}</div>
-<div className={cc}><h3 className={hc} style={{color:O[700]}}>必要な配慮</h3><p className="text-xs text-gray-500 mb-2">例文タップで追加</p><textarea className={ic+" h-24"} maxLength={80} value={f.accoms} onChange={e=>{setF(p=>({...p,accoms:e.target.value.slice(0,80)}));}}/><div className="flex justify-between mt-1"><p className="text-xs" style={{color:f.accoms.length>=60?"#E87830":"#999"}}>{f.accoms.length>=60?"残り"+(80-f.accoms.length)+"文字":"枠内に収まる文字数です"}</p><p className="text-xs" style={{color:f.accoms.length>=60?"#E87830":"#999"}}>{f.accoms.length}/80</p></div>
+<div className={cc}><h3 className={hc} style={{color:O[700]}}>必要な配慮</h3><p className="text-xs text-gray-500 mb-2">例文タップで追加</p><textarea className={ic+" h-24"} maxLength={200} value={f.accoms} onChange={e=>{setF(p=>({...p,accoms:e.target.value.slice(0,200)}));}}/><div className="flex justify-between mt-1"><p className="text-xs" style={{color:f.accoms.length>=170?"#E87830":"#999"}}>{f.accoms.length>=170?"残り"+(200-f.accoms.length)+"文字":"枠内に収まる文字数です"}</p><p className="text-xs" style={{color:f.accoms.length>=170?"#E87830":"#999"}}>{f.accoms.length}/200</p></div>
 <div className="mt-3 space-y-1.5">{AC.map((ex,i)=> <button key={i} onClick={()=>insAc(ex)} className="block w-full text-left text-xs rounded-lg px-3 py-2 border hover:border-yellow-600" style={{background:"#FAFAFA",borderColor:"#E5E7EB"}}>+ {ex}</button>)}</div>
 </div></div>;
 
@@ -526,8 +526,8 @@ const generateDocx=async function(){
       var head=t.substring(0,t.indexOf(rs[0])); // 表の定義部。行を書き換える前に確保しておく
       var hd0=putCell(setH(rs[0],366),0,xpara("志望動機",18,{jc:"center",bold:true,auto:true}));
       // 志望動機を1つの大きな枠にする（自己PR欄は設けない）
-      var H2=[600,600,600,260,900,900]; // 合計3860。表の総高は従来どおり4226
-      var r1=putCell(setH(vMerge(rs[1],0,true),H2[0]),0,xpara(f.motivation||"",fitSz(f.motivation,8504,3700,18,12),{}));
+      var H2=[400,400,400,400,400,400]; // 合計2400。400字がゆとりを持って収まる高さ
+      var r1=putCell(setH(vMerge(rs[1],0,true),H2[0]),0,xpara(f.motivation||"",fitSz(f.motivation,8504,2300,18,12),{}));
       var rest="";
       for(var bi=2;bi<=6;bi++)rest+=setH(vMerge(rs[bi],0,false),H2[bi-1]);
       return head+hd0+r1+rest+"</w:tbl>";
@@ -548,8 +548,8 @@ const generateDocx=async function(){
       var out=setH(rs[0],366)+two(rs[1],454,d1,d2)+two(rs[2],454,d3,d4)+two(rs[3],454,tc1,tc2)+two(rs[4],454,tc3,"")+two(rs[5],366,vt,mt);
       out+=putCell(setH(vMerge(vMerge(rs[6],0,true),1,true),454),1,xpara(f.chars||"",fitSz(f.chars,7610,2270,18,12),{}));
       for(var i=7;i<=10;i++)out+=setH(vMerge(vMerge(rs[i],0,false),1,false),454);
-      out+=putCell(setH(vMerge(vMerge(rs[11],0,true),1,true),284),1,xpara(f.accoms||"",fitSz(f.accoms,7610,567,18,12),{}));
-      out+=setH(vMerge(vMerge(rs[12],0,false),1,false),283);
+      out+=putCell(setH(vMerge(vMerge(rs[11],0,true),1,true),1000),1,xpara(f.accoms||"",fitSz(f.accoms,7610,2000,18,12),{}));
+      out+=setH(vMerge(vMerge(rs[12],0,false),1,false),1027);
       return t.substring(0,t.indexOf(rs[0]))+out+"</w:tbl>";
     });
     xml=xml.replace("約　　　　時間　　　　分","約　"+f.commuteH+"　時間　"+f.commuteM+"　分");
@@ -699,7 +699,7 @@ var valC={border:IN,padding:"3px 6px",fontSize:11,textAlign:"center",verticalAli
 var hd={border:IN,padding:"3px",fontSize:10.5,textAlign:"center",letterSpacing:1};
 var box={...val,verticalAlign:"top",whiteSpace:"pre-wrap",overflow:"hidden",fontSize:10.5,lineHeight:1.55,padding:"5px 8px"};
 var now=new Date();
-var photo=f.photoPreview?<img src={f.photoPreview} style={{width:96,height:128,objectFit:"cover"}}/>:<div style={{width:96,height:128,border:"1px dashed #aaa",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#999",fontSize:8,textAlign:"center",margin:"0 auto",lineHeight:1.5}}>写真貼付欄<br/>縦40mm<br/>横30mm</div>;
+var photo=f.photoPreview?<img src={f.photoPreview} style={{width:99,height:132,objectFit:"cover",display:"block",margin:"0 auto"}}/>:<div style={{width:99,height:132,border:"1px dashed #aaa",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#999",fontSize:8,textAlign:"center",margin:"0 auto",lineHeight:1.5}}>写真貼付欄<br/>縦40mm<br/>横30mm</div>;
 // 高さを固定した内枠。文字量が増えても枠が広がらず、他の行が押し下げられない
 var fix=function(v,h,st){return <div style={{height:h,overflow:"hidden",...(st||{})}}>{v}</div>;};
 var LB={...lab,padding:"2px 4px"};
@@ -710,10 +710,10 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 <div style={{fontSize:10.5,paddingBottom:3}}>{now.getFullYear()}年　{now.getMonth()+1}月　{now.getDate()}日　現在</div>
 </div>
 <table style={tbl}><colgroup><col style={{width:"13%"}}/><col/><col style={{width:"12%"}}/><col style={{width:"20%"}}/><col style={{width:"104px"}}/></colgroup><tbody>
-<tr><td style={LB}>ふりがな</td><td style={val} colSpan={3}>{fix(f.furigana,24)}</td><td rowSpan={4} style={{...val,textAlign:"center",verticalAlign:"middle",padding:4}}>{photo}</td></tr>
-<tr><td style={LB}>氏名</td><td style={{...val,fontSize:16,fontWeight:700}} colSpan={3}>{fix(f.name,40,{lineHeight:"40px"})}</td></tr>
-<tr><td style={LB}>生年月日</td><td style={val} colSpan={3}>{fix(f.birthYear&&(f.birthYear+"年 "+f.birthMonth+"月 "+f.birthDay+"日生　（満 "+age+" 歳）　　"+f.gender),28,{lineHeight:"28px"})}</td></tr>
-<tr><td style={LB}>ふりがな</td><td style={val} colSpan={3}>{fix(f.furiganaAddr,24)}</td></tr>
+<tr><td style={LB}>ふりがな</td><td style={val} colSpan={3}>{fix(f.furigana,24)}</td><td rowSpan={3} style={{...val,textAlign:"center",verticalAlign:"middle",padding:5}}>{photo}</td></tr>
+<tr><td style={LB}>氏名</td><td style={{...val,fontSize:16,fontWeight:700}} colSpan={3}>{fix(f.name,46,{lineHeight:"46px"})}</td></tr>
+<tr><td style={LB}>生年月日</td><td style={val} colSpan={3}>{fix(f.birthYear&&(f.birthYear+"年 "+f.birthMonth+"月 "+f.birthDay+"日生　（満 "+age+" 歳）　　"+f.gender),44,{lineHeight:"44px"})}</td></tr>
+<tr><td style={LB}>ふりがな</td><td style={val} colSpan={4}>{fix(f.furiganaAddr,24)}</td></tr>
 <tr><td style={LB}>現住所</td><td style={val} colSpan={4}>{fix((f.zip?("〒"+f.zip+"　"):"")+f.address,32)}</td></tr>
 <tr><td style={LB}>電話</td><td style={val}>{fix(f.phone,24)}</td><td style={LB}>携帯</td><td style={val} colSpan={2}>{fix(f.mobile,24)}</td></tr>
 <tr><td style={LB}>最寄り駅</td><td style={val} colSpan={4}>{fix((f.nearLine||f.nearStation||f.walkMin)?((f.nearLine||"")+"線　"+(f.nearStation||"")+"駅　徒歩"+(f.walkMin||"")+"分"):"",24)}</td></tr>
@@ -732,7 +732,7 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 </tbody></table>
 <table style={tbl}><tbody>
 <tr><td style={hd}>志望動機</td></tr>
-<tr><td style={box}>{fix(f.motivation,296)}</td></tr>
+<tr><td style={box}>{fix(f.motivation,186)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
 <tr><td style={hd} colSpan={4}>障がいについて</td></tr>
@@ -742,7 +742,7 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 <tr><td style={LB}>手帳③</td><td style={val}>{fix(th3,24)}</td><td style={LB}></td><td style={val}>{fix("",24)}</td></tr>
 <tr><td style={LB}>通院</td><td style={val}>{fix(visitV,24)}</td><td style={LB}>服薬</td><td style={val}>{fix(medV,24)}</td></tr>
 <tr><td style={LB}>現状</td><td style={box} colSpan={3}>{fix(f.chars,110)}</td></tr>
-<tr><td style={LB}>必要な配慮</td><td style={box} colSpan={3}>{fix(f.accoms,64)}</td></tr>
+<tr><td style={LB}>必要な配慮</td><td style={box} colSpan={3}>{fix(f.accoms,174)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"16%"}}/><col/><col style={{width:"24%"}}/><col/></colgroup><tbody>
 <tr><td style={LB}>通勤時間</td><td style={valC}>{fix((f.commuteH||f.commuteM)?("約 "+(f.commuteH||0)+" 時間 "+(f.commuteM||0)+" 分"):"",26,{lineHeight:"26px"})}</td><td style={LB}>扶養家族数（配偶者を除く）</td><td style={valC}>{fix(f.familyCount!==""?f.familyCount+" 人":"",26,{lineHeight:"26px"})}</td></tr>
