@@ -245,7 +245,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-01-g"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-01-h"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -602,10 +602,14 @@ const generateDocx=async function(){
       for(var i=0;i<rs.length;i++){
         var r=setH(rs[i],H[i]||360);
         if(i<3){
+          // テンプレートは写真欄の列を「省略する」指定(gridAfter/wAfter)で空けている。
+          // セルを足すならこの指定を外さないと、行の列構成が矛盾して幅が崩れる
+          r=r.replace(/<w:gridAfter[^>]*\/>/,"").replace(/<w:wAfter[^>]*\/>/,"");
           // 写真欄のセルは写真の有無にかかわらず必ず入れる。固定幅では先頭行の
           // セル構成が表全体の幅を決めるため、欠けていると表ごと縮んでしまう
           var body=(i===0&&photoXml)?('<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/><w:jc w:val="center"/></w:pPr>'+photoXml+'</w:p>')
                                     :'<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr></w:p>';
+          // 3行分を縦結合して1つの枠にする（写真4cmを収めるため高さが必要）
           var vm=(i===0)?'<w:vMerge w:val="restart"/>':'<w:vMerge/>';
           // 写真が無いときは枠線を消す（テンプレートの写真貼付欄の枠と二重にならないよう）
           var bd=photoXml?'':'<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>';
@@ -676,7 +680,7 @@ const generateDocx=async function(){
             else b=b+LAY;
             // 幅は「本文幅に対して100%」で指定する。dxaの絶対値指定だけだと
             // 自動調整に負けて表ごとに幅が変わることがある（pctは50分の1%単位）
-            return '<w:tblPr><w:tblW w:w="5000" w:type="pct"/>'+b+'</w:tblPr>';
+            return '<w:tblPr><w:tblW w:w="'+sum+'" w:type="dxa"/>'+b+'</w:tblPr>';
           });
         }
         out+=xml.substring(i,st)+t;i=en;
