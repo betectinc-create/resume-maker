@@ -245,7 +245,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-01-n"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-01-o"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -742,7 +742,7 @@ var lab={border:IN,padding:"2px 4px",fontSize:10.5,textAlign:"center",verticalAl
 var val={border:IN,padding:"3px 7px",fontSize:11,verticalAlign:"middle",wordBreak:"break-word",lineHeight:1.4};
 var valC={border:IN,padding:"3px 6px",fontSize:11,textAlign:"center",verticalAlign:"middle",lineHeight:1.4};
 var hd={border:IN,padding:"3px",fontSize:10.5,textAlign:"center",letterSpacing:1};
-var box={...val,verticalAlign:"top",whiteSpace:"pre-wrap",overflow:"hidden",fontSize:10.5,lineHeight:1.55,padding:"5px 8px"};
+var box={...val,verticalAlign:"top",whiteSpace:"pre-wrap",overflow:"hidden",fontSize:10.5,lineHeight:1.45,padding:"5px 8px"};
 var now=new Date();
 var photo=f.photoPreview?<img src={f.photoPreview} style={{width:118,height:157,objectFit:"cover",display:"block",border:"1px solid #000"}}/>:<div style={{width:118,height:157,border:"1px solid #000",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#999",fontSize:8,textAlign:"center",margin:"0 auto",lineHeight:1.5}}>写真貼付欄<br/>縦40mm<br/>横30mm</div>;
 // 高さを固定した内枠。文字量が増えても枠が広がらず、他の行が押し下げられない
@@ -782,7 +782,7 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 </tbody></table>
 <table style={tbl}><tbody>
 <tr><td style={hd}>{fix("志望動機",26,{lineHeight:"26px"})}</td></tr>
-<tr><td style={box}>{fix(f.motivation,186)}</td></tr>
+<tr><td style={box}>{fix(f.motivation,128)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
 <tr><td style={hd} colSpan={4}>{fix("障がいについて",26,{lineHeight:"26px"})}</td></tr>
@@ -791,8 +791,8 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 <tr><td style={LB}>手帳①</td><td style={val}>{fix(th1,24)}</td><td style={LB}>手帳②</td><td style={val}>{fix(th2,24)}</td></tr>
 <tr><td style={LB}>手帳③</td><td style={val}>{fix(th3,24)}</td><td style={LB}></td><td style={val}>{fix("",24)}</td></tr>
 <tr><td style={LB}>通院</td><td style={val}>{fix(visitV,24)}</td><td style={LB}>服薬</td><td style={val}>{fix(medV,24)}</td></tr>
-<tr><td style={LB}>現状</td><td style={box} colSpan={3}>{fix(f.chars,100)}</td></tr>
-<tr><td style={LB}>必要な配慮</td><td style={box} colSpan={3}>{fix(f.accoms,84)}</td></tr>
+<tr><td style={LB}>現状</td><td style={box} colSpan={3}>{fix(f.chars,96)}</td></tr>
+<tr><td style={LB}>必要な配慮</td><td style={box} colSpan={3}>{fix(f.accoms,80)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"27%"}}/><col style={{width:"20%"}}/></colgroup><tbody>
 <tr><td style={LB}>通勤時間</td><td style={valC}>{fix((f.commuteH||f.commuteM)?("約 "+(f.commuteH||0)+" 時間 "+(f.commuteM||0)+" 分"):"",26,{lineHeight:"26px"})}</td><td style={{...LB,fontSize:9.5}}>扶養家族数（配偶者除く）</td><td style={valC}>{fix(f.familyCount!==""?f.familyCount+" 人":"",26,{lineHeight:"26px"})}</td></tr>
