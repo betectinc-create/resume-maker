@@ -40,7 +40,7 @@ var googleProvider=new firebase.auth.GoogleAuthProvider();
     .lc-tight{font-size:11px!important;white-space:nowrap;}
     .print-resume{display:none;}
     /* PDFはA4比率の固定サイズ枠に描画する（入力量でレイアウトが変わらない） */
-    .pdf-page{width:760px;height:1116px;overflow:hidden;background:#fff;}
+    .pdf-page{width:760px;height:1116px;overflow:hidden;background:#fff;padding:0 38px;}
     #pdfHost{position:fixed;left:-20000px;top:0;display:none;z-index:-1;}
     #pdfHost .print-resume{display:block!important;}
     @page{size:A4;margin:10mm;}
@@ -525,13 +525,12 @@ const generateDocx=async function(){
       var rs=rowsOf(t);if(rs.length<7)return t;
       var head=t.substring(0,t.indexOf(rs[0])); // 表の定義部。行を書き換える前に確保しておく
       var hd0=putCell(setH(rs[0],366),0,xpara("志望動機",18,{jc:"center",bold:true,auto:true}));
-      // 上の大きい枠が志望動機、下の枠が自己PR
-      var r1=putCell(setH(vMerge(rs[1],0,true),600),0,xpara(f.motivation||"",fitSz(f.motivation,8702,1800,18,12),{}));
-      var lab=setBorders(putCell(setH(rs[4],260),0,xpara("自己PR",18,{bold:true,line:240})),0,RULE);
-      var r5=putCell(setH(vMerge(rs[5],0,true),900),0,xpara(f.selfPR||"",fitSz(f.selfPR,8702,1800,18,12),{}));
-      return head+hd0+r1
-        +setH(vMerge(rs[2],0,false),600)+setH(vMerge(rs[3],0,false),600)
-        +lab+r5+setH(vMerge(rs[6],0,false),900)+"</w:tbl>";
+      // 志望動機を1つの大きな枠にする（自己PR欄は設けない）
+      var H2=[600,600,600,260,900,900]; // 合計3860。表の総高は従来どおり4226
+      var r1=putCell(setH(vMerge(rs[1],0,true),H2[0]),0,xpara(f.motivation||"",fitSz(f.motivation,8504,3700,18,12),{}));
+      var rest="";
+      for(var bi=2;bi<=6;bi++)rest+=setH(vMerge(rs[bi],0,false),H2[bi-1]);
+      return head+hd0+r1+rest+"</w:tbl>";
     });
     var d1=f.dis1name==="その他"?f.dis1other:f.dis1name;
     var d2=f.dis2name==="その他"?f.dis2other:f.dis2name;
@@ -733,9 +732,7 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 </tbody></table>
 <table style={tbl}><tbody>
 <tr><td style={hd}>志望動機</td></tr>
-<tr><td style={{...box,borderBottom:"none"}}>{fix(f.motivation,150)}</td></tr>
-<tr><td style={{...lab,textAlign:"left",padding:"1px 7px"}}>自己PR</td></tr>
-<tr><td style={{...box,borderTop:"none"}}>{fix(f.selfPR,120)}</td></tr>
+<tr><td style={box}>{fix(f.motivation,296)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
 <tr><td style={hd} colSpan={4}>障がいについて</td></tr>
