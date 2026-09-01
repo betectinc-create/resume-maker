@@ -460,6 +460,8 @@ const generateDocx=async function(){
     var bin=Uint8Array.from(atob(TMPL_B64),function(c){return c.charCodeAt(0);});
     var zp=await window.JSZip.loadAsync(bin);
     var xml=await zp.file("word/document.xml").async("string");
+    // 左右の余白をPDFと同じ27.2mmにする（元の30mmでは表が狭く見えていた）
+    xml=xml.replace(/(<w:pgMar[^>]*?)w:right="\d+"/,'$1w:right="1541"').replace(/(<w:pgMar[^>]*?)w:left="\d+"/,'$1w:left="1541"');
     // テンプレート由来のフォント指定も游明朝に置き換える（Macで「見つからないフォント」になるため）
     xml=xml.replace(/ＭＳ 明朝|ＭＳ ゴシック|ＭＳ Ｐ明朝|ＭＳ Ｐゴシック|Century/g,DOCFONT);
     var st0=await zp.file("word/styles.xml").async("string");
@@ -527,7 +529,7 @@ const generateDocx=async function(){
       var hd0=putCell(setH(rs[0],366),0,xpara("志望動機",18,{jc:"center",bold:true,auto:true}));
       // 志望動機を1つの大きな枠にする（自己PR欄は設けない）
       var H2=[400,400,400,400,400,400]; // 合計2400。400字がゆとりを持って収まる高さ
-      var r1=putCell(setH(vMerge(rs[1],0,true),H2[0]),0,xpara(f.motivation||"",fitSz(f.motivation,8504,2300,18,12),{}));
+      var r1=putCell(setH(vMerge(rs[1],0,true),H2[0]),0,xpara(f.motivation||"",fitSz(f.motivation,8824,2300,18,12),{}));
       var rest="";
       for(var bi=2;bi<=6;bi++)rest+=setH(vMerge(rs[bi],0,false),H2[bi-1]);
       return head+hd0+r1+rest+"</w:tbl>";
@@ -637,14 +639,14 @@ const generateDocx=async function(){
         var gEnd=t.indexOf("</w:tblGrid>");
         var sum=0,m,re=/<w:gridCol w:w="(\d+)"/g,g=t.substring(0,gEnd);
         while((m=re.exec(g))!==null)sum+=parseInt(m[1]);
-        if(sum>0&&sum!==8504){
-          // 表ごとに幅が違ううえ、いずれも本文幅(8504)を超過している。最終列で調整して揃える
-          var diff=8504-sum;
+        if(sum>0&&sum!==8824){
+          // 全ての表を8824twips(155.7mm)に統一する。PDF側の内容幅と同じ寸法
+          var diff=8824-sum;
           t=t.substring(0,gEnd).replace(/<w:gridCol w:w="(\d+)"\/>(?![\s\S]*<w:gridCol)/,function(w,v){return '<w:gridCol w:w="'+(parseInt(v)+diff)+'"/>';})+t.substring(gEnd);
           t=t.replace(/<w:tr[ >][\s\S]*?<\/w:tr>/g,function(row){
             return row.replace(/<w:tcW w:w="(\d+)"([^>]*)\/>(?![\s\S]*<w:tcW)/,function(w,v,rest){return '<w:tcW w:w="'+(parseInt(v)+diff)+'"'+rest+'/>';});
           });
-          sum=8504;
+          sum=8824;
         }
         if(sum>0){
           t=t.replace(/<w:tblPr>([\s\S]*?)<\/w:tblPr>/,function(w,inner){
