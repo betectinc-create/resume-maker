@@ -245,7 +245,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-01-j"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-01-k"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -597,7 +597,7 @@ const generateDocx=async function(){
     xml=putTbl(xml,"ふりがな",function(t){
       var rs=rowsOf(t);if(rs.length<10)return t;
       // 写真欄(右上)は3行分を縦結合したセル。写真4cm＋余白が入る高さを確保する
-      var H=[400,1100,950,260,900,300,260,900,300,380];
+      var H=[380,1300,610,260,900,300,260,900,300,380];
       var out="";
       for(var i=0;i<rs.length;i++){
         var r=setH(rs[i],H[i]||360);
@@ -611,8 +611,8 @@ const generateDocx=async function(){
                                     :'<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr></w:p>';
           // 3行分を縦結合して1つの枠にする（写真4cmを収めるため高さが必要）
           var vm=(i===0)?'<w:vMerge w:val="restart"/>':'<w:vMerge/>';
-          // 写真が無いときは枠線を消す（テンプレートの写真貼付欄の枠と二重にならないよう）
-          var bd=photoXml?'':'<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>';
+          // 写真欄は枠線を出さない（写真そのものの輪郭だけを見せる）
+          var bd='<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>';
           r=r.replace(/<\/w:tr>$/,'<w:tc><w:tcPr><w:tcW w:w="2654" w:type="dxa"/>'+vm+bd+'<w:vAlign w:val="center"/></w:tcPr>'+body+'</w:tc></w:tr>');
         }
         out+=r;
@@ -734,7 +734,7 @@ var valC={border:IN,padding:"3px 6px",fontSize:11,textAlign:"center",verticalAli
 var hd={border:IN,padding:"3px",fontSize:10.5,textAlign:"center",letterSpacing:1};
 var box={...val,verticalAlign:"top",whiteSpace:"pre-wrap",overflow:"hidden",fontSize:10.5,lineHeight:1.55,padding:"5px 8px"};
 var now=new Date();
-var photo=f.photoPreview?<img src={f.photoPreview} style={{width:113,height:151,objectFit:"cover",display:"block",border:"1px solid #000"}}/>:<div style={{width:113,height:151,border:"1px solid #000",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#999",fontSize:8,textAlign:"center",margin:"0 auto",lineHeight:1.5}}>写真貼付欄<br/>縦40mm<br/>横30mm</div>;
+var photo=f.photoPreview?<img src={f.photoPreview} style={{width:118,height:157,objectFit:"cover",display:"block",border:"1px solid #000"}}/>:<div style={{width:118,height:157,border:"1px solid #000",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#999",fontSize:8,textAlign:"center",margin:"0 auto",lineHeight:1.5}}>写真貼付欄<br/>縦40mm<br/>横30mm</div>;
 // 高さを固定した内枠。文字量が増えても枠が広がらず、他の行が押し下げられない
 var fix=function(v,h,st){return <div style={{height:h,overflow:"hidden",...(st||{})}}>{v}</div>;};
 var LB={...lab,padding:"2px 4px"};
@@ -746,9 +746,9 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 </div>
 <div style={{display:"flex",alignItems:"flex-start",marginBottom:4}}>
 <table style={{...tbl,marginBottom:0,width:"calc(100% - 142px)"}}><colgroup><col style={{width:"96px"}}/><col/></colgroup><tbody>
-<tr><td style={LB}>ふりがな</td><td style={val}>{fix(f.furigana,24)}</td></tr>
-<tr><td style={LB}>氏名</td><td style={{...val,fontSize:16,fontWeight:700}}>{fix(f.name,46,{lineHeight:"46px"})}</td></tr>
-<tr><td style={LB}>生年月日</td><td style={val}>{fix(f.birthYear&&(f.birthYear+"年 "+f.birthMonth+"月 "+f.birthDay+"日生 （満 "+age+" 歳）　"+f.gender),44,{lineHeight:"44px"})}</td></tr>
+<tr><td style={LB}>ふりがな</td><td style={val}>{fix(f.furigana,30)}</td></tr>
+<tr><td style={LB}>氏名</td><td style={{...val,fontSize:16,fontWeight:700}}>{fix(f.name,54,{lineHeight:"54px"})}</td></tr>
+<tr><td style={LB}>生年月日</td><td style={val}>{fix(f.birthYear&&(f.birthYear+"年 "+f.birthMonth+"月 "+f.birthDay+"日生 （満 "+age+" 歳）　"+f.gender),51,{lineHeight:"51px"})}</td></tr>
 </tbody></table>
 <div style={{width:142,display:"flex",justifyContent:"center",alignItems:"flex-start"}}>{photo}</div>
 </div>
