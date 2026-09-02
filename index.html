@@ -145,13 +145,13 @@ const S0=()=> <div className="space-y-4">
 <div className="mb-3"><label className={lc}>郵便番号</label><div className="flex gap-2"><input className={ic+" flex-1"} placeholder="1234567" value={f.zip} onChange={u("zip")}/><button onClick={lookupZip} className="px-4 py-2 rounded-lg text-xs font-bold text-white whitespace-nowrap" style={{background:O[500]}}>住所検索</button></div></div>
 <div className="mb-3"><label className={lc}>住所ふりがな</label><input className={ic} value={f.furiganaAddr} onChange={u("furiganaAddr")}/></div>
 <div className="mb-3"><label className={lc}>住所</label><input className={ic} value={f.address} onChange={u("address")}/></div>
-<div className="grid grid-cols-3 gap-3 mb-3"><div><label className={lc}>最寄り線</label><input className={ic} value={f.nearLine} onChange={u("nearLine")}/></div><div><label className={lc}>最寄り駅</label><input className={ic} value={f.nearStation} onChange={u("nearStation")}/></div><div><label className={lc}>徒歩（分）</label><input className={ic} type="number" min="0" value={f.walkMin} onChange={e=>setF(p=>({...p,walkMin:Math.max(0,parseInt(e.target.value)||0).toString()}))} placeholder="0"/></div></div>
-<div className="grid grid-cols-3 gap-3 mb-3"><div><label className={lc}>電話番号</label><input className={ic} value={f.phone} onChange={u("phone")}/></div><div><label className={lc}>携帯</label><input className={ic} value={f.mobile} onChange={u("mobile")}/></div><div><label className={lc}>FAX</label><input className={ic} value={f.fax} onChange={u("fax")}/></div></div>
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3"><div><label className={lc}>最寄り線</label><input className={ic} value={f.nearLine} onChange={u("nearLine")}/></div><div><label className={lc}>最寄り駅</label><input className={ic} value={f.nearStation} onChange={u("nearStation")}/></div><div><label className={lc}>徒歩（分）</label><input className={ic} type="number" min="0" value={f.walkMin} onChange={e=>setF(p=>({...p,walkMin:Math.max(0,parseInt(e.target.value)||0).toString()}))} placeholder="0"/></div></div>
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3"><div><label className={lc}>電話番号</label><input className={ic} value={f.phone} onChange={u("phone")}/></div><div><label className={lc}>携帯</label><input className={ic} value={f.mobile} onChange={u("mobile")}/></div><div><label className={lc}>FAX</label><input className={ic} value={f.fax} onChange={u("fax")}/></div></div>
 <div className="mb-3"><label className={lc}>E-mail</label><input className={ic} value={f.email} onChange={u("email")}/></div>
 <hr className="my-3 border-yellow-300"/><p className="text-xs text-gray-400 mb-2">連絡先（現住所以外の場合のみ）</p>
 <div className="grid grid-cols-2 gap-3 mb-2"><div><label className={lc}>連絡先ふりがな</label><input className={ic} value={f.furiganaContact} onChange={u("furiganaContact")}/></div><div><label className={lc}>連絡先〒</label><input className={ic} value={f.contactZip} onChange={u("contactZip")}/></div></div>
 <div className="mb-2"><label className={lc}>連絡先住所</label><input className={ic} value={f.contactAddr} onChange={u("contactAddr")}/></div>
-<div className="grid grid-cols-3 gap-3"><div><label className={lc}>電話</label><input className={ic} value={f.contactPhone} onChange={u("contactPhone")}/></div><div><label className={lc}>携帯</label><input className={ic} value={f.contactMobile} onChange={u("contactMobile")}/></div><div><label className={lc}>FAX</label><input className={ic} value={f.contactFax} onChange={u("contactFax")}/></div></div>
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-3"><div><label className={lc}>電話</label><input className={ic} value={f.contactPhone} onChange={u("contactPhone")}/></div><div><label className={lc}>携帯</label><input className={ic} value={f.contactMobile} onChange={u("contactMobile")}/></div><div><label className={lc}>FAX</label><input className={ic} value={f.contactFax} onChange={u("contactFax")}/></div></div>
 </div>
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>通勤・家族</h3>
 <div className="grid grid-cols-2 gap-3 mb-3"><div><label className={lc}>通勤（時間）</label><select className={sc2} value={f.commuteH} onChange={u("commuteH")}><option value="">-</option>{[0,1,2,3].map(h=> <option key={h}>{h}</option>)}</select></div><div><label className={lc}>通勤（分）</label><select className={sc2} value={f.commuteM} onChange={u("commuteM")}><option value="">-</option>{[0,5,10,15,20,25,30,35,40,45,50,55].map(m=> <option key={m}>{m}</option>)}</select></div></div>
@@ -162,7 +162,7 @@ const S1=()=> <div className="space-y-4">
 <div className={cc}><div className="flex justify-between items-center mb-2"><h3 className={hc} style={{color:O[700]}}>学歴</h3>{f.education.length<ME&&<button onClick={()=>setF(p=>({...p,education:[...p.education,{year:"",month:"",type:"",name:"",dept:"",sub:"",sfx:""}]}))} style={{color:O[600]}} className="text-xs font-bold">＋追加</button>}</div>
 {f.education.map((ed,i)=> <div key={i} className="rounded-xl p-3 mb-3" style={{background:"#FAFAFA",border:"1px solid #E5E7EB",borderRadius:12}}>
 <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-gray-500">学歴{i+1}</span>{f.education.length>1&&<button onClick={()=>setF(p=>({...p,education:p.education.filter((_,j)=>j!==i)}))} className="text-red-400 text-xs font-bold">削除</button>}</div>
-<div className="grid grid-cols-4 gap-2 mb-2">
+<div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
 <div><label className={lc}>年</label><select className={sc2} value={ed.year} onChange={e=>uE(i,"year",e.target.value)}><option value="">年</option>{YRS.map(y=> <option key={y}>{y}</option>)}</select></div>
 <div><label className={lc}>月</label><select className={sc2} value={ed.month} onChange={e=>uE(i,"month",e.target.value)}><option value="">月</option>{MOS.map(m=> <option key={m}>{m}</option>)}</select></div>
 <div><label className={lc}>種別</label><select className={sc2} value={ed.type} onChange={e=>uE(i,"type",e.target.value)}><option value="">選択</option>{Object.keys(ST).map(t=> <option key={t}>{t}</option>)}</select>{ed.type==="その他"&&<p className="text-xs text-amber-600 mt-1">学校名を直接入力してください</p>}</div>
@@ -175,11 +175,11 @@ const S1=()=> <div className="space-y-4">
 <div className={cc}><div className="flex justify-between items-center mb-2"><h3 className={hc} style={{color:O[700]}}>職歴</h3>{f.work.length<MW&&<button onClick={()=>setF(p=>({...p,work:[...p.work,{year:"",month:"",company:"",sfx:""}]}))} style={{color:O[600]}} className="text-xs font-bold">＋追加</button>}</div>
 {f.work.map((w,i)=> <div key={i} className="rounded-xl p-3 mb-3" style={{background:"#FAFAFA",border:"1px solid #E5E7EB",borderRadius:12}}>
 <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-gray-500">{f.isPartTime?"バイト":"職歴"}{i+1}</span>{f.work.length>1&&<button onClick={()=>setF(p=>({...p,work:p.work.filter((_,j)=>j!==i)}))} className="text-red-400 text-xs font-bold">削除</button>}</div>
-<div className="grid grid-cols-4 gap-2">
+<div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
 <div><label className={lc}>年</label><select className={sc2} value={w.year} onChange={e=>uW(i,"year",e.target.value)}><option value="">年</option>{YRS.map(y=> <option key={y}>{y}</option>)}</select></div>
 <div><label className={lc}>月</label><select className={sc2} value={w.month} onChange={e=>uW(i,"month",e.target.value)}><option value="">月</option>{MOS.map(m=> <option key={m}>{m}</option>)}</select></div>
-<div><label className={lc}>{f.isPartTime?"店名":"会社名"}</label><input className={ic} value={w.company} onChange={e=>uW(i,"company",e.target.value)}/></div>
-<div><label className={lc}>区分</label><select className={sc2} value={w.sfx} onChange={e=>uW(i,"sfx",e.target.value)}><option value="">選択</option>{WS.map(s=> <option key={s}>{s}</option>)}</select></div>
+<div className="col-span-2 sm:col-span-1"><label className={lc}>{f.isPartTime?"店名":"会社名"}</label><input className={ic} value={w.company} onChange={e=>uW(i,"company",e.target.value)}/></div>
+<div className="col-span-2 sm:col-span-1"><label className={lc}>区分</label><select className={sc2} value={w.sfx} onChange={e=>uW(i,"sfx",e.target.value)}><option value="">選択</option>{WS.map(s=> <option key={s}>{s}</option>)}</select></div>
 </div></div>)}
 </div></div>;
 
@@ -187,7 +187,7 @@ const S2=()=> <div className={cc}>
 <div className="flex justify-between items-center mb-3"><h3 className={hc} style={{color:O[700]}}>資格・免許</h3>{f.quals.length<MQ&&<button onClick={()=>setF(p=>({...p,quals:[...p.quals,{name:"",custom:"",year:"",month:""}]}))} style={{color:O[600]}} className="text-xs font-bold">＋追加</button>}</div>
 {f.quals.map((q,i)=> <div key={i} className="mb-4 p-3 rounded-xl" style={{background:"#FAFAFA",border:"1px solid #E5E7EB",borderRadius:12}}>
 <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-gray-500">資格{i+1}</span>{f.quals.length>1&&<button onClick={()=>setF(p=>({...p,quals:p.quals.filter((_,j)=>j!==i)}))} className="text-red-400 text-xs font-bold">削除</button>}</div>
-<div className="grid grid-cols-4 gap-2 mb-2">
+<div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
 <div><label className={lc}>取得年</label><select className={sc2} value={q.year} onChange={e=>uQ(i,"year",e.target.value)}><option value="">年</option>{YRS.map(y=> <option key={y}>{y}</option>)}</select></div>
 <div><label className={lc}>月</label><select className={sc2} value={q.month} onChange={e=>uQ(i,"month",e.target.value)}><option value="">月</option>{MOS.map(m=> <option key={m}>{m}</option>)}</select></div>
 <div className="col-span-2"><label className={lc}>資格名</label><select className={sc2} value={q.name} onChange={e=>uQ(i,"name",e.target.value)}><option value="">選択</option>{CQ.map(c=> <option key={c}>{c}</option>)}</select></div>
@@ -250,7 +250,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-02-b"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-02-c"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -407,7 +407,15 @@ const saveToCloud=async function(){
   // 保存と一覧取得は分けて扱う。一覧の取得に失敗しても保存自体は成功しているため
   try{
     var key=await deriveKey(user.uid);
-    var encryptedData=await encryptData(key,{...f,photoPreview:null});
+    // 写真も含めて保存する。Firestoreの1ドキュメント上限は1MBなので、
+    // 写真が大きい場合のみ除外して本文だけでも保存できるようにする
+    var payload={...f};
+    var encryptedData=await encryptData(key,payload);
+    if(JSON.stringify(encryptedData).length>900000){
+      payload={...f,photoPreview:null};
+      encryptedData=await encryptData(key,payload);
+      tt("写真が大きいため写真以外を保存します");
+    }
     var data={uid:user.uid,name:f.name||"無題",encryptedData:encryptedData,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
     await fbDb.collection("resumes").add(data);
   }catch(e){
@@ -555,12 +563,13 @@ const generateDocx=async function(){
       var rs=rowsOf(t);if(rs.length<7)return t;
       var head=t.substring(0,t.indexOf(rs[0])); // 表の定義部。行を書き換える前に確保しておく
       var hd0=putCell(setH(rs[0],366),0,xpara("志望動機",18,{jc:"center",bold:true,auto:true}));
-      // 志望動機を1つの大きな枠にする（自己PR欄は設けない）
-      var H2=[400,400,400,400,400,400]; // 合計2400。400字がゆとりを持って収まる高さ
-      var r1=putCell(setH(vMerge(rs[1],0,true),H2[0]),0,xpara(f.motivation||"",fitSz(f.motivation,8824,2300,18,12),{}));
-      var rest="";
-      for(var bi=2;bi<=6;bi++)rest+=setH(vMerge(rs[bi],0,false),H2[bi-1]);
-      return head+hd0+r1+rest+"</w:tbl>";
+      // 上の大枠が志望動機、その下が自己PR
+      var r1=putCell(setH(vMerge(rs[1],0,true),667),0,xpara(f.motivation||"",fitSz(f.motivation,8824,2000,18,12),{}));
+      var lab=setBorders(putCell(setH(rs[4],260),0,xpara("自己PR",18,{bold:true,line:240})),0,RULE);
+      var r5=putCell(setH(vMerge(rs[5],0,true),1000),0,xpara(f.selfPR||"",fitSz(f.selfPR,8824,2000,18,12),{}));
+      return head+hd0+r1
+        +setH(vMerge(rs[2],0,false),667)+setH(vMerge(rs[3],0,false),667)
+        +lab+r5+setH(vMerge(rs[6],0,false),1000)+"</w:tbl>";
     });
     var d1=f.dis1name==="その他"?f.dis1other:f.dis1name;
     var d2=f.dis2name==="その他"?f.dis2other:f.dis2name;
@@ -810,7 +819,9 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 </tbody></table>
 <table style={tbl}><tbody>
 <tr><td style={hd}>{fix("志望動機",26,{lineHeight:"26px"})}</td></tr>
-<tr><td style={box}>{fix(f.motivation,128)}</td></tr>
+<tr><td style={box}>{fix(f.motivation,124)}</td></tr>
+<tr><td style={{...lab,textAlign:"left",padding:"1px 7px"}}>{fix("自己PR",20,{lineHeight:"20px",textAlign:"left"})}</td></tr>
+<tr><td style={box}>{fix(f.selfPR,124)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
 <tr><td style={hd} colSpan={4}>{fix("障がいについて",26,{lineHeight:"26px"})}</td></tr>
@@ -934,7 +945,6 @@ return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'N
 </header>
 <div className="mx-auto px-4 pb-8 noprint" style={{maxWidth:1080,display:"flex",gap:28,alignItems:"flex-start"}}>
 <div style={{flex:1,minWidth:0}}>
-<div className="rounded-xl p-3 mb-6 text-xs" style={{background:O[50],border:"1px solid "+O[200],color:O[800],borderRadius:16}}><b>個人情報は収集しません。</b>ブラウザ上のみで処理。</div>
 {pg==="form"&&<>
 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
 {STP.map((s,i)=> <button key={i} onClick={()=>setStep(i)} className="whitespace-nowrap rounded-xl font-bold flex-shrink-0" style={{background:step===i?"#E87830":"transparent",color:step===i?"white":"#9CA3AF",border:step===i?"2px solid #E87830":"1px solid #E5E7EB",fontWeight:700,fontSize:10,padding:"8px 10px",overflow:"hidden",textOverflow:"ellipsis",maxWidth:120}}>{i+1}.{s}</button>)}
