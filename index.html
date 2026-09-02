@@ -68,7 +68,11 @@ var googleProvider=new firebase.auth.GoogleAuthProvider();
 <script type="text/babel">
 const {useState,useEffect}=React;
 
-const YRS=Array.from({length:55},(_,i)=>1970+i);
+const NOWY=new Date().getFullYear();
+// 学歴・職歴・資格の年：1940年から6年後まで（卒業見込み等に対応）。新しい年が先頭
+const YRS=Array.from({length:NOWY+6-1940+1},(_,i)=>NOWY+6-i);
+// 生年：1930年から16年前まで
+const BYRS=Array.from({length:(NOWY-16)-1930+1},(_,i)=>(NOWY-16)-i);
 const MOS=Array.from({length:12},(_,i)=>i+1);
 const DAYS=Array.from({length:31},(_,i)=>i+1);
 const ME=8,MW=8,MQ=5,MP=400;
@@ -137,7 +141,7 @@ const S0=()=> <div className="space-y-4">
 <div className={cc}><h3 className={hc} style={{color:O[700]}}>氏名</h3>
 <div className="grid grid-cols-2 gap-3"><div><label className={lc}>ふりがな</label><input className={ic} placeholder="やまだ たろう" value={f.furigana} onChange={u("furigana")}/></div><div><label className={lc}>氏名</label><input className={ic} placeholder="山田 太郎" value={f.name} onChange={u("name")}/></div></div>
 <div className="grid grid-cols-4 gap-2 mt-3">
-<div><label className={lc}>生年</label><select className={sc2} value={f.birthYear} onChange={u("birthYear")}><option value="">年</option>{YRS.map(y=> <option key={y}>{y}</option>)}</select></div>
+<div><label className={lc}>生年</label><select className={sc2} value={f.birthYear} onChange={u("birthYear")}><option value="">年</option>{BYRS.map(y=> <option key={y}>{y}</option>)}</select></div>
 <div><label className={lc}>月</label><select className={sc2} value={f.birthMonth} onChange={u("birthMonth")}><option value="">月</option>{MOS.map(m=> <option key={m}>{m}</option>)}</select></div>
 <div><label className={lc}>日</label><select className={sc2} value={f.birthDay} onChange={u("birthDay")}><option value="">日</option>{DAYS.map(d=> <option key={d}>{d}</option>)}</select></div>
 <div><label className={lc}>性別</label><select className={sc2} value={f.gender} onChange={u("gender")}><option value="">選択</option><option>男</option><option>女</option><option>回答しない</option></select></div>
@@ -251,7 +255,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-02-i"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-02-j"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
