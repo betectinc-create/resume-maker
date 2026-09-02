@@ -251,7 +251,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-02-g"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-02-h"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -636,7 +636,7 @@ const generateDocx=async function(){
     xml=putTbl(xml,"ふりがな",function(t){
       var rs=rowsOf(t);if(rs.length<10)return t;
       // 写真欄(右上)は3行分を縦結合したセル。写真4cm＋余白が入る高さを確保する
-      var H=[400,1140,788,360,900,360,360,900,360,380];
+      var H=[400,1200,800,360,900,360,360,900,360,380];
       var out="";
       for(var i=0;i<rs.length;i++){
         var r=setH(rs[i],H[i]||360);
@@ -654,6 +654,9 @@ const generateDocx=async function(){
           // テンプレートは写真欄の列を「省略する」指定(gridAfter/wAfter)で空けている。
           // セルを足すならこの指定を外さないと、行の列構成が矛盾して幅が崩れる
           r=r.replace(/<w:gridAfter[^>]*\/>/,"").replace(/<w:wAfter[^>]*\/>/,"");
+          // 写真の行だけは「最低この高さ」にする。固定にすると環境によっては
+          // 画像の行間の分だけ写真が下の欄にはみ出すため、足りなければ行を伸ばす
+          if(photoXml)r=r.replace('<w:trHeight w:hRule="exact"','<w:trHeight w:hRule="atLeast"');
           // 写真欄のセルは写真の有無にかかわらず必ず入れる。固定幅では先頭行の
           // セル構成が表全体の幅を決めるため、欠けていると表ごと縮んでしまう
           var body=(i===0&&photoXml)?('<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="atLeast"/><w:jc w:val="center"/></w:pPr>'+photoXml+'</w:p>')
@@ -776,7 +779,7 @@ var hasContact=f.contactZip||f.contactAddr||f.contactPhone||f.contactMobile;
 // Word（ＭＳ 明朝の履歴書様式）に合わせた体裁。枠線は黒、文字サイズは固定。
 // Wordテンプレートに合わせた体裁：網掛けなし・太字なし・外枠1.5pt/内側0.5ptの黒罫のみ
 var OUT="",IN=""; // 罫線はスタイルシート側(.print-resume)で指定する
-var tbl={width:"100%",borderCollapse:"collapse",tableLayout:"fixed",marginBottom:12};
+var tbl={width:"100%",borderCollapse:"collapse",tableLayout:"fixed",marginBottom:8};
 var lab={padding:"2px 4px",fontSize:10.5,textAlign:"center",verticalAlign:"middle",lineHeight:1.3};
 var val={padding:"3px 7px",fontSize:11,verticalAlign:"middle",wordBreak:"break-word",lineHeight:1.4};
 var valC={padding:"3px 6px",fontSize:11,textAlign:"center",verticalAlign:"middle",lineHeight:1.4};
@@ -822,9 +825,9 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 </tbody></table>
 <table style={tbl}><tbody>
 <tr><td style={hd}>{fixC("自己PR",26)}</td></tr>
-<tr><td style={box}>{fix(f.selfPR,140)}</td></tr>
+<tr><td style={box}>{fix(f.selfPR,105)}</td></tr>
 <tr><td style={hd}>{fixC("志望動機",26)}</td></tr>
-<tr><td style={box}>{fix(f.motivation,140)}</td></tr>
+<tr><td style={box}>{fix(f.motivation,105)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
 <tr><td style={hd} colSpan={4}>{fixC("障がいについて",26)}</td></tr>
@@ -833,8 +836,8 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 <tr><td style={LB}>手帳①</td><td style={val}>{fix(th1,24)}</td><td style={LB}>手帳②</td><td style={val}>{fix(th2,24)}</td></tr>
 <tr><td style={LB}>手帳③</td><td style={val}>{fix(th3,24)}</td><td style={LB}></td><td style={val}>{fix("",24)}</td></tr>
 <tr><td style={LB}>通院</td><td style={val}>{fix(visitV,24)}</td><td style={LB}>服薬</td><td style={val}>{fix(medV,24)}</td></tr>
-<tr><td style={LB}>現状</td><td style={box} colSpan={3}>{fix(f.chars,96)}</td></tr>
-<tr><td style={LB}>必要な配慮</td><td style={box} colSpan={3}>{fix(f.accoms,80)}</td></tr>
+<tr><td style={LB}>現状</td><td style={box} colSpan={3}>{fix(f.chars,105)}</td></tr>
+<tr><td style={LB}>必要な配慮</td><td style={box} colSpan={3}>{fix(f.accoms,145)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"27%"}}/><col style={{width:"20%"}}/></colgroup><tbody>
 <tr><td style={LB}>通勤時間</td><td style={valC}>{fix((f.commuteH||f.commuteM)?("約 "+(f.commuteH||0)+" 時間 "+(f.commuteM||0)+" 分"):"",26,{lineHeight:"26px"})}</td><td style={{...LB,fontSize:9.5}}>扶養家族数（配偶者除く）</td><td style={valC}>{fix(f.familyCount!==""?f.familyCount+" 人":"",26,{lineHeight:"26px"})}</td></tr>
