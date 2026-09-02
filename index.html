@@ -251,7 +251,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-02-f"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-02-g"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -949,9 +949,11 @@ return <div className="min-h-screen" style={{background:'#F5F5F4',fontFamily:"'N
 <div className="mx-auto px-4 pb-8 noprint" style={{maxWidth:1080,display:"flex",gap:28,alignItems:"flex-start"}}>
 <div style={{flex:1,minWidth:0}}>
 {pg==="form"&&<>
-<div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+<div className="flex items-start gap-2 mb-6">
+<div className="flex gap-2 overflow-x-auto pb-2" style={{flex:1,minWidth:0}}>
 {STP.map((s,i)=> <button key={i} onClick={()=>setStep(i)} className="whitespace-nowrap rounded-xl font-bold flex-shrink-0" style={{background:step===i?"#E87830":"transparent",color:step===i?"white":"#9CA3AF",border:step===i?"2px solid #E87830":"1px solid #E5E7EB",fontWeight:700,fontSize:10,padding:"8px 10px",overflow:"hidden",textOverflow:"ellipsis",maxWidth:120}}>{i+1}.{s}</button>)}
-<button onClick={()=>setPg("saves")} className="whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold ml-2" style={{background:"white",color:"#6B7280",border:"1px solid #E5E7EB"}}>保存/読込</button>
+</div>
+<button onClick={()=>setPg("saves")} className="whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold flex-shrink-0" style={{background:"white",color:"#6B7280",border:"1px solid #E5E7EB"}}>保存/読込</button>
 </div>
 {steps[step]()}
 <div className="flex justify-between mt-6 mb-4">
