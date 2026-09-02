@@ -251,7 +251,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-02-d"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-02-e"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -357,7 +357,7 @@ const putTbl=function(xml,marker,fn){var p=xml.indexOf(marker);if(p===-1)return 
 // 指定の幅×高さ(px)に収まる最大のフォントサイズ(px)を返す（PDF側のレイアウト固定用）
 const fitPx=function(text,wPx,hPx,base,min){var t=String(text||"");if(!t)return base;for(var s=base;s>min;s--){var per=Math.max(1,Math.floor(wPx/s));var ln=0;t.split(/\r?\n/).forEach(function(l){ln+=Math.max(1,Math.ceil(l.length/per));});if(ln*s*1.4<=hPx-6)return s;}return min;};
 // 指定の幅×高さ(twips)に収まる最大の文字サイズ(half-point)を返す
-const fitSz=function(text,wTw,hTw,base,min){var t=String(text||"");if(!t)return base;for(var sz=base;sz>min;sz-=2){var per=Math.max(1,Math.floor((wTw-260)/(sz*10)));var ln=0;t.split(/\r?\n/).forEach(function(s){ln+=Math.max(1,Math.ceil(s.length/per));});if(ln*Math.round(sz*LINEF)<=hTw-120)return sz;}return min;};
+const fitSz=function(text,wTw,hTw,base,min){var t=String(text||"");if(!t)return base;for(var sz=base;sz>min;sz-=2){var per=Math.max(1,Math.floor((wTw-260)/(sz*10)));var ln=0;t.split(/\r?\n/).forEach(function(s){ln+=Math.max(1,Math.ceil(s.length/per));});if(ln*Math.round(sz*LINEF)<=hTw-260)return sz;}return min;};
 
 const doLogin=async function(){try{await fbAuth.signInWithPopup(googleProvider);}catch(e){if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/unauthorized-domain"||e.code==="auth/operation-not-supported-in-this-environment")){try{await fbAuth.signInWithRedirect(googleProvider);}catch(re){tt("ログインエラー: "+(re.message||re.code));}}else{tt("ログインエラー: "+(e.message||e.code));}}};
 const doLogout=function(){fbAuth.signOut();};
@@ -563,11 +563,12 @@ const generateDocx=async function(){
     xml=putTbl(xml,"自己",function(t){
       var rs=rowsOf(t);if(rs.length<7)return t;
       var head=t.substring(0,t.indexOf(rs[0])); // 表の定義部。行を書き換える前に確保しておく
-      var hd0=putCell(setH(rs[0],366),0,xpara("志望動機",18,{jc:"center",bold:true,auto:true}));
-      // 上の大枠が志望動機、その下が自己PR
-      var r1=putCell(setH(vMerge(rs[1],0,true),667),0,xpara(f.motivation||"",fitSz(f.motivation,8824,2000,18,12),{}));
-      var lab=setBorders(putCell(setH(rs[4],260),0,xpara("自己PR",18,{bold:true,line:240,jc:"center"})),0,RULE);
-      var r5=putCell(setH(vMerge(rs[5],0,true),1000),0,xpara(f.selfPR||"",fitSz(f.selfPR,8824,2000,18,12),{}));
+      var hd0=putCell(setH(rs[0],366),0,xpara("自己PR",18,{jc:"center",bold:true,auto:true}));
+      // 上の大枠が自己PR、その下が志望動機。文字サイズは両方の小さい方に揃える
+      var szBoth=Math.min(fitSz(f.selfPR,8824,2000,18,12),fitSz(f.motivation,8824,2000,18,12));
+      var r1=putCell(setH(vMerge(rs[1],0,true),667),0,xpara(f.selfPR||"",szBoth,{}));
+      var lab=setBorders(putCell(setH(rs[4],260),0,xpara("志望動機",18,{bold:true,line:240,jc:"center"})),0,RULE);
+      var r5=putCell(setH(vMerge(rs[5],0,true),1000),0,xpara(f.motivation||"",szBoth,{}));
       return head+hd0+r1
         +setH(vMerge(rs[2],0,false),667)+setH(vMerge(rs[3],0,false),667)
         +lab+r5+setH(vMerge(rs[6],0,false),1000)+"</w:tbl>";
@@ -785,6 +786,7 @@ var now=new Date();
 var photo=f.photoPreview?<img src={f.photoPreview} style={{width:118,height:157,objectFit:"cover",display:"block",border:"1px solid #000"}}/>:<div style={{width:118,height:157,border:"1px solid #000",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#999",fontSize:8,textAlign:"center",margin:"0 auto",lineHeight:1.5}}>写真貼付欄<br/>縦40mm<br/>横30mm</div>;
 // 高さを固定した内枠。文字量が増えても枠が広がらず、他の行が押し下げられない
 var fix=function(v,h,st){return <div style={{height:h,overflow:"hidden",...(st||{})}}>{v}</div>;};
+var fixC=function(v,h){return <div style={{height:h,overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center"}}>{v}</div>;};
 var LB={...lab,padding:"2px 4px"};
 return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho','YuMincho','Hiragino Mincho ProN','MS Mincho','Noto Serif JP',serif"}}>
 <div className="pdf-page" id="pdfPage1">
@@ -809,23 +811,23 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 <tr><td style={LB}>連絡先</td><td style={val} colSpan={3}>{fix(hasContact?((f.contactZip?("〒"+f.contactZip+"　"):"")+(f.contactAddr||"")+(f.contactPhone?("　電話 "+f.contactPhone):"")+(f.contactMobile?("　携帯 "+f.contactMobile):"")):"",24)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"11%"}}/><col style={{width:"9%"}}/><col/></colgroup><tbody>
-<tr><td style={hd}>{fix("年",26,{lineHeight:"26px"})}</td><td style={hd}>{fix("月",26,{lineHeight:"26px"})}</td><td style={hd}>{fix("学歴・職歴（各項目ごとにまとめて書く）",26,{lineHeight:"26px"})}</td></tr>
+<tr><td style={hd}>{fixC("年",26)}</td><td style={hd}>{fixC("月",26)}</td><td style={hd}>{fixC("学歴・職歴（各項目ごとにまとめて書く）",26)}</td></tr>
 {histFix.map(function(r,i){return <tr key={"h"+i}><td style={valC}>{fix(r.y,26,{lineHeight:"26px"})}</td><td style={valC}>{fix(r.m,26,{lineHeight:"26px"})}</td><td style={val}>{fix(r.t,26,{lineHeight:"26px",textAlign:r.c?"center":(r.r?"right":"left"),fontWeight:(r.c||r.r)?700:400})}</td></tr>;})}
 </tbody></table>
 </div>
 <div className="pdf-page" id="pdfPage2" style={{breakBefore:"page",pageBreakBefore:"always"}}>
 <table style={tbl}><colgroup><col style={{width:"11%"}}/><col style={{width:"9%"}}/><col/></colgroup><tbody>
-<tr><td style={hd}>{fix("年",26,{lineHeight:"26px"})}</td><td style={hd}>{fix("月",26,{lineHeight:"26px"})}</td><td style={hd}>{fix("免許・資格",26,{lineHeight:"26px"})}</td></tr>
+<tr><td style={hd}>{fixC("年",26)}</td><td style={hd}>{fixC("月",26)}</td><td style={hd}>{fixC("免許・資格",26)}</td></tr>
 {qFix.map(function(r,i){return <tr key={"q"+i}><td style={valC}>{fix(r.y,28,{lineHeight:"28px"})}</td><td style={valC}>{fix(r.m,28,{lineHeight:"28px"})}</td><td style={val}>{fix(r.t,28,{lineHeight:"28px"})}</td></tr>;})}
 </tbody></table>
 <table style={tbl}><tbody>
-<tr><td style={hd}>{fix("志望動機",26,{lineHeight:"26px"})}</td></tr>
-<tr><td style={box}>{fix(f.motivation,140)}</td></tr>
-<tr><td style={hd}>{fix("自己PR",26,{lineHeight:"26px"})}</td></tr>
+<tr><td style={hd}>{fixC("自己PR",26)}</td></tr>
 <tr><td style={box}>{fix(f.selfPR,140)}</td></tr>
+<tr><td style={hd}>{fixC("志望動機",26)}</td></tr>
+<tr><td style={box}>{fix(f.motivation,140)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
-<tr><td style={hd} colSpan={4}>{fix("障がいについて",26,{lineHeight:"26px"})}</td></tr>
+<tr><td style={hd} colSpan={4}>{fixC("障がいについて",26)}</td></tr>
 <tr><td style={LB}>障がい①</td><td style={val}>{fix(d1,24)}</td><td style={LB}>障がい②</td><td style={val}>{fix(d2,24)}</td></tr>
 <tr><td style={LB}>障がい③</td><td style={val}>{fix(d3,24)}</td><td style={LB}>障がい④</td><td style={val}>{fix(d4,24)}</td></tr>
 <tr><td style={LB}>手帳①</td><td style={val}>{fix(th1,24)}</td><td style={LB}>手帳②</td><td style={val}>{fix(th2,24)}</td></tr>
