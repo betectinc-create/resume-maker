@@ -251,7 +251,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-02-h"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-02-i"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -636,7 +636,7 @@ const generateDocx=async function(){
     xml=putTbl(xml,"ふりがな",function(t){
       var rs=rowsOf(t);if(rs.length<10)return t;
       // 写真欄(右上)は3行分を縦結合したセル。写真4cm＋余白が入る高さを確保する
-      var H=[400,1200,800,360,900,360,360,900,360,380];
+      var H=[400,1400,800,360,900,360,360,900,360,380];
       var out="";
       for(var i=0;i<rs.length;i++){
         var r=setH(rs[i],H[i]||360);
