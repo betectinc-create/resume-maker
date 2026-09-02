@@ -111,8 +111,9 @@ const uW=(i,k,v)=>{const a=[...f.work];a[i]={...a[i],[k]:clip(LIMR,k,v)};setF(p=
 const uQ=(i,k,v)=>{const a=[...f.quals];a[i]={...a[i],[k]:clip(LIMR,k,v)};setF(p=>({...p,quals:a}));};
 const handlePhoto=e=>{const file=e.target.files?.[0];if(file){const img=new Image();img.onload=function(){const canvas=document.createElement("canvas");canvas.width=227;canvas.height=303;const ctx=canvas.getContext("2d");const sx=Math.max(0,(img.width-img.height*0.75)/2);const sy=Math.max(0,(img.height-img.width/0.75)/2);const sw=Math.min(img.width,img.height*0.75);const sh=Math.min(img.height,img.width/0.75);ctx.drawImage(img,sx,sy,sw,sh,0,0,227,303);setF(p=>({...p,photoPreview:canvas.toDataURL("image/jpeg",0.9)}));};img.src=URL.createObjectURL(file);}};
 const insAc=text=>{const nx=f.accoms?(f.accoms+"\n"+text):text;if(nx.length>200){tt("200文字までです（残り"+(200-f.accoms.length)+"文字）");return;}setF(p=>({...p,accoms:nx}));tt("追加しました");};
-const pS=id=>setF(p=>({...p,strId:id,scene:"",sceneOther:"",selfPR:gP(id,"",""),motivation:gM(id)}));
-const pSc=sc=>{setF(p=>({...p,scene:sc,selfPR:gP(f.strId,sc,f.sceneOther)}));};
+const cutMP=t=>String(t||"").slice(0,MP);
+const pS=id=>setF(p=>({...p,strId:id,scene:"",sceneOther:"",selfPR:cutMP(gP(id,"","")),motivation:cutMP(gM(id))}));
+const pSc=sc=>{setF(p=>({...p,scene:sc,selfPR:cutMP(gP(f.strId,sc,f.sceneOther))}));};
 useEffect(()=>{if(f.strId&&f.scene)setF(p=>({...p,selfPR:gP(f.strId,f.scene,f.sceneOther)}));},[f.sceneOther]);
 const lookupZip=async()=>{const z=f.zip.replace(/[-ー−]/g,"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xfee0));if(z.length<7){tt("7桁入力してください");return;}try{const r=await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${z}`);const d=await r.json();if(d.results?.[0]){const a=d.results[0];setF(p=>({...p,address:`${a.address1}${a.address2}${a.address3}`}));tt("住所を入力しました");}else{tt("見つかりません");}}catch{tt("検索できません");}};
 
@@ -250,7 +251,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-02-c"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-02-d"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -565,7 +566,7 @@ const generateDocx=async function(){
       var hd0=putCell(setH(rs[0],366),0,xpara("志望動機",18,{jc:"center",bold:true,auto:true}));
       // 上の大枠が志望動機、その下が自己PR
       var r1=putCell(setH(vMerge(rs[1],0,true),667),0,xpara(f.motivation||"",fitSz(f.motivation,8824,2000,18,12),{}));
-      var lab=setBorders(putCell(setH(rs[4],260),0,xpara("自己PR",18,{bold:true,line:240})),0,RULE);
+      var lab=setBorders(putCell(setH(rs[4],260),0,xpara("自己PR",18,{bold:true,line:240,jc:"center"})),0,RULE);
       var r5=putCell(setH(vMerge(rs[5],0,true),1000),0,xpara(f.selfPR||"",fitSz(f.selfPR,8824,2000,18,12),{}));
       return head+hd0+r1
         +setH(vMerge(rs[2],0,false),667)+setH(vMerge(rs[3],0,false),667)
@@ -819,9 +820,9 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 </tbody></table>
 <table style={tbl}><tbody>
 <tr><td style={hd}>{fix("志望動機",26,{lineHeight:"26px"})}</td></tr>
-<tr><td style={box}>{fix(f.motivation,124)}</td></tr>
-<tr><td style={{...lab,textAlign:"left",padding:"1px 7px"}}>{fix("自己PR",20,{lineHeight:"20px",textAlign:"left"})}</td></tr>
-<tr><td style={box}>{fix(f.selfPR,124)}</td></tr>
+<tr><td style={box}>{fix(f.motivation,140)}</td></tr>
+<tr><td style={hd}>{fix("自己PR",26,{lineHeight:"26px"})}</td></tr>
+<tr><td style={box}>{fix(f.selfPR,140)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
 <tr><td style={hd} colSpan={4}>{fix("障がいについて",26,{lineHeight:"26px"})}</td></tr>
