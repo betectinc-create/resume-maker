@@ -251,7 +251,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-02-e"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-02-f"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -357,7 +357,7 @@ const putTbl=function(xml,marker,fn){var p=xml.indexOf(marker);if(p===-1)return 
 // 指定の幅×高さ(px)に収まる最大のフォントサイズ(px)を返す（PDF側のレイアウト固定用）
 const fitPx=function(text,wPx,hPx,base,min){var t=String(text||"");if(!t)return base;for(var s=base;s>min;s--){var per=Math.max(1,Math.floor(wPx/s));var ln=0;t.split(/\r?\n/).forEach(function(l){ln+=Math.max(1,Math.ceil(l.length/per));});if(ln*s*1.4<=hPx-6)return s;}return min;};
 // 指定の幅×高さ(twips)に収まる最大の文字サイズ(half-point)を返す
-const fitSz=function(text,wTw,hTw,base,min){var t=String(text||"");if(!t)return base;for(var sz=base;sz>min;sz-=2){var per=Math.max(1,Math.floor((wTw-260)/(sz*10)));var ln=0;t.split(/\r?\n/).forEach(function(s){ln+=Math.max(1,Math.ceil(s.length/per));});if(ln*Math.round(sz*LINEF)<=hTw-260)return sz;}return min;};
+const fitSz=function(text,wTw,hTw,base,min){var t=String(text||"");if(!t)return base;for(var sz=base;sz>min;sz-=2){var per=Math.max(1,Math.floor((wTw-260)/(sz*10)));var ln=0;t.split(/\r?\n/).forEach(function(s){ln+=Math.max(1,Math.ceil(s.length/per));});ln=Math.ceil(ln*1.25);if(ln*Math.round(sz*LINEF)<=hTw-260)return sz;}return min;};
 
 const doLogin=async function(){try{await fbAuth.signInWithPopup(googleProvider);}catch(e){if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/unauthorized-domain"||e.code==="auth/operation-not-supported-in-this-environment")){try{await fbAuth.signInWithRedirect(googleProvider);}catch(re){tt("ログインエラー: "+(re.message||re.code));}}else{tt("ログインエラー: "+(e.message||e.code));}}};
 const doLogout=function(){fbAuth.signOut();};
@@ -551,7 +551,7 @@ const generateDocx=async function(){
       var rs=rowsOf(t);if(rs.length<2)return t;
       var body="";
       for(var i=0;i<5;i++){
-        var L=qs[i]||{},r=setH(rs[1],454);
+        var L=qs[i]||{},r=setH(rs[1],350);
         r=putCell(r,0,xpara(L.y||"",18,{jc:"center",auto:true}));
         r=putCell(r,1,xpara(L.m||"",18,{jc:"center",auto:true}));
         r=putCell(r,2,xpara(L.t||"",18,{auto:true}));
@@ -565,13 +565,13 @@ const generateDocx=async function(){
       var head=t.substring(0,t.indexOf(rs[0])); // 表の定義部。行を書き換える前に確保しておく
       var hd0=putCell(setH(rs[0],366),0,xpara("自己PR",18,{jc:"center",bold:true,auto:true}));
       // 上の大枠が自己PR、その下が志望動機。文字サイズは両方の小さい方に揃える
-      var szBoth=Math.min(fitSz(f.selfPR,8824,2000,18,12),fitSz(f.motivation,8824,2000,18,12));
-      var r1=putCell(setH(vMerge(rs[1],0,true),667),0,xpara(f.selfPR||"",szBoth,{}));
+      var szBoth=Math.min(fitSz(f.selfPR,8824,2500,18,12),fitSz(f.motivation,8824,2500,18,12));
+      var r1=putCell(setH(vMerge(rs[1],0,true),833),0,xpara(f.selfPR||"",szBoth,{}));
       var lab=setBorders(putCell(setH(rs[4],260),0,xpara("志望動機",18,{bold:true,line:240,jc:"center"})),0,RULE);
-      var r5=putCell(setH(vMerge(rs[5],0,true),1000),0,xpara(f.motivation||"",szBoth,{}));
+      var r5=putCell(setH(vMerge(rs[5],0,true),1250),0,xpara(f.motivation||"",szBoth,{}));
       return head+hd0+r1
-        +setH(vMerge(rs[2],0,false),667)+setH(vMerge(rs[3],0,false),667)
-        +lab+r5+setH(vMerge(rs[6],0,false),1000)+"</w:tbl>";
+        +setH(vMerge(rs[2],0,false),833)+setH(vMerge(rs[3],0,false),833)
+        +lab+r5+setH(vMerge(rs[6],0,false),1250)+"</w:tbl>";
     });
     var d1=f.dis1name==="その他"?f.dis1other:f.dis1name;
     var d2=f.dis2name==="その他"?f.dis2other:f.dis2name;
@@ -587,10 +587,10 @@ const generateDocx=async function(){
       var rs=rowsOf(t);if(rs.length<13)return t;
       var two=function(r,h,a,b){r=setH(r,h);r=putCell(r,1,xpara(a||"",18,{auto:true}));r=putCell(r,3,xpara(b||"",18,{auto:true}));return r;};
       var out=setH(rs[0],366)+two(rs[1],454,d1,d2)+two(rs[2],454,d3,d4)+two(rs[3],454,tc1,tc2)+two(rs[4],454,tc3,"")+two(rs[5],366,vt,mt);
-      out+=putCell(setH(vMerge(vMerge(rs[6],0,true),1,true),320),1,xpara(f.chars||"",fitSz(f.chars,7610,1600,18,12),{}));
-      for(var i=7;i<=10;i++)out+=setH(vMerge(vMerge(rs[i],0,false),1,false),320);
-      out+=putCell(setH(vMerge(vMerge(rs[11],0,true),1,true),650),1,xpara(f.accoms||"",fitSz(f.accoms,7610,1300,18,12),{}));
-      out+=setH(vMerge(vMerge(rs[12],0,false),1,false),650);
+      out+=putCell(setH(vMerge(vMerge(rs[6],0,true),1,true),290),1,xpara(f.chars||"",fitSz(f.chars,7610,1450,18,12),{}));
+      for(var i=7;i<=10;i++)out+=setH(vMerge(vMerge(rs[i],0,false),1,false),290);
+      out+=putCell(setH(vMerge(vMerge(rs[11],0,true),1,true),600),1,xpara(f.accoms||"",fitSz(f.accoms,7610,1200,18,12),{}));
+      out+=setH(vMerge(vMerge(rs[12],0,false),1,false),600);
       return t.substring(0,t.indexOf(rs[0]))+out+"</w:tbl>";
     });
     xml=xml.replace("約　　　　時間　　　　分","約　"+f.commuteH+"　時間　"+f.commuteM+"　分");
