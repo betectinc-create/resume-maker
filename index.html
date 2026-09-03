@@ -255,7 +255,7 @@ useEffect(function(){
 const xesc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
 // ===== 利用規約・プライバシーポリシー（本サービス専用。CONNECTのHP掲載分とは別） =====
 const TERMS_VER="2026-08-10";
-const APP_VER="2026-09-02-j"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
+const APP_VER="2026-09-03-a"; // 生成物に埋め込む版数。どの版で作られたファイルか判別するため
 const TERMS_DOC=[
 {h1:"履歴書簡単メーカー 利用規約"},
 {p:"本利用規約（以下「本規約」といいます。）は、株式会社mooble（以下「当社」といいます。）が提供するウェブサービス「履歴書簡単メーカー」（以下「本サービス」といいます。）の利用条件を定めるものです。ユーザーの皆様には、本規約に従って本サービスをご利用いただきます。"},
@@ -539,7 +539,7 @@ const generateDocx=async function(){
     if(HL.length)HL.push({t:"以上",r:1});
     xml=putTbl(xml,"学歴・職歴（各部にまとめて書く）",function(t){
       var rs=rowsOf(t);if(rs.length<2)return t;
-      var n=Math.max(16,HL.length),h=Math.max(280,Math.floor(6500/n)),body="";
+      var n=Math.max(16,HL.length),h=Math.max(280,Math.floor(5500/n)),body="";
       for(var i=0;i<n;i++){
         var L=HL[i]||{},r=setH(rs[1],h);
         r=putCell(r,0,xpara(L.y||"",18,{jc:"center",auto:true}));
@@ -555,7 +555,7 @@ const generateDocx=async function(){
       var rs=rowsOf(t);if(rs.length<2)return t;
       var body="";
       for(var i=0;i<5;i++){
-        var L=qs[i]||{},r=setH(rs[1],350);
+        var L=qs[i]||{},r=setH(rs[1],320);
         r=putCell(r,0,xpara(L.y||"",18,{jc:"center",auto:true}));
         r=putCell(r,1,xpara(L.m||"",18,{jc:"center",auto:true}));
         r=putCell(r,2,xpara(L.t||"",18,{auto:true}));
@@ -591,8 +591,8 @@ const generateDocx=async function(){
       var rs=rowsOf(t);if(rs.length<13)return t;
       var two=function(r,h,a,b){r=setH(r,h);r=putCell(r,1,xpara(a||"",18,{auto:true}));r=putCell(r,3,xpara(b||"",18,{auto:true}));return r;};
       var out=setH(rs[0],366)+two(rs[1],454,d1,d2)+two(rs[2],454,d3,d4)+two(rs[3],454,tc1,tc2)+two(rs[4],454,tc3,"")+two(rs[5],366,vt,mt);
-      out+=putCell(setH(vMerge(vMerge(rs[6],0,true),1,true),290),1,xpara(f.chars||"",fitSz(f.chars,7610,1450,18,12),{}));
-      for(var i=7;i<=10;i++)out+=setH(vMerge(vMerge(rs[i],0,false),1,false),290);
+      out+=putCell(setH(vMerge(vMerge(rs[6],0,true),1,true),275),1,xpara(f.chars||"",fitSz(f.chars,7610,1375,18,12),{}));
+      for(var i=7;i<=10;i++)out+=setH(vMerge(vMerge(rs[i],0,false),1,false),275);
       out+=putCell(setH(vMerge(vMerge(rs[11],0,true),1,true),600),1,xpara(f.accoms||"",fitSz(f.accoms,7610,1200,18,12),{}));
       out+=setH(vMerge(vMerge(rs[12],0,false),1,false),600);
       return t.substring(0,t.indexOf(rs[0]))+out+"</w:tbl>";
@@ -825,13 +825,13 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 <div className="pdf-page" id="pdfPage2" style={{breakBefore:"page",pageBreakBefore:"always"}}>
 <table style={tbl}><colgroup><col style={{width:"11%"}}/><col style={{width:"9%"}}/><col/></colgroup><tbody>
 <tr><td style={hd}>{fixC("年",26)}</td><td style={hd}>{fixC("月",26)}</td><td style={hd}>{fixC("免許・資格",26)}</td></tr>
-{qFix.map(function(r,i){return <tr key={"q"+i}><td style={valC}>{fix(r.y,28,{lineHeight:"28px"})}</td><td style={valC}>{fix(r.m,28,{lineHeight:"28px"})}</td><td style={val}>{fix(r.t,28,{lineHeight:"28px"})}</td></tr>;})}
+{qFix.map(function(r,i){return <tr key={"q"+i}><td style={valC}>{fix(r.y,24,{lineHeight:"24px"})}</td><td style={valC}>{fix(r.m,24,{lineHeight:"24px"})}</td><td style={val}>{fix(r.t,24,{lineHeight:"24px"})}</td></tr>;})}
 </tbody></table>
 <table style={tbl}><tbody>
 <tr><td style={hd}>{fixC("自己PR",26)}</td></tr>
-<tr><td style={box}>{fix(f.selfPR,105)}</td></tr>
+<tr><td style={box}>{fix(f.selfPR,135)}</td></tr>
 <tr><td style={hd}>{fixC("志望動機",26)}</td></tr>
-<tr><td style={box}>{fix(f.motivation,105)}</td></tr>
+<tr><td style={box}>{fix(f.motivation,135)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"15%"}}/><col/></colgroup><tbody>
 <tr><td style={hd} colSpan={4}>{fixC("障がいについて",26)}</td></tr>
@@ -841,7 +841,7 @@ return <div className="print-resume" style={{color:"#000",fontFamily:"'Yu Mincho
 <tr><td style={LB}>手帳③</td><td style={val}>{fix(th3,24)}</td><td style={LB}></td><td style={val}>{fix("",24)}</td></tr>
 <tr><td style={LB}>通院</td><td style={val}>{fix(visitV,24)}</td><td style={LB}>服薬</td><td style={val}>{fix(medV,24)}</td></tr>
 <tr><td style={LB}>現状</td><td style={box} colSpan={3}>{fix(f.chars,105)}</td></tr>
-<tr><td style={LB}>必要な配慮</td><td style={box} colSpan={3}>{fix(f.accoms,145)}</td></tr>
+<tr><td style={LB}>必要な配慮</td><td style={box} colSpan={3}>{fix(f.accoms,110)}</td></tr>
 </tbody></table>
 <table style={tbl}><colgroup><col style={{width:"15%"}}/><col/><col style={{width:"27%"}}/><col style={{width:"20%"}}/></colgroup><tbody>
 <tr><td style={LB}>通勤時間</td><td style={valC}>{fix((f.commuteH||f.commuteM)?("約 "+(f.commuteH||0)+" 時間 "+(f.commuteM||0)+" 分"):"",26,{lineHeight:"26px"})}</td><td style={{...LB,fontSize:9.5}}>扶養家族数（配偶者除く）</td><td style={valC}>{fix(f.familyCount!==""?f.familyCount+" 人":"",26,{lineHeight:"26px"})}</td></tr>
